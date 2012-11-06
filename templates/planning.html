@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block body %}
+Planning
+<script type="text/javascript">
+  (function() {
+    "use strict";
+    $(document).ready(function() {
+      $('li').removeClass('active');
+      $("ul li:nth-child(3)").addClass('active');
+    });
+  }());
+</script>
+{% endblock %}
