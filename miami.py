@@ -20,6 +20,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
     detail = db.Column(db.Text)
+    status = db.Column(db.String(10),default = 'NEW')
 
 
 # Create the database tables.
@@ -42,7 +43,7 @@ manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 
 # Create API endpoints, which will be available at /api/<tablename> by
 # default. Allowed HTTP methods can be specified as well.
-manager.create_api(Task, methods=['GET', 'POST', 'DELETE'])
+manager.create_api(Task, methods=['GET', 'POST','PUT', 'DELETE'])
 
 
 

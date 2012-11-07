@@ -13,7 +13,7 @@
 
   </style>
 
-<div class=" ui-widget ui-helper-clearfix">
+<div id ="tasks" class=" ui-widget ui-helper-clearfix">
   <div id="ntasks" class=" ui-tasks ui-widget-content ui-state-default">
     <h4 class="ui-widget-header">Ready</h4>
     <ul class="ntasks ui-helper-reset"></ul>
@@ -43,13 +43,14 @@
           success: function(data) {
             var i;
             for(i in data.objects){
-              var new_row = $('<li class="ui-widget-content ui-corner-tr" style="display: list-item;"><a>' +  data.objects[i].title+ '</a></li>');
+              var new_row = $('<li id="'+data.objects[i].id+'" class="ui-widget-content ui-corner-tr" style="display: list-item;"><a>' +  data.objects[i].title+ '</a><span>'+data.objects[i].status+'</span></li>');
               $("#ntasks > ul").append(new_row);
             }
 
             // there's the ntasks and the ptasks
             var $ntasks = $( "#ntasks" ),
-              $ptasks = $( "#ptasks" );
+              $ptasks = $( "#ptasks" ),
+              $ftasks = $("#ftasks");
 
             // let the ntasks items be draggable
             $( "li", $ntasks ).draggable({
@@ -65,14 +66,33 @@
               accept: "#ntasks li",
               activeClass: "ui-state-highlight",
               drop: function( event, ui ) {
-                deleteImage( ui.draggable );
+                $.ajax({
+                  type: 'PUT',
+                  url: '/api/task/'+ui.draggable[0].id,
+                  data: '{"status":"PROGRESS"}',
+                  success: function(data){
+                    alert(data);
+                    deleteImage( ui.draggable , $ptasks);
+                  },
+                  dataType: 'json',
+                  contentType: 'application/json'
+                });  
+              }
+            });
+
+            // let the ptasks be droppable, accepting the ntasks items
+            $ftasks.droppable({
+              accept: "#ptasks li",
+              activeClass: "ui-state-highlight",
+              drop: function( event, ui ) {
+                deleteImage( ui.draggable ,$ftasks);
               }
             });
 
             // let the ntasks be droppable as well, accepting items from the ptasks
             $ntasks.droppable({
-              accept: "#ptasks li",
-              activeClass: "custom-state-active",
+              accept: "#tasks li",
+              activeClass: "ui-state-highlight",
               drop: function( event, ui ) {
                 recycleImage( ui.draggable );
               }
@@ -80,11 +100,11 @@
 
             // image deletion function
             var recycle_icon = "<a href='link/to/recycle/script/when/we/have/js/off' title='Recycle this image' class='ui-icon ui-icon-refresh'>Recycle image</a>";
-            function deleteImage( $item ) {
+            function deleteImage( $item , $tasks) {
               $item.fadeOut(function() {
-                var $list = $( "ul", $ptasks ).length ?
-                  $( "ul", $ptasks ) :
-                  $( "<ul class='ntasks ui-helper-reset'/>" ).appendTo( $ptasks );
+                var $list = $( "ul", $tasks ).length ?
+                  $( "ul", $tasks ) :
+                  $( "<ul class='ntasks ui-helper-reset'/>" ).appendTo( $tasks );
 
                 $item.appendTo($list).fadeIn();
               });
