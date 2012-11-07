@@ -1,13 +1,101 @@
 {% extends "layout.html" %}
 {% block body %}
-Planning
+<style>
+ 
+  .ui-tasks-ul.custom-state-active { background: #eee; }
+  .ui-tasks-ul li { float: left; width: 140px; height: 64px; padding: 0.4em; margin: 0 0.4em 0.4em 0; text-align: center; }
+  .ui-tasks-ul li a { margin: 0 0 0.4em; cursor: move; }
+
+  .ui-tasks { float: left; width: 30%; min-height: 18em; padding: 2px;} * html .ui-task { height: 18em; } /* IE6 */
+  .ui-tasks h4 { line-height: 16px; margin: 0 0 0.4em; }
+  .ui-tasks h4 .ui-icon { float: left; }
+  .ui-tasks .ui-tasks-ul h5 { display: none; }
+
+</style>
+
+<div id ="tasks" class=" ui-widget ui-helper-clearfix">
+    <div id="ntasks" class=" ui-tasks ui-widget-content ui-state-default">
+        <h4 class="ui-widget-header">Ready</h4>
+        <ul class="ui-tasks-ul ui-helper-reset"></ul>
+    </div>
+    <div id="ptasks" class=" ui-tasks ui-widget-content ui-state-default">
+        <h4 class="ui-widget-header">Progress</h4>
+    </div>
+    <div id="ftasks" class=" ui-tasks ui-widget-content ui-state-default">
+        <h4 class="ui-widget-header">Done</h4>
+    </div>
+</div>
+
 <script type="text/javascript">
   (function() {
     "use strict";
     $(document).ready(function() {
       $('li').removeClass('active');
       $("ul li:nth-child(3)").addClass('active');
+      var $ntasks =$( "#ntasks" ),
+        $ptasks = $('#ptasks'),
+        $ftasks = $('#ftasks');
+      wrapTasks($ntasks,'NEW',"#ptasks li,#ftasks li");
+      wrapTasks($ptasks,'PROGRESS',"#ntasks li,#ftasks li");
+      wrapTasks($ftasks,'DONE',"#ptasks li");
+      $ntasks.loadtasks();
+      $ptasks.loadtasks();
+      $ftasks.loadtasks();
     });
+
+    function deleteImage( $item , $tasks) {
+        $item.fadeOut(function() {
+            var $list = $( "ul", $tasks ).length ?
+              $( "ul", $tasks ) :
+              $( "<ul class='ui-tasks-ul ui-helper-reset'/>" ).appendTo( $tasks );
+
+            $item.appendTo($list).fadeIn();
+        });
+    };
+    
+    function wrapTasks($tasks,$status, $accept){
+        $tasks.droppable({
+              accept: $accept,
+              activeClass: "ui-state-highlight",
+              drop: function( event, ui ) {
+                $.ajax({
+                  type: 'PUT',
+                  url: '/api/task/'+ui.draggable[0].id,
+                  data: '{"status":"'+$status+'"}',
+                  success: function(data){
+                    deleteImage( ui.draggable , $tasks);
+                  },
+                  dataType: 'json',
+                  contentType: 'application/json'
+                });  
+              }
+            });
+
+        $tasks.loadtasks=function(){
+            $.ajax({
+                  type: 'GET',
+                  url: '/api/task',
+                  data: {q:'{"filters": [{"name": "status", "op": "eq", "val": "'+$status+'"}]}'},
+                  success: function(data){
+                    var $list = $( "ul", $tasks ).length ?
+                                  $( "ul", $tasks ) :
+                                  $( "<ul class='ui-tasks-ul ui-helper-reset'/>" ).appendTo( $tasks );
+                    for(var i in data.objects){
+                         $('ul',$tasks).append('<li id="'+data.objects[i].id+'" class="ui-widget-content ui-corner-tr" style="display: list-item;"><a>' +  data.objects[i].title+ '</a><span>'+data.objects[i].status+'</span></li>');
+                    }
+
+                    $( "li", $tasks ).draggable({
+                      cancel: "a.ui-icon", // clicking an icon won't initiate dragging
+                      revert: "invalid", // when not dropped, the item will revert back to its initial position
+                      containment: "document",
+                      helper: "clone",
+                      cursor: "move"
+                    });
+                  },
+                  dataType: 'json'
+            });
+        };
+    };
   }());
 </script>
 {% endblock %}
