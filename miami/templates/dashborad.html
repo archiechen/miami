@@ -1,5 +1,10 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<!-- NEW Task Form -->
+<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+ 
+</div>
 <div id ="tasks" class=" ui-widget ui-helper-clearfix">
   <div id="rtasks" class=" ui-tasks-3 ui-widget-content ui-state-default">
     <h4 class="ui-widget-header">Ready</h4>
@@ -24,7 +29,28 @@
         $dtasks = $('#dtasks');
 
       wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li",function(ui,data){});
-      wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li",function(ui,data){});
+      wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li",function(ui,data){
+        $('#myModal').children().remove();
+        $('#myModal').append(data.responseText);  
+        $('#save').click(function(){
+          $.ajax({
+            type: 'PUT',
+            url: '/api/task/'+ui.draggable[0].id,
+            data: '{"status":"PROGRESS","estimate":'+$('#estimate').val()+'}',
+            success: function(data){
+              $('#myModal').modal('hide');
+              var $item = ui.draggable;
+              $item.fadeOut(function() {
+                  var $list = $("ul", $ptasks).length ? $("ul", $ptasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($ptasks);
+                  $item.appendTo($list).fadeIn();
+              });
+            },
+            dataType: 'json',
+            contentType: 'application/json'
+          });
+        });
+        $('#myModal').modal('show');
+      });
       wrapTasks($dtasks,'DONE',"#ptasks li",function(ui,data){});
       $rtasks.loadtasks();
       $ptasks.loadtasks();
