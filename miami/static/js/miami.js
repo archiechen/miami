@@ -11,7 +11,6 @@ function wrapTasks($tasks, $status, $accept) {
                     var $item = ui.draggable;
                     $item.fadeOut(function() {
                         var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
-
                         $item.appendTo($list).fadeIn();
                     });
                 },

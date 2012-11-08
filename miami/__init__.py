@@ -34,6 +34,10 @@ def index():
 def new_task():
     return render_template('new_task.html')
 
+@app.route('/tasks', methods=['GET'])
+def new_task():
+    return render_template('tasks.html')
+
 @app.route('/planning', methods=['GET'])
 def planning():
     return render_template('planning.html')
