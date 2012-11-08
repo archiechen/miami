@@ -1,5 +1,5 @@
 .ui-tasks-ul.custom-state-active { background: #eee; }
-.ui-tasks-ul li { float: left; width: 140px; height: 64px; padding: 0.4em; margin: 0 0.4em 0.4em 0; text-align: center; }
+.ui-tasks-ul li { float: left; width: 140px; height: 64px; padding: 0.4em; margin: 0.4em; }
 .ui-tasks-ul li a { margin: 0 0 0.4em; cursor: move; }
 
 .ui-tasks-2 { float: left; width: 44%; min-height: 18em; padding: 2px; margin-left: 10px;} * html .ui-task { height: 18em; } /* IE6 */

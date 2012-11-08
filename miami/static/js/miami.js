@@ -31,7 +31,7 @@ function wrapTasks($tasks, $status, $accept) {
             success: function(data) {
                 var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
                 for(var i in data.objects) {
-                    $('ul', $tasks).append('<li id="' + data.objects[i].id + '" class="ui-widget-content ui-corner-tr" style="display: list-item;"><a>' + data.objects[i].title + '</a><span>' + data.objects[i].status + '</span></li>');
+                    $('ul', $tasks).append('<li id="' + data.objects[i].id + '" class="ui-widget-content" style="display: list-item;"><a>' + data.objects[i].title + '</a><span>' + data.objects[i].status + '</span></li>');
                 }
 
                 $("li", $tasks).draggable({
