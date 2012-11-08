@@ -1,27 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
-<style>
- 
-  .ntasks.custom-state-active { background: #eee; }
-  .ntasks li { float: left; width: 140px; height: 64px; padding: 0.4em; margin: 0 0.4em 0.4em 0; text-align: center; }
-  .ntasks li a { margin: 0 0 0.4em; cursor: move; }
-
-  .ui-tasks { float: left; width: 30%; min-height: 18em; padding: 2px;} * html .ui-task { height: 18em; } /* IE6 */
-  .ui-tasks h4 { line-height: 16px; margin: 0 0 0.4em; }
-  .ui-tasks h4 .ui-icon { float: left; }
-  .ui-tasks .ntasks h5 { display: none; }
-
-  </style>
-
 <div id ="tasks" class=" ui-widget ui-helper-clearfix">
-  <div id="ntasks" class=" ui-tasks ui-widget-content ui-state-default">
+  <div id="rtasks" class=" ui-tasks-3 ui-widget-content ui-state-default">
     <h4 class="ui-widget-header">Ready</h4>
-    <ul class="ntasks ui-helper-reset"></ul>
+    <ul class="ui-tasks-ul ui-helper-reset"></ul>
   </div>
-  <div id="ptasks" class=" ui-tasks ui-widget-content ui-state-default">
+  <div id="ptasks" class=" ui-tasks-3 ui-widget-content ui-state-default">
     <h4 class="ui-widget-header">Progress</h4>
   </div>
-  <div id="ftasks" class=" ui-tasks ui-widget-content ui-state-default">
+  <div id="ftasks" class=" ui-tasks-3 ui-widget-content ui-state-default">
     <h4 class="ui-widget-header">Done</h4>
   </div>
 </div>
@@ -32,134 +19,16 @@
     $(document).ready(function() {
       $('ul.nav > li').removeClass('active');
       $("ul.nav > li:nth-child(1)").addClass('active');
+      var $rtasks =$( "#rtasks" ),
+        $ptasks = $('#ptasks'),
+        $dtasks = $('#dtasks');
 
-      $.ajax({
-          type:'GET',
-          url: '/api/task',
-          dataType: 'json',
-          error: function() {
-            alert("No more people.");
-          },
-          success: function(data) {
-            var i;
-            for(i in data.objects){
-              var new_row = $('<li id="'+data.objects[i].id+'" class="ui-widget-content ui-corner-tr" style="display: list-item;"><a>' +  data.objects[i].title+ '</a><span>'+data.objects[i].status+'</span></li>');
-              $("#ntasks > ul").append(new_row);
-            }
-
-            // there's the ntasks and the ptasks
-            var $ntasks = $( "#ntasks" ),
-              $ptasks = $( "#ptasks" ),
-              $ftasks = $("#ftasks");
-
-            // let the ntasks items be draggable
-            $( "li", $ntasks ).draggable({
-              cancel: "a.ui-icon", // clicking an icon won't initiate dragging
-              revert: "invalid", // when not dropped, the item will revert back to its initial position
-              containment: "document",
-              helper: "clone",
-              cursor: "move"
-            });
-
-            // let the ptasks be droppable, accepting the ntasks items
-            $ptasks.droppable({
-              accept: "#ntasks li",
-              activeClass: "ui-state-highlight",
-              drop: function( event, ui ) {
-                $.ajax({
-                  type: 'PUT',
-                  url: '/api/task/'+ui.draggable[0].id,
-                  data: '{"status":"PROGRESS"}',
-                  success: function(data){
-                    alert(data);
-                    deleteImage( ui.draggable , $ptasks);
-                  },
-                  dataType: 'json',
-                  contentType: 'application/json'
-                });  
-              }
-            });
-
-            // let the ptasks be droppable, accepting the ntasks items
-            $ftasks.droppable({
-              accept: "#ptasks li",
-              activeClass: "ui-state-highlight",
-              drop: function( event, ui ) {
-                deleteImage( ui.draggable ,$ftasks);
-              }
-            });
-
-            // let the ntasks be droppable as well, accepting items from the ptasks
-            $ntasks.droppable({
-              accept: "#tasks li",
-              activeClass: "ui-state-highlight",
-              drop: function( event, ui ) {
-                recycleImage( ui.draggable );
-              }
-            });
-
-            // image deletion function
-            var recycle_icon = "<a href='link/to/recycle/script/when/we/have/js/off' title='Recycle this image' class='ui-icon ui-icon-refresh'>Recycle image</a>";
-            function deleteImage( $item , $tasks) {
-              $item.fadeOut(function() {
-                var $list = $( "ul", $tasks ).length ?
-                  $( "ul", $tasks ) :
-                  $( "<ul class='ntasks ui-helper-reset'/>" ).appendTo( $tasks );
-
-                $item.appendTo($list).fadeIn();
-              });
-            }
-
-            // image recycle function
-            function recycleImage( $item ) {
-              $item.fadeOut(function() {
-                var $list = $( "ul", $ntasks ).length ?
-                  $( "ul", $ntasks ) :
-                  $( "<ul class='ntasks ui-helper-reset'/>" ).appendTo( $ntasks );
-
-                $item.appendTo($list).fadeIn();
-                
-              });
-            }
-
-            // image preview function, demonstrating the ui.dialog used as a modal window
-            function viewLargerImage( $link ) {
-              var src = $link.attr( "href" ),
-                title = $link.siblings( "img" ).attr( "alt" ),
-                $modal = $( "img[src$='" + src + "']" );
-
-              if ( $modal.length ) {
-                $modal.dialog( "open" );
-              } else {
-                var img = $( "<img alt='" + title + "' width='384' height='288' style='display: none; padding: 8px;' />" )
-                  .attr( "src", src ).appendTo( "body" );
-                setTimeout(function() {
-                  img.dialog({
-                    title: title,
-                    width: 400,
-                    modal: true
-                  });
-                }, 1 );
-              }
-            }
-
-            // resolve the icons behavior with event delegation
-            $( "ul.ntasks > li" ).click(function( event ) {
-              var $item = $( this ),
-                $target = $( event.target );
-
-              if ( $target.is( "a.ui-icon-ptasks" ) ) {
-                deleteImage( $item );
-              } else if ( $target.is( "a.ui-icon-zoomin" ) ) {
-                viewLargerImage( $target );
-              } else if ( $target.is( "a.ui-icon-refresh" ) ) {
-                recycleImage( $item );
-              }
-
-              return false;
-            });
-          }
-      });
+      wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li");
+      wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li");
+      wrapTasks($dtasks,'DONE',"#ptasks li");
+      $rtasks.loadtasks();
+      $ptasks.loadtasks();
+      $dtasks.loadtasks();
     });
   }());
   </script>

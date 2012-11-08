@@ -1,0 +1,9 @@
+.ui-tasks-ul.custom-state-active { background: #eee; }
+.ui-tasks-ul li { float: left; width: 140px; height: 64px; padding: 0.4em; margin: 0 0.4em 0.4em 0; text-align: center; }
+.ui-tasks-ul li a { margin: 0 0 0.4em; cursor: move; }
+
+.ui-tasks-2 { float: left; width: 44%; min-height: 18em; padding: 2px; margin-left: 10px;} * html .ui-task { height: 18em; } /* IE6 */
+.ui-tasks-3 { float: left; width: 30%; min-height: 18em; padding: 2px; margin-left: 10px;} * html .ui-task { height: 18em; } /* IE6 */
+.ui-tasks h4 { line-height: 16px; margin: 0 0 0.4em; }
+.ui-tasks h4 .ui-icon { float: left; }
+.ui-tasks .ui-tasks-ul h5 { display: none; }
