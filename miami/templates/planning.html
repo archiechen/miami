@@ -6,13 +6,13 @@
  
 </div>
 
-<div id ="tasks" class=" ui-widget ui-helper-clearfix">
-  <div id="ntasks" class=" ui-tasks-2 ui-widget-content ui-state-default">
-    <h4 class="ui-widget-header">New</h4>
-    <ul class="ui-tasks-ul ui-helper-reset"></ul>
+<div id ="tasks">
+  <div id="ntasks" class="ui-tasks col2">
+    <h4 class="page-header">New</h4>
+    <ul class="ui-helper-reset"></ul>
   </div>
-  <div id="rtasks" class=" ui-tasks-2 ui-widget-content ui-state-default">
-    <h4 class="ui-widget-header">Ready</h4>
+  <div id="rtasks" class="ui-tasks col2">
+    <h4 class="page-header">Ready</h4>
   </div>
 </div>
 
@@ -37,7 +37,7 @@
               $('#myModal').modal('hide');
               var $item = ui.draggable;
               $item.fadeOut(function() {
-                  var $list = $("ul", $rtasks).length ? $("ul", $rtasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($rtasks);
+                  var $list = $("ul", $rtasks).length ? $("ul", $rtasks) : $("<ul class='ui-helper-reset'/>").appendTo($rtasks);
                   $item.appendTo($list).fadeIn();
               });
             },

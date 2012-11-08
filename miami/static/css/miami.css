@@ -1,31 +1,28 @@
-.ui-tasks-ul.custom-state-active { background: #eee; }
-.ui-tasks-ul li {
+.ui-tasks {
+    border: 1px solid #AAA;
+    float: left;
+    margin-left: 10px;
+    min-height: 46em;
+}
+.col2 { padding-left: 0.7em; width: 47%; }
+.col3 { padding-left: 0.2em; width: 31%; }
+.ui-tasks h4 { line-height: 16px; margin: 0 0 0.4em; }
+
+.ui-tasks.custom-state-active { background: #eee; }
+.ui-tasks li {
+    background-color: white;
+    border: 1px solid #AAA;
+    color: #222;
     float: left;
     height: 84px;
-    margin: 0.4em;
-    padding: 0.1em;
-    width: 140px;
+    list-style: none;
+    margin: 0.3em;
+    padding: 0.2em;
+    width: 164px;
 }
-.ui-tasks-ul li a { cursor: move; margin: 0 0 0.4em; }
-.ui-tasks-ul h5 { margin: 0.1em 0.1em 0 0.1em; }
+.ui-tasks li a { cursor: move; margin: 0 0 0.4em; }
+.ui-tasks h5 { margin: 0.1em 0.1em 0 0.1em; }
 
-.ui-tasks-2 {
-    float: left;
-    margin-left: 10px;
-    min-height: 18em;
-    padding: 2px;
-    width: 44%;
-}
-.ui-tasks-3 {
-    float: left;
-    margin-left: 10px;
-    min-height: 18em;
-    padding: 2px;
-    width: 30%;
-}
-.ui-tasks h4 { line-height: 16px; margin: 0 0 0.4em; }
-.ui-tasks h4 .ui-icon { float: left; }
-.ui-tasks .ui-tasks-ul h5 { display: none; }
 
 .form-signin {
     -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
