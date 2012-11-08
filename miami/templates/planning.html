@@ -1,5 +1,22 @@
 {% extends "layout.html" %}
 {% block body %}
+
+<!-- NEW Task Form -->
+<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">New Task</h3>
+  </div>
+  <div class="modal-body">
+    <input id="title" type="text" class="input-block-level" placeholder="title">
+    <textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>
+  </div>
+  <div class="modal-footer">
+    <button id="save" class="btn btn-primary">Save</button>
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+  </div>
+</div>
+
 <div id ="tasks" class=" ui-widget ui-helper-clearfix">
   <div id="ntasks" class=" ui-tasks-2 ui-widget-content ui-state-default">
     <h4 class="ui-widget-header">New</h4>
@@ -18,10 +35,23 @@
       $("ul li:nth-child(3)").addClass('active');
       var $ntasks =$( "#ntasks" ),
         $rtasks = $('#rtasks');
-      wrapTasks($ntasks,'NEW',"#rtasks li");
-      wrapTasks($rtasks,'READY',"#ntasks li");
+      wrapTasks($ntasks,'NEW',"#rtasks li",function(ui,data){});
+      wrapTasks($rtasks,'READY',"#ntasks li",function(ui,data){
+        $('#save').click(function(){
+          $('#myModal').modal('hide');
+          var $item = ui.draggable;
+          $item.fadeOut(function() {
+              var $list = $("ul", $rtasks).length ? $("ul", $rtasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($rtasks);
+              $item.appendTo($list).fadeIn();
+          });
+        });
+        $('.modal-body').append(data);  
+        $('#myModal').modal('show');
+      });
       $ntasks.loadtasks();
       $rtasks.loadtasks();
+
+
     });  
   }());
 </script>

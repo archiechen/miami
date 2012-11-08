@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, abort
 import flask.ext.sqlalchemy
 import flask.ext.restless
 
@@ -16,38 +16,51 @@ db = flask.ext.sqlalchemy.SQLAlchemy(app)
 #   2. They must have an __init__ method which accepts keyword arguments for
 #      all columns (the constructor in flask.ext.sqlalchemy.SQLAlchemy.Model
 #      supplies such a method, so you don't need to declare a new one).
+
+
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
     detail = db.Column(db.Text)
-    status = db.Column(db.String(10),default = 'NEW')
+    status = db.Column(db.String(10), default='NEW')
+    price = db.Column(db.Integer, default=0)
 
 
 # Create the database tables.
 db.create_all()
 
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('dashborad.html')
+
 
 @app.route('/new_task', methods=['GET'])
 def new_task():
     return render_template('new_task.html')
 
+
 @app.route('/tasks', methods=['GET'])
 def new_task():
     return render_template('tasks.html')
 
+
 @app.route('/planning', methods=['GET'])
 def planning():
     return render_template('planning.html')
+
+
+@app.route('/tasks/<status>/<tid>', methods=['PUT'])
+def to_status(status, tid):
+    task = Task.query.get(tid)
+    if status == 'READY' and task.price == 0:
+        return render_template('price.html'), 400
+    return "Welcome to %s,price:%d" % (status, task.price)
+
 
 # Create the Flask-Restless API manager.
 manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 
 # Create API endpoints, which will be available at /api/<tablename> by
 # default. Allowed HTTP methods can be specified as well.
-manager.create_api(Task, methods=['GET', 'POST','PUT', 'DELETE'])
-
-
-
+manager.create_api(Task, methods=['GET', 'POST', 'PUT', 'DELETE'])

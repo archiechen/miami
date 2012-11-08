@@ -23,9 +23,9 @@
         $ptasks = $('#ptasks'),
         $dtasks = $('#dtasks');
 
-      wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li");
-      wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li");
-      wrapTasks($dtasks,'DONE',"#ptasks li");
+      wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li",function(ui,data){});
+      wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li",function(ui,data){});
+      wrapTasks($dtasks,'DONE',"#ptasks li",function(ui,data){});
       $rtasks.loadtasks();
       $ptasks.loadtasks();
       $dtasks.loadtasks();

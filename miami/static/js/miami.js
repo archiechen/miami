@@ -1,12 +1,11 @@
-function wrapTasks($tasks, $status, $accept) {
+function wrapTasks($tasks, $status, $accept, func_400) {
     $tasks.droppable({
         accept: $accept,
         activeClass: "ui-state-highlight",
         drop: function(event, ui) {
             $.ajax({
                 type: 'PUT',
-                url: '/api/task/' + ui.draggable[0].id,
-                data: '{"status":"' + $status + '"}',
+                url: '/tasks/' + $status + '/' + ui.draggable[0].id,
                 success: function(data) {
                     var $item = ui.draggable;
                     $item.fadeOut(function() {
@@ -14,8 +13,12 @@ function wrapTasks($tasks, $status, $accept) {
                         $item.appendTo($list).fadeIn();
                     });
                 },
-                dataType: 'json',
-                contentType: 'application/json'
+                statusCode: {
+                    400: function(data) {
+                        func_400(ui, data);
+                    }
+                },
+                dataType: 'html'
             });
         }
     });
