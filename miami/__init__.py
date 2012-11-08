@@ -54,7 +54,7 @@ def planning():
 def to_status(status, tid):
     task = Task.query.get(tid)
     if status == 'READY' and task.price == 0:
-        return render_template('price.html'), 400
+        return render_template('price.html', task=task), 400
     return "Welcome to %s,price:%d" % (status, task.price)
 
 
