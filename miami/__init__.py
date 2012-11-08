@@ -47,5 +47,3 @@ manager.create_api(Task, methods=['GET', 'POST','PUT', 'DELETE'])
 
 
 
-# start the flask loop
-app.run()
