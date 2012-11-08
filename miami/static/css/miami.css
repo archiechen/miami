@@ -1,12 +1,13 @@
 .ui-tasks-ul.custom-state-active { background: #eee; }
 .ui-tasks-ul li {
     float: left;
-    height: 64px;
+    height: 84px;
     margin: 0.4em;
-    padding: 0.4em;
+    padding: 0.1em;
     width: 140px;
 }
 .ui-tasks-ul li a { cursor: move; margin: 0 0 0.4em; }
+.ui-tasks-ul h5 { margin: 0.1em 0.1em 0 0.1em; }
 
 .ui-tasks-2 {
     float: left;

@@ -41,12 +41,12 @@
       reloadTasks();
       
       $('#save').click(function(){
-        $('#myModal').modal('hide');  
         $.ajax({
           type: 'POST',
           url: '/api/task',
           data: '{"title":"'+$('#title').val()+'","detail":"'+$('#detail').val()+'"}',
           success: function(data){
+            $('#myModal').modal('hide');    
             reloadTasks();
           },
           dataType: 'json',
