@@ -35,7 +35,7 @@ function wrapTasks($tasks, $status, $accept, func_400) {
             success: function(data) {
                 var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
                 for(var i in data.objects) {
-                    $('ul', $tasks).append('<li id="' + data.objects[i].id + '" style="display: list-item;"><h5>' + data.objects[i].title + '</h5><small>' + data.objects[i].status + '</small><p class="text-warning">$' + data.objects[i].price + '</p><p class="text-info">' + data.objects[i].estimate + 'H</p></li>');
+                    $('ul', $tasks).append('<li id="' + data.objects[i].id + '" style="display: list-item;">'+create_taskcard(data.objects[i])+'</li>');
                 }
 
                 $("li", $tasks).draggable({
@@ -51,4 +51,8 @@ function wrapTasks($tasks, $status, $accept, func_400) {
             dataType: 'json'
         });
     };
+};
+
+function create_taskcard(task){
+    return '<h5>'+task.title+'</h5><small>'+task.status+'</small><p class="text-warning">$'+task.price+'</p><p class="text-info">'+task.estimate+'H</p>';
 };
