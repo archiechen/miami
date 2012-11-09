@@ -41,6 +41,8 @@
               $('#myModal').modal('hide');
               var $item = ui.draggable;
               $item.fadeOut(function() {
+                  $item.children().remove();
+                  $item.append('<h5>'+data.title+'</h5><small>'+data.status+'</small><p class="text-warning">$'+data.price+'</p><p class="text-info">'+data.estimate+'H</p>');
                   var $list = $("ul", $ptasks).length ? $("ul", $ptasks) : $("<ul class='ui-helper-reset/>").appendTo($ptasks);
                   $item.appendTo($list).fadeIn();
               });

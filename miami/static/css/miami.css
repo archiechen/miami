@@ -21,6 +21,7 @@
     width: 164px;
 }
 .ui-tasks li a { cursor: move; margin: 0 0 0.4em; }
+.ui-tasks li p { float: right; margin: 0 10px 10px; }
 .ui-tasks h5 { margin: 0.1em 0.1em 0 0.1em; }
 
 

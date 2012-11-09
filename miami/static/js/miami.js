@@ -10,6 +10,8 @@ function wrapTasks($tasks, $status, $accept, func_400) {
                     var $item = ui.draggable;
                     $item.fadeOut(function() {
                         var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
+                        $item.children().remove();
+                        $item.append(data);
                         $item.appendTo($list).fadeIn();
                     });
                 },
@@ -33,7 +35,7 @@ function wrapTasks($tasks, $status, $accept, func_400) {
             success: function(data) {
                 var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
                 for(var i in data.objects) {
-                    $('ul', $tasks).append('<li id="' + data.objects[i].id + '" style="display: list-item;"><h5>' + data.objects[i].title + '</h5><small>' + data.objects[i].status + '</small><p class="text-warning">$' + data.objects[i].price + '</p></li>');
+                    $('ul', $tasks).append('<li id="' + data.objects[i].id + '" style="display: list-item;"><h5>' + data.objects[i].title + '</h5><small>' + data.objects[i].status + '</small><p class="text-warning">$' + data.objects[i].price + '</p><p class="text-info">' + data.objects[i].estimate + 'H</p></li>');
                 }
 
                 $("li", $tasks).draggable({

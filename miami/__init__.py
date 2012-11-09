@@ -62,7 +62,7 @@ def to_status(status, tid):
         task.status = status
         db.session.commit()
 
-    return "Welcome to %s,price:%d" % (status, task.price)
+    return render_template('task_card.html',task = task)
 
 
 # Create the Flask-Restless API manager.
