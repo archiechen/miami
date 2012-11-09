@@ -1,6 +1,7 @@
 from flask import Flask, render_template, abort
 import flask.ext.sqlalchemy
 import flask.ext.restless
+from datetime import datetime
 
 
 # Create the Flask application and the Flask-SQLAlchemy object.
@@ -25,6 +26,7 @@ class Task(db.Model):
     status = db.Column(db.String(10), default='NEW')
     price = db.Column(db.Integer, default=0)
     estimate = db.Column(db.Integer, default=0)
+    created_time = db.Column(db.DateTime, default=datetime.now)
 
 
 # Create the database tables.
@@ -62,7 +64,7 @@ def to_status(status, tid):
         task.status = status
         db.session.commit()
 
-    return render_template('task_card.html',task = task)
+    return render_template('task_card.html', task=task)
 
 
 # Create the Flask-Restless API manager.

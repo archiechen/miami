@@ -24,6 +24,7 @@
       <td>Id</td>
       <td>Status</td>
       <td>Title</td>
+      <td>Created</td>
     </tr>
   </thead>
   <tbody>
@@ -61,7 +62,7 @@
         success: function(data){
           $('tbody > tr').remove();
           for(var i in data.objects) {
-            $('.table > tbody').append('<tr><td>' + data.objects[i].id + '</td><td>' + data.objects[i].status + '</td><td>' + data.objects[i].title+ '</td></tr>');
+            $('.table > tbody').append('<tr><td>' + data.objects[i].id + '</td><td>' + data.objects[i].status + '</td><td>' + data.objects[i].title+ '</td><td>' + $.format.date(data.objects[i].created_time,'yyyy-MM-dd')+ '</td></tr>');
           }
         },
         dataType: 'json'
