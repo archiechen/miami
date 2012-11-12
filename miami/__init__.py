@@ -26,7 +26,9 @@ class Task(db.Model):
     status = db.Column(db.String(10), default='NEW')
     price = db.Column(db.Integer, default=0)
     estimate = db.Column(db.Integer, default=0)
+    consuming = db.Column(db.Integer, default=0)
     created_time = db.Column(db.DateTime, default=datetime.now)
+    start_time = db.Column(db.DateTime, default=datetime.now)
 
 
 # Create the database tables.
@@ -56,13 +58,21 @@ def planning():
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
 def to_status(status, tid):
     task = Task.query.get(tid)
+    if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
+        task.consuming += (datetime.now() - task.start_time).total_seconds()
+
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
-    elif status == 'PROGRESS' and task.estimate == 0:
-        return render_template('estimate.html', task=task), 400
+    elif status == 'PROGRESS':
+        if task.estimate == 0:
+            return render_template('estimate.html', task=task), 400
+        else:
+            task.status = status
+            task.start_time = datetime.now()
     else:
         task.status = status
-        db.session.commit()
+        
+    db.session.commit()
 
     return render_template('task_card.html', task=task)
 
