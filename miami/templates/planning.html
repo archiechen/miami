@@ -24,8 +24,8 @@
       $("ul li:nth-child(3)").addClass('active');
       var $ntasks =$( "#ntasks" ),
         $rtasks = $('#rtasks');
-      wrapTasks($ntasks,'NEW',"#rtasks li",function(ui,data){});
-      wrapTasks($rtasks,'READY',"#ntasks li",function(ui,data){
+      $.miami.wrapTasks($ntasks,'NEW',"#rtasks li",function(ui,data){});
+      $.miami.wrapTasks($rtasks,'READY',"#ntasks li",function(ui,data){
         $('#myModal').children().remove();
         $('#myModal').append(data.responseText);  
         $('#save').click(function(){
@@ -35,13 +35,7 @@
             data: '{"status":"READY","price":'+$('#price').val()+'}',
             success: function(data){
               $('#myModal').modal('hide');
-              var $item = ui.draggable;
-              $item.fadeOut(function() {
-                  $item.children().remove();
-                  $item.append(create_taskcard(data));
-                  var $list = $("ul", $rtasks).length ? $("ul", $rtasks) : $("<ul class='ui-helper-reset'/>").appendTo($rtasks);
-                  $item.appendTo($list).fadeIn();
-              });
+              $.miami.moveto(ui.draggable,$rtasks,$.miami.create_taskcard(data));
             },
             dataType: 'json',
             contentType: 'application/json'

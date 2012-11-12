@@ -28,8 +28,8 @@
         $ptasks = $('#ptasks'),
         $dtasks = $('#dtasks');
 
-      wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li",function(ui,data){});
-      wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li",function(ui,data){
+      $.miami.wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li",function(ui,data){});
+      $.miami.wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li",function(ui,data){
         $('#myModal').children().remove();
         $('#myModal').append(data.responseText);  
         $('#save').click(function(){
@@ -39,13 +39,7 @@
             data: '{"status":"PROGRESS","estimate":'+$('#estimate').val()+'}',
             success: function(data){
               $('#myModal').modal('hide');
-              var $item = ui.draggable;
-              $item.fadeOut(function() {
-                  $item.children().remove();
-                  $item.append(create_taskcard(data));
-                  var $list = $("ul", $ptasks).length ? $("ul", $ptasks) : $("<ul class='ui-helper-reset/>").appendTo($ptasks);
-                  $item.appendTo($list).fadeIn();
-              });
+              $.miami.moveto(ui.draggable,$ptasks,$.miami.create_taskcard(data));
             },
             dataType: 'json',
             contentType: 'application/json'
@@ -53,7 +47,7 @@
         });
         $('#myModal').modal('show');
       });
-      wrapTasks($dtasks,'DONE',"#ptasks li",function(ui,data){});
+      $.miami.wrapTasks($dtasks,'DONE',"#ptasks li",function(ui,data){});
       $rtasks.loadtasks();
       $ptasks.loadtasks();
       $dtasks.loadtasks();
