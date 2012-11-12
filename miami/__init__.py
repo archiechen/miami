@@ -4,10 +4,12 @@ import flask.ext.restless
 from datetime import datetime
 
 
+DATABASE = '/tmp/test.db'
+
 # Create the Flask application and the Flask-SQLAlchemy object.
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % DATABASE
 
 db = flask.ext.sqlalchemy.SQLAlchemy(app)
 
@@ -30,9 +32,24 @@ class Task(db.Model):
     created_time = db.Column(db.DateTime, default=datetime.now)
     start_time = db.Column(db.DateTime, default=datetime.now)
 
+    def __init__(self, title, detail, estimate=0, price=0 ,status='NEW', start_time=datetime.now()):
+        self.title = title
+        self.detail = detail
+        self.price=price
+        self.estimate = estimate
+        self.status = status
+        self.start_time = start_time
+
 
 # Create the database tables.
-db.create_all()
+def init_db():
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+
+
+def now():
+    return datetime.now()
 
 
 @app.route('/', methods=['GET'])
@@ -57,9 +74,9 @@ def planning():
 
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
 def to_status(status, tid):
-    task = Task.query.get(tid)
+    task = Task.query.get_or_404(tid)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.consuming += (datetime.now() - task.start_time).total_seconds()
+        task.consuming += (now() - task.start_time).total_seconds()
 
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
@@ -71,7 +88,7 @@ def to_status(status, tid):
             task.start_time = datetime.now()
     else:
         task.status = status
-        
+
     db.session.commit()
 
     return render_template('task_card.html', task=task)
