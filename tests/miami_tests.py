@@ -7,14 +7,15 @@ import miami
 import simplejson as json
 from datetime import datetime
 from mockito import when
-from miami import Task, TimeSlot
-
-when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+from miami import Task, TimeSlot, User
 
 
 def create_entity(entity):
     miami.db.session.add(entity)
     miami.db.session.commit()
+
+
+when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
 
 
 class Test(unittest.TestCase):
@@ -24,6 +25,7 @@ class Test(unittest.TestCase):
         miami.app.config['TESTING'] = True
         self.app = miami.app.test_client()
         miami.init_db()
+        create_entity(User('Mike'))
 
     def tearDown(self):
         os.close(self.db_fd)
@@ -71,17 +73,22 @@ class Test(unittest.TestCase):
 
     def test_progress_to_ready(self):
         create_entity(Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11)))
+        user = User.query.get(1)
+        when(miami).current_user().thenReturn(user)
         rv = self.app.put('/tasks/READY/1')
 
         self.assertEquals(200, rv.status_code)
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
         self.assertEquals(60, task.consuming)
+        self.assertEquals(1, task.time_slots[0].user.id)
 
     def test_multi_timeslots(self):
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
-        task.time_slots.append(TimeSlot(task.start_time, 20))
+        task.time_slots.append(TimeSlot(task.start_time, 20, User.query.get(1)))
         create_entity(task)
+        create_entity(User('Bob'))
+        when(miami).current_user().thenReturn(User.query.get(2))
 
         rv = self.app.put('/tasks/READY/1')
 
@@ -89,6 +96,8 @@ class Test(unittest.TestCase):
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
         self.assertEquals(80, task.consuming)
+        self.assertEquals(1, task.time_slots[0].user.id)
+        self.assertEquals(2, task.time_slots[1].user.id)
 
     def test_new_to_ready_without_price(self):
         create_entity(Task('title', 'detail'))
@@ -109,3 +118,4 @@ class Test(unittest.TestCase):
 
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
+id

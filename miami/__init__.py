@@ -52,12 +52,24 @@ class Task(db.Model):
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship("User")
+
     start_time = db.Column(db.DateTime, default=datetime.now)
     consuming = db.Column(db.Integer, default=0)
 
-    def __init__(self, start_time, consuming):
+    def __init__(self, start_time, consuming, user):
         self.consuming = consuming
         self.start_time = start_time
+        self.user = user
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+
+    def __init__(self, name):
+        self.name = name
 
 
 # Create the database tables.
@@ -69,6 +81,10 @@ def init_db():
 
 def now():
     return datetime.now()
+
+
+def current_user():
+    return User.query.get(1)
 
 
 @app.route('/', methods=['GET'])
@@ -95,7 +111,7 @@ def planning():
 def to_status(status, tid):
     task = Task.query.get_or_404(tid)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds()))
+        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user()))
 
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
