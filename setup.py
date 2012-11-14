@@ -14,6 +14,7 @@ setup(
         'flup==1.0.3.dev_20110405',
         'sqlalchemy==0.7.9',
         'flask_restless==0.7.0',
+        'flask_login==0.1.3',
         'flask_sqlalchemy==0.16'
     ]
 )
