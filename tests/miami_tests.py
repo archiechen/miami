@@ -38,8 +38,8 @@ class Test(unittest.TestCase):
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
 
-    def test_new_to_progress_without_estimate(self):
-        create_entity(Task('title1', 'detail1'))
+    def test_ready_to_progress_without_estimate(self):
+        create_entity(Task('title1', 'detail1', status='READY'))
 
         rv = self.app.put('/tasks/PROGRESS/1')
 
@@ -50,8 +50,8 @@ class Test(unittest.TestCase):
         assert '<p>detail1</p>' in rv.data
         assert '<input id="estimate" type="text" class="input-small" placeholder="estimate" value="0"/>' in rv.data
 
-    def test_new_to_progress_with_estimate(self):
-        create_entity(Task('title2', 'detail2', estimate=10))
+    def test_ready_to_progress_with_estimate(self):
+        create_entity(Task('title2', 'detail2', status='READY', estimate=10))
 
         rv = self.app.put('/tasks/PROGRESS/1')
 
@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
 
     def test_multi_timeslots(self):
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
-        task.time_slots.append(TimeSlot(task.start_time,20))
+        task.time_slots.append(TimeSlot(task.start_time, 20))
         create_entity(task)
 
         rv = self.app.put('/tasks/READY/1')
@@ -89,4 +89,23 @@ class Test(unittest.TestCase):
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
         self.assertEquals(80, task.consuming)
-        #yptest
+
+    def test_new_to_ready_without_price(self):
+        create_entity(Task('title', 'detail'))
+
+        rv = self.app.put('/tasks/READY/1')
+        self.assertEquals(400, rv.status_code)
+
+        assert '<h3 id="myModalLabel">Pricing</h3>' in rv.data
+        assert '<h4>title</h4>' in rv.data
+        assert '<p>detail</p>' in rv.data
+        assert '<input id="price" type="text" class="input-small" placeholder="price" value="0"/>' in rv.data
+
+    def test_new_to_ready_with_price(self):
+        create_entity(Task('title', 'detail', price=20))
+
+        rv = self.app.put('/tasks/READY/1')
+        self.assertEquals(200, rv.status_code)
+
+        task = Task.query.get(1)
+        self.assertEquals('READY', task.status)
