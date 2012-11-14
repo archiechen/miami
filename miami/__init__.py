@@ -2,6 +2,7 @@ from flask import Flask, render_template, abort
 import flask.ext.sqlalchemy
 import flask.ext.restless
 from datetime import datetime
+import math
 
 
 DATABASE = '/tmp/test.db'
@@ -28,16 +29,34 @@ class Task(db.Model):
     status = db.Column(db.String(10), default='NEW')
     price = db.Column(db.Integer, default=0)
     estimate = db.Column(db.Integer, default=0)
-    consuming = db.Column(db.Integer, default=0)
     created_time = db.Column(db.DateTime, default=datetime.now)
     start_time = db.Column(db.DateTime, default=datetime.now)
+    time_slots = db.relationship('TimeSlot', backref='task',
+                                 lazy='dynamic')
 
-    def __init__(self, title, detail, estimate=0, price=0 ,status='NEW', start_time=datetime.now()):
+    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now()):
         self.title = title
         self.detail = detail
-        self.price=price
+        self.price = price
         self.estimate = estimate
         self.status = status
+        self.start_time = start_time
+
+    def __getattr__(self, name):
+        if name == 'consuming':
+            return math.fsum([ts.consuming for ts in self.time_slots])
+
+        return db.Model.__getattr__(self.name)
+
+
+class TimeSlot(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
+    start_time = db.Column(db.DateTime, default=datetime.now)
+    consuming = db.Column(db.Integer, default=0)
+
+    def __init__(self, start_time, consuming):
+        self.consuming = consuming
         self.start_time = start_time
 
 
@@ -76,7 +95,7 @@ def planning():
 def to_status(status, tid):
     task = Task.query.get_or_404(tid)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.consuming += (now() - task.start_time).total_seconds()
+        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds()))
 
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400

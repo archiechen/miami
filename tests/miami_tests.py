@@ -7,12 +7,13 @@ import miami
 import simplejson as json
 from datetime import datetime
 from mockito import when
+from miami import Task, TimeSlot
 
 when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
 
 
-def create_task(task):
-    miami.db.session.add(task)
+def create_entity(entity):
+    miami.db.session.add(entity)
     miami.db.session.commit()
 
 
@@ -38,7 +39,7 @@ class Test(unittest.TestCase):
         self.assertEquals('NEW', task.status)
 
     def test_new_to_progress_without_estimate(self):
-        create_task(miami.Task('title1', 'detail1'))
+        create_entity(Task('title1', 'detail1'))
 
         rv = self.app.put('/tasks/PROGRESS/1')
 
@@ -50,16 +51,16 @@ class Test(unittest.TestCase):
         assert '<input id="estimate" type="text" class="input-small" placeholder="estimate" value="0"/>' in rv.data
 
     def test_new_to_progress_with_estimate(self):
-        create_task(miami.Task('title2', 'detail2', estimate=10))
+        create_entity(Task('title2', 'detail2', estimate=10))
 
         rv = self.app.put('/tasks/PROGRESS/1')
 
         self.assertEquals(200, rv.status_code)
-        task = miami.Task.query.get(1)
+        task = Task.query.get(1)
         self.assertEquals('PROGRESS', task.status)
 
     def test_estimate(self):
-        create_task(miami.Task('title1', 'detail1'))
+        create_entity(Task('title1', 'detail1'))
 
         rv = self.app.put('/api/task/1', data='{"status":"PROGRESS","estimate":10}')
 
@@ -69,10 +70,22 @@ class Test(unittest.TestCase):
         self.assertEquals(10, updated['estimate'])
 
     def test_progress_to_ready(self):
-        create_task(miami.Task('title2', 'detail2', estimate=10, price=10,status='PROGRESS', start_time=datetime(2012, 11, 11)))
+        create_entity(Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11)))
         rv = self.app.put('/tasks/READY/1')
 
         self.assertEquals(200, rv.status_code)
-        task = miami.Task.query.get(1)
+        task = Task.query.get(1)
         self.assertEquals('READY', task.status)
         self.assertEquals(60, task.consuming)
+
+    def test_multi_timeslots(self):
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.time_slots.append(TimeSlot(task.start_time,20))
+        create_entity(task)
+
+        rv = self.app.put('/tasks/READY/1')
+
+        self.assertEquals(200, rv.status_code)
+        task = Task.query.get(1)
+        self.assertEquals('READY', task.status)
+        self.assertEquals(80, task.consuming)
