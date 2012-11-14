@@ -89,3 +89,4 @@ class Test(unittest.TestCase):
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
         self.assertEquals(80, task.consuming)
+        #yptest
