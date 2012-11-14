@@ -18,7 +18,7 @@ def create_entity(entity):
 when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
 
 
-class Test(unittest.TestCase):
+class MiamiTest(unittest.TestCase):
 
     def setUp(self):
         self.db_fd, miami.app.config['DATABASE'] = tempfile.mkstemp()

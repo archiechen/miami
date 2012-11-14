@@ -1,16 +1,20 @@
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, flash, request, redirect, url_for
 import flask.ext.sqlalchemy
 import flask.ext.restless
 from datetime import datetime
 import math
+from flask.ext.login import LoginManager, UserMixin, AnonymousUser, login_user,logout_user, login_required
 
 
 DATABASE = '/tmp/test.db'
+SECRET_KEY = "yeah, not actually a secret"
 
 # Create the Flask application and the Flask-SQLAlchemy object.
 app = Flask(__name__)
-app.config['DEBUG'] = True
+app.config.from_object(__name__)
+app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % DATABASE
+
 
 db = flask.ext.sqlalchemy.SQLAlchemy(app)
 
@@ -64,15 +68,38 @@ class TimeSlot(db.Model):
         self.user = user
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
+    active = db.Column(db.Boolean)
 
-    def __init__(self, name):
+    def __init__(self, name, active=True):
         self.name = name
+        self.active = active
+
+    def is_active(self):
+        return self.active
 
 
+class Anonymous(AnonymousUser):
+    name = u"Anonymous"
+
+
+login_manager = LoginManager()
+
+login_manager.anonymous_user = Anonymous
+login_manager.login_view = "login"
+login_manager.login_message = u"Please log in to access this page."
+
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+login_manager.setup_app(app)
 # Create the database tables.
+
+
 def init_db():
     with app.app_context():
         db.drop_all()
@@ -85,6 +112,29 @@ def now():
 
 def current_user():
     return User.query.get(1)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    error = None
+    if request.method == "POST" and "username" in request.form:
+        user = User.query.filter_by(name=request.form["username"]).first()
+        if user:
+            if login_user(user):
+                flash("Logged in!")
+                return redirect(request.args.get("next") or url_for("index"))
+            else:
+                flash("Sorry, but you could not log in.")
+        else:
+            flash(u"Invalid username.")
+    return render_template("login.html", error=error)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
 
 
 @app.route('/', methods=['GET'])
