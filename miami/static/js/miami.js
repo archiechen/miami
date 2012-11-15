@@ -9,7 +9,7 @@
                         type: 'PUT',
                         url: '/tasks/' + $status + '/' + ui.draggable[0].id,
                         success: function(data) {
-                            moveto(ui.draggable, $tasks , data);
+                            moveto(ui.draggable, $tasks, data);
                         },
                         statusCode: {
                             400: function(data) {
@@ -59,13 +59,17 @@
         }
 
         function create_taskcard(task) {
-            return '<h5>' + task.title + '</h5><small>' + task.status + '</small><p class="text-warning">$' + task.price + '</p><p class="text-info">' + task.estimate + 'H</p><p class="text-info">' + task.consuming + 'S</p>';
+            var consuming = 0;
+            for(var i in task.time_slots) {
+                consuming += task.time_slots[i].consuming;
+            }
+            return '<h5>' + task.title + '</h5><small>' + task.status + '</small><p class="text-warning">$' + task.price + '</p><p class="text-info">' + task.estimate + 'H</p><p class="text-info">' + consuming + 'S</p>';
         };
 
         return {
-            wrapTasks:wrapTasks,
-            moveto:moveto,
-            create_taskcard:create_taskcard
+            wrapTasks: wrapTasks,
+            moveto: moveto,
+            create_taskcard: create_taskcard
         }
     }());
 }(jQuery));

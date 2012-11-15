@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
-<a href="#myModal" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
+<a href="#taskForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
 </a>
 
 <!-- NEW Task Form -->
-<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div id="taskForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="taskFormLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">New Task</h3>
+    <h3 id="taskFormLabel">New Task</h3>
   </div>
   <div class="modal-body">
     <input id="title" type="text" class="input-block-level" placeholder="title">
@@ -46,7 +46,7 @@
           url: '/api/task',
           data: '{"title":"'+$('#title').val()+'","detail":"'+$('#detail').val()+'"}',
           success: function(data){
-            $('#myModal').modal('hide');    
+            $('#taskForm').modal('hide');    
             reloadTasks();
           },
           dataType: 'json',

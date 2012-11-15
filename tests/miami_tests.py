@@ -26,10 +26,20 @@ class MiamiTest(unittest.TestCase):
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
+        self.login('Mike', '')
 
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(miami.app.config['DATABASE'])
+
+    def login(self, username, password):
+        return self.app.post('/login', data=dict(
+            username=username,
+            password=password
+        ), follow_redirects=True)
+
+    def logout(self):
+        return self.app.get('/logout', follow_redirects=True)
 
     def test_create_task(self):
         rv = self.app.post('/api/task', data='{"title":"title1","detail":"detail1"}')
@@ -39,6 +49,12 @@ class MiamiTest(unittest.TestCase):
 
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
+
+    def test_create_task_logout(self):
+        self.logout()
+        rv = self.app.post('/api/task', data='{"title":"title1","detail":"detail1"}')
+
+        self.assertEquals(401, rv.status_code)
 
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
@@ -52,6 +68,15 @@ class MiamiTest(unittest.TestCase):
         assert '<p>detail1</p>' in rv.data
         assert '<input id="estimate" type="text" class="input-small" placeholder="estimate" value="0"/>' in rv.data
 
+    def test_ready_to_progress_without_estimate_logout(self):
+        self.logout()
+        create_entity(Task('title1', 'detail1', status='READY'))
+
+        rv = self.app.put('/tasks/PROGRESS/1')
+
+        self.assertEquals(401, rv.status_code)
+        assert '<form action="/login" method="POST" class="form-horizontal">' in rv.data
+
     def test_ready_to_progress_with_estimate(self):
         create_entity(Task('title2', 'detail2', status='READY', estimate=10))
 
@@ -62,19 +87,22 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals('PROGRESS', task.status)
 
     def test_estimate(self):
-        create_entity(Task('title1', 'detail1'))
+        create_entity(Task('title1', 'detail1', status='READY'))
 
-        rv = self.app.put('/api/task/1', data='{"status":"PROGRESS","estimate":10}')
+        rv = self.app.put('/tasks/PROGRESS/1/10')
 
         self.assertEquals('200 OK', rv.status)
-        updated = json.loads(rv.data)
-        self.assertEquals('PROGRESS', updated['status'])
-        self.assertEquals(10, updated['estimate'])
+
+        assert '<h5>title1</h5>' in rv.data
+        assert '<small>PROGRESS</small>' in rv.data
+        assert '<p class="text-warning">$0</p>' in rv.data
+        assert '<p class="text-info">10H</p>' in rv.data
+        assert '<p class="text-info">0.0S</p>' in rv.data
 
     def test_progress_to_ready(self):
         create_entity(Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11)))
         user = User.query.get(1)
-        when(miami).current_user().thenReturn(user)
+        when(miami).get_current_user().thenReturn(user)
         rv = self.app.put('/tasks/READY/1')
 
         self.assertEquals(200, rv.status_code)
@@ -88,7 +116,7 @@ class MiamiTest(unittest.TestCase):
         task.time_slots.append(TimeSlot(task.start_time, 20, User.query.get(1)))
         create_entity(task)
         create_entity(User('Bob'))
-        when(miami).current_user().thenReturn(User.query.get(2))
+        when(miami).get_current_user().thenReturn(User.query.get(2))
 
         rv = self.app.put('/tasks/READY/1')
 

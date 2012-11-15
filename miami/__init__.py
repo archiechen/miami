@@ -3,11 +3,12 @@ import flask.ext.sqlalchemy
 import flask.ext.restless
 from datetime import datetime
 import math
-from flask.ext.login import LoginManager, UserMixin, AnonymousUser, login_user,logout_user, login_required
+from flask.ext.login import LoginManager, UserMixin, AnonymousUser, login_user, logout_user, login_required, current_user
 
 
 DATABASE = '/tmp/test.db'
 SECRET_KEY = "yeah, not actually a secret"
+DEBUG = True
 
 # Create the Flask application and the Flask-SQLAlchemy object.
 app = Flask(__name__)
@@ -34,7 +35,7 @@ class Task(db.Model):
     price = db.Column(db.Integer, default=0)
     estimate = db.Column(db.Integer, default=0)
     created_time = db.Column(db.DateTime, default=datetime.now)
-    start_time = db.Column(db.DateTime, default=datetime.now)
+    start_time = db.Column(db.DateTime)
     time_slots = db.relationship('TimeSlot', backref='task',
                                  lazy='dynamic')
 
@@ -86,10 +87,7 @@ class Anonymous(AnonymousUser):
 
 
 login_manager = LoginManager()
-
 login_manager.anonymous_user = Anonymous
-login_manager.login_view = "login"
-login_manager.login_message = u"Please log in to access this page."
 
 
 @login_manager.user_loader
@@ -110,8 +108,13 @@ def now():
     return datetime.now()
 
 
-def current_user():
+def get_current_user():
     return User.query.get(1)
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+    return render_template('login.html', message='please login.'), 401
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -138,30 +141,43 @@ def logout():
 
 
 @app.route('/', methods=['GET'])
+@login_required
 def index():
-    return render_template('dashborad.html')
-
-
-@app.route('/new_task', methods=['GET'])
-def new_task():
-    return render_template('new_task.html')
+    return render_template('dashborad.html', user=current_user)
 
 
 @app.route('/tasks', methods=['GET'])
+@login_required
 def new_task():
-    return render_template('tasks.html')
+    return render_template('tasks.html', user=current_user)
 
 
 @app.route('/planning', methods=['GET'])
+@login_required
 def planning():
-    return render_template('planning.html')
+    return render_template('planning.html', user=current_user)
+
+
+@app.route('/tasks/PROGRESS/<tid>/<estimate>', methods=['PUT'])
+@login_required
+def estimate(tid, estimate):
+    task = Task.query.get_or_404(tid)
+    if task.status == 'READY' or task.status == 'DONE':
+        task.estimate = estimate
+        task.status = 'PROGRESS'
+        task.start_time = now()
+        db.session.commit()
+        return render_template('task_card.html', task=task)
+
+    abort(400)
 
 
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
+@login_required
 def to_status(status, tid):
     task = Task.query.get_or_404(tid)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user()))
+        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), get_current_user()))
 
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
@@ -180,8 +196,10 @@ def to_status(status, tid):
 
 
 # Create the Flask-Restless API manager.
+auth_func = lambda: current_user.is_authenticated()
 manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 
 # Create API endpoints, which will be available at /api/<tablename> by
 # default. Allowed HTTP methods can be specified as well.
-manager.create_api(Task, methods=['GET', 'POST', 'PUT', 'DELETE'])
+manager.create_api(Task, methods=['GET', 'POST', 'PUT', 'DELETE'], authentication_required_for=['POST', 'PUT'],
+                   authentication_function=auth_func)

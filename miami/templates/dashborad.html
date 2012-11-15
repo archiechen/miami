@@ -35,14 +35,12 @@
         $('#save').click(function(){
           $.ajax({
             type: 'PUT',
-            url: '/api/task/'+ui.draggable[0].id,
-            data: '{"status":"PROGRESS","estimate":'+$('#estimate').val()+'}',
+            url: '/tasks/PROGRESS/'+ui.draggable[0].id+'/'+$('#estimate').val(),
             success: function(data){
               $('#myModal').modal('hide');
-              $.miami.moveto(ui.draggable,$ptasks,$.miami.create_taskcard(data));
+              $.miami.moveto(ui.draggable,$ptasks,data);
             },
-            dataType: 'json',
-            contentType: 'application/json'
+            dataType: 'html'
           });
         });
         $('#myModal').modal('show');
