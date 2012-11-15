@@ -178,18 +178,19 @@ def to_status(status, tid):
     if task.owner and task.owner.id != current_user.id:
         abort(401)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(),current_user))
+        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user))
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
-    elif status == 'PROGRESS':
+    if status == 'PROGRESS':
+        if Task.query.filter_by(owner=current_user, status='PROGRESS').count() > 0:
+            abort(403)
+
         if task.estimate == 0:
             return render_template('estimate.html', task=task), 400
         else:
-            task.status = status
             task.start_time = datetime.now()
-    else:
-        task.status = status
-
+    
+    task.status = status
     db.session.commit()
 
     return render_template('task_card.html', task=task)

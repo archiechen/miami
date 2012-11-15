@@ -17,6 +17,9 @@
                             },
                             401: function(data) {
                                 alert('unauthorization');
+                            },
+                            403: function(data) {
+                                alert('已经有任务了');
                             }
                         },
                         dataType: 'html'
@@ -67,7 +70,7 @@
                 consuming += task.time_slots[i].consuming;
             }
             var owner = '';
-            if(task.owner!=null){
+            if(task.owner != null) {
                 owner = task.owner.name;
             }
             return '<h5>' + task.title + '</h5><small>' + task.status + '</small><p class="text-warning">$' + task.price + '</p><p class="text-info">' + task.estimate + 'H</p><p class="text-info">' + consuming + 'S</p><p class="text-info">' + owner + '</p>';

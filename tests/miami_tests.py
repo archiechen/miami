@@ -115,10 +115,10 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(401, rv.status_code)
 
     def test_progress_to_ready(self):
-        task=Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
-        task.owner=User.query.get(1)
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(1)
         create_entity(task)
-  
+
         rv = self.app.put('/tasks/READY/1')
 
         self.assertEquals(200, rv.status_code)
@@ -164,4 +164,12 @@ class MiamiTest(unittest.TestCase):
 
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
-id
+
+    def test_owner_one_task(self):
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(1)
+        create_entity(task)
+        create_entity(Task('title3', 'detail3', estimate=10, price=10, status='NEW', start_time=datetime(2012, 11, 11)))
+        rv = self.app.put('/tasks/PROGRESS/2')
+
+        self.assertEquals(403,rv.status_code)
