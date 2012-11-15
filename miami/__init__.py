@@ -38,8 +38,10 @@ class Task(db.Model):
     start_time = db.Column(db.DateTime)
     time_slots = db.relationship('TimeSlot', backref='task',
                                  lazy='dynamic')
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    owner = db.relationship("User")
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship("User", primaryjoin='User.id==Task.owner_id')
+    partner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    partner = db.relationship("User", primaryjoin='User.id==Task.partner_id')
 
     def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now()):
         self.title = title
@@ -171,6 +173,14 @@ def estimate(tid, estimate):
     abort(400)
 
 
+@app.route('/jointask/<tid>', methods=['PUT'])
+@login_required
+def join_task(tid):
+    task = Task.query.get_or_404(tid)
+    task.partner=current_user
+    return render_template('task_card.html', task=task)
+
+
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
 @login_required
 def to_status(status, tid):
@@ -189,7 +199,7 @@ def to_status(status, tid):
             return render_template('estimate.html', task=task), 400
         else:
             task.start_time = datetime.now()
-    
+
     task.status = status
     db.session.commit()
 

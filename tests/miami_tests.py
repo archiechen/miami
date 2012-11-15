@@ -172,4 +172,21 @@ class MiamiTest(unittest.TestCase):
         create_entity(Task('title3', 'detail3', estimate=10, price=10, status='NEW', start_time=datetime(2012, 11, 11)))
         rv = self.app.put('/tasks/PROGRESS/2')
 
-        self.assertEquals(403,rv.status_code)
+        self.assertEquals(403, rv.status_code)
+
+    def test_join_partner(self):
+        create_entity(User('Bob'))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(2)
+        create_entity(task)
+
+        rv = self.app.put('/jointask/1')
+
+        self.assertEquals(200, rv.status_code)
+        assert '<h5>title2</h5>' in rv.data
+        assert '<small>PROGRESS</small>' in rv.data
+        assert '<p class="text-warning">$10</p>' in rv.data
+        assert '<p class="text-info">10H</p>' in rv.data
+        assert '<p class="text-info">0.0S</p>' in rv.data
+        assert '<p class="text-info">Mike</p>' in rv.data
+        assert '<p class="text-info">Bob</p>' in rv.data
