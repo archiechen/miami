@@ -98,11 +98,27 @@ class MiamiTest(unittest.TestCase):
         assert '<p class="text-warning">$0</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
         assert '<p class="text-info">0.0S</p>' in rv.data
+        assert '<p class="text-info">Mike</p>' in rv.data
+
+    def test_ready_to_progress_noauth(self):
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        mike = User.query.get(1)
+        task.owner = mike
+        task.time_slots.append(TimeSlot(task.start_time, 20, mike))
+        create_entity(task)
+        create_entity(User('Bob'))
+        self.logout()
+        self.login('Bob', '')
+
+        rv = self.app.put('/tasks/PROGRESS/1')
+
+        self.assertEquals(401, rv.status_code)
 
     def test_progress_to_ready(self):
-        create_entity(Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11)))
-        user = User.query.get(1)
-        when(miami).get_current_user().thenReturn(user)
+        task=Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner=User.query.get(1)
+        create_entity(task)
+  
         rv = self.app.put('/tasks/READY/1')
 
         self.assertEquals(200, rv.status_code)
@@ -112,11 +128,13 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(1, task.time_slots[0].user.id)
 
     def test_multi_timeslots(self):
+        create_entity(User('Bob'))
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
         task.time_slots.append(TimeSlot(task.start_time, 20, User.query.get(1)))
+        task.owner = User.query.get(2)
         create_entity(task)
-        create_entity(User('Bob'))
-        when(miami).get_current_user().thenReturn(User.query.get(2))
+        self.logout()
+        self.login('Bob', '')
 
         rv = self.app.put('/tasks/READY/1')
 

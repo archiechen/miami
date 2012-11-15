@@ -14,6 +14,9 @@
                         statusCode: {
                             400: function(data) {
                                 func_400(ui, data);
+                            },
+                            401: function(data) {
+                                alert('unauthorization');
                             }
                         },
                         dataType: 'html'
@@ -63,7 +66,11 @@
             for(var i in task.time_slots) {
                 consuming += task.time_slots[i].consuming;
             }
-            return '<h5>' + task.title + '</h5><small>' + task.status + '</small><p class="text-warning">$' + task.price + '</p><p class="text-info">' + task.estimate + 'H</p><p class="text-info">' + consuming + 'S</p>';
+            var owner = '';
+            if(task.owner!=null){
+                owner = task.owner.name;
+            }
+            return '<h5>' + task.title + '</h5><small>' + task.status + '</small><p class="text-warning">$' + task.price + '</p><p class="text-info">' + task.estimate + 'H</p><p class="text-info">' + consuming + 'S</p><p class="text-info">' + owner + '</p>';
         };
 
         return {

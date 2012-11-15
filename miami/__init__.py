@@ -38,6 +38,8 @@ class Task(db.Model):
     start_time = db.Column(db.DateTime)
     time_slots = db.relationship('TimeSlot', backref='task',
                                  lazy='dynamic')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship("User")
 
     def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now()):
         self.title = title
@@ -108,10 +110,6 @@ def now():
     return datetime.now()
 
 
-def get_current_user():
-    return User.query.get(1)
-
-
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template('login.html', message='please login.'), 401
@@ -166,6 +164,7 @@ def estimate(tid, estimate):
         task.estimate = estimate
         task.status = 'PROGRESS'
         task.start_time = now()
+        task.owner = current_user
         db.session.commit()
         return render_template('task_card.html', task=task)
 
@@ -176,9 +175,10 @@ def estimate(tid, estimate):
 @login_required
 def to_status(status, tid):
     task = Task.query.get_or_404(tid)
+    if task.owner and task.owner.id != current_user.id:
+        abort(401)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), get_current_user()))
-
+        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(),current_user))
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
     elif status == 'PROGRESS':
