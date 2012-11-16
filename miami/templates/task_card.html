@@ -3,5 +3,5 @@
 <p class="text-warning">${{task.price}}</p>
 <p class="text-info">{{task.estimate}}H</p>
 <p class="text-info">{{task.consuming}}S</p>
-<p class="text-info">{%- if task.owner -%}{{task.owner.name}}{% endif %}</p>
-<p class="text-info">{%- if task.partner -%}{{task.partner.name}}{% endif %}</p>
+<p class="text-info">{% if task.owner %}{{task.owner.name}}{% endif %}</p>
+<p class="text-info">{% if task.partner %}{{task.partner.name}}{% endif %}</p>
