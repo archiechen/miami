@@ -61,16 +61,18 @@ class Task(db.Model):
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship("User")
-
     start_time = db.Column(db.DateTime, default=datetime.now)
     consuming = db.Column(db.Integer, default=0)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship("User", primaryjoin='User.id==TimeSlot.user_id')
+    partner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    partner = db.relationship("User", primaryjoin='User.id==TimeSlot.partner_id')
 
-    def __init__(self, start_time, consuming, user):
+    def __init__(self, start_time, consuming, user, partner=None):
         self.consuming = consuming
         self.start_time = start_time
         self.user = user
+        self.partner = partner
 
 
 class User(db.Model, UserMixin):
@@ -177,7 +179,11 @@ def estimate(tid, estimate):
 @login_required
 def join_task(tid):
     task = Task.query.get_or_404(tid)
-    task.partner=current_user
+    task.partner = current_user
+    current_time = now()
+    task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
+    task.start_time = current_time
+    db.session.commit()
     return render_template('task_card.html', task=task)
 
 
@@ -188,7 +194,8 @@ def to_status(status, tid):
     if task.owner and task.owner.id != current_user.id:
         abort(401)
     if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user))
+        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user, partner=task.partner))
+        task.partner = None
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
     if status == 'PROGRESS':
