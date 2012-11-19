@@ -6,16 +6,13 @@ import tempfile
 import miami
 import simplejson as json
 from datetime import datetime
-from mockito import when
+from mockito import when, unstub
 from miami import Task, TimeSlot, User
 
 
 def create_entity(entity):
     miami.db.session.add(entity)
     miami.db.session.commit()
-
-
-when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
 
 
 class MiamiTest(unittest.TestCase):
@@ -26,11 +23,13 @@ class MiamiTest(unittest.TestCase):
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
+        when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(miami.app.config['DATABASE'])
+        unstub()
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(
@@ -65,10 +64,8 @@ class MiamiTest(unittest.TestCase):
 
         assert '<li id="1" style="display: list-item;">' in rv.data
         assert '<h5>title2</h5>' in rv.data
-        assert '<small>READY</small>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">0H</p>' in rv.data
-        assert '<p class="text-info">0.0S</p>' in rv.data
 
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
@@ -108,10 +105,8 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals('200 OK', rv.status)
 
         assert '<h5>title1</h5>' in rv.data
-        assert '<small>PROGRESS</small>' in rv.data
         assert '<p class="text-warning">$0</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<p class="text-info">0.0S</p>' in rv.data
         assert '<p class="text-info">Mike</p>' in rv.data
 
     def test_ready_to_progress_noauth(self):

@@ -114,6 +114,21 @@ def now():
     return datetime.now()
 
 
+def zeroing():
+    app.logger.debug('zeroing')
+    tasks = Task.query.filter_by(status='PROGRESS')
+
+    for task in tasks:
+        app.logger.debug('update status')
+        task.status = 'READY'
+        end_time = now()
+        if end_time.hour > 18:
+            end_time = end_time.replace(hour=18, minute=0, second=0)
+        task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner))
+
+    db.session.commit()
+
+
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template('login.html', message='please login.'), 401

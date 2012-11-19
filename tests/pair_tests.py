@@ -6,16 +6,13 @@ import tempfile
 import miami
 import simplejson as json
 from datetime import datetime
-from mockito import when
+from mockito import when,unstub
 from miami import Task, TimeSlot, User
 
 
 def create_entity(entity):
     miami.db.session.add(entity)
     miami.db.session.commit()
-
-
-when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
 
 
 class PairTest(unittest.TestCase):
@@ -26,11 +23,13 @@ class PairTest(unittest.TestCase):
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
+        when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(miami.app.config['DATABASE'])
+        unstub()
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(
@@ -51,15 +50,14 @@ class PairTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
         assert '<h5>title2</h5>' in rv.data
-        assert '<small>PROGRESS</small>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<p class="text-info">60.0S</p>' in rv.data
         assert '<p class="text-info">Bob</p>' in rv.data
         assert '<button class="btn btn-mini btn-leave" type="button"> <i class="icon-share"></i>' in rv.data
 
         task = Task.query.get(1)
         self.assertEquals(1, task.time_slots.count())
+        self.assertEquals('PROGRESS', task.status)
         self.assertEquals(60, task.time_slots[0].consuming)
         self.assertEquals('Bob', task.time_slots[0].user.name)
         self.assertIsNone(task.time_slots[0].partner)
@@ -79,14 +77,13 @@ class PairTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
         assert '<h5>title2</h5>' in rv.data
-        assert '<small>DONE</small>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<p class="text-info">120.0S</p>' in rv.data
         assert '<p class="text-info">Mike</p>' in rv.data
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
+        self.assertEquals('DONE', task.status)
         self.assertEquals(2, task.time_slots.count())
         self.assertEquals(60, task.time_slots[0].consuming)
         self.assertEquals('Mike', task.time_slots[0].user.name)
@@ -106,15 +103,14 @@ class PairTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
         assert '<h5>title2</h5>' in rv.data
-        assert '<small>PROGRESS</small>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<p class="text-info">60.0S</p>' in rv.data
         assert '<p class="text-info">Bob</p>' in rv.data
         assert '<button class="btn btn-mini btn-join" type="button"> <i class="icon-random"></i>' in rv.data
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
+        self.assertEquals('PROGRESS', task.status)
         self.assertEquals(1, task.time_slots.count())
         self.assertEquals(datetime(2012, 11, 11, 0, 1, 0), task.start_time)
         self.assertEquals(60, task.time_slots[0].consuming)
