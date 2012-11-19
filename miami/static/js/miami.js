@@ -51,6 +51,36 @@
                 helper: "clone",
                 cursor: "move"
             });
+            make_join($target);
+        }
+
+        function make_join($target){
+            $('.btn-join',$target).click(function(){
+                var parent = $(this.parentElement);
+                $.ajax({
+                    type: 'PUT',
+                    url: '/jointask/' + parent.attr('id'),
+                    success: function(data) {
+                        parent.children().remove();
+                        parent.append($(data).children());
+                        make_join(parent);
+                    },
+                    dataType: 'html'
+                });
+            });
+            $('.btn-leave',$target).click(function(){
+                var parent = $(this.parentElement);
+                $.ajax({
+                    type: 'PUT',
+                    url: '/leavetask/' + parent.attr('id'),
+                    success: function(data) {
+                        parent.children().remove();
+                        parent.append($(data).children());
+                        make_join(parent);
+                    },
+                    dataType: 'html'
+                });
+            });
         }
 
         function moveto($item, $target, content) {
@@ -58,9 +88,8 @@
                 var $list = $("ul", $target).length ? $("ul", $target) : $("<ul class='ui-helper-reset'/>").appendTo($target);
                 $item.children().remove();
                 $item.append($(content).children());
-                $item.appendTo($list).fadeIn();
-                $('button',$item).click(function(){
-                    alert('join')
+                $item.appendTo($list).fadeIn(function(){
+                    make_join($item);
                 });
             });
         }

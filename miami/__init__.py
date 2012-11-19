@@ -192,7 +192,7 @@ def join_task(tid):
     task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
     task.start_time = current_time
     db.session.commit()
-    return render_template('task_card.html', tasks=[task])
+    return render_template('task_card.html', tasks=[task], user=current_user)
 
 
 @app.route('/leavetask/<tid>', methods=['PUT'])

@@ -7,10 +7,14 @@
     <p class="text-info">{{task.consuming}}S</p>
     <p class="text-info">{% if task.owner %}{{task.owner.name}}{% endif %}</p>
     {% if task.partner %}
-    <p class="text-info">{{task.partner.name}}</p>
+        {% if task.partner.name ==  user.name%}
+    <button class="btn btn-mini btn-leave" type="button"> <i class="icon-share"></i>
+        {%else%}
+        <p class="text-info">{{task.partner.name}}</p>
+        {% endif %}
     {% elif task.status=='PROGRESS' and task.owner.name!=user.name%}
-    <button class="btn btn-mini" type="button"> <i class="icon-random"></i>
-    </button>
-    {% endif %}
-</li>
-{% endfor %}
+        <button class="btn btn-mini btn-join" type="button"> <i class="icon-random"></i>
+        </button>
+        {% endif %}
+    </li>
+    {% endfor %}
