@@ -30,37 +30,38 @@
             $tasks.loadtasks = function() {
                 $.ajax({
                     type: 'GET',
-                    url: '/api/task',
-                    data: {
-                        q: '{"filters": [{"name": "status", "op": "eq", "val": "' + $status + '"}]}'
-                    },
+                    url: '/tasks/'+$status,
                     success: function(data) {
                         var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
-                        for(var i in data.objects) {
-                            $('ul', $tasks).append('<li id="' + data.objects[i].id + '" style="display: list-item;">' + create_taskcard(data.objects[i]) + '</li>');
-                        }
-
-                        $("li", $tasks).draggable({
-                            cancel: "a.ui-icon",
-                            // clicking an icon won't initiate dragging
-                            revert: "invalid",
-                            // when not dropped, the item will revert back to its initial position
-                            containment: "document",
-                            helper: "clone",
-                            cursor: "move"
-                        });
+                        $('ul',$tasks).append(data);
+                        make_draggable($tasks);
                     },
-                    dataType: 'json'
+                    dataType: 'html'
                 });
             };
         };
 
-        function moveto($item, $target, $content) {
+        function make_draggable($target){
+            $("li", $target).draggable({
+                cancel: "a.ui-icon",
+                // clicking an icon won't initiate dragging
+                revert: "invalid",
+                // when not dropped, the item will revert back to its initial position
+                containment: "document",
+                helper: "clone",
+                cursor: "move"
+            });
+        }
+
+        function moveto($item, $target, content) {
             $item.fadeOut(function() {
                 var $list = $("ul", $target).length ? $("ul", $target) : $("<ul class='ui-helper-reset'/>").appendTo($target);
                 $item.children().remove();
-                $item.append($content);
+                $item.append($(content).children());
                 $item.appendTo($list).fadeIn();
+                $('button',$item).click(function(){
+                    alert('join')
+                });
             });
         }
 

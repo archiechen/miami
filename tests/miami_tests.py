@@ -56,6 +56,20 @@ class MiamiTest(unittest.TestCase):
 
         self.assertEquals(401, rv.status_code)
 
+    def test_load_task(self):
+        create_entity(Task('title2', 'detail2', status='READY', price=10))
+
+        rv = self.app.get('/tasks/READY')
+
+        self.assertEquals(200, rv.status_code)
+
+        assert '<li id="1" style="display: list-item;">' in rv.data
+        assert '<h5>title2</h5>' in rv.data
+        assert '<small>READY</small>' in rv.data
+        assert '<p class="text-warning">$10</p>' in rv.data
+        assert '<p class="text-info">0H</p>' in rv.data
+        assert '<p class="text-info">0.0S</p>' in rv.data
+
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
 

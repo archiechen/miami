@@ -49,14 +49,16 @@ class PairTest(unittest.TestCase):
 
         rv = self.app.put('/jointask/1')
 
+        print rv.data
+
         self.assertEquals(200, rv.status_code)
         assert '<h5>title2</h5>' in rv.data
         assert '<small>PROGRESS</small>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
         assert '<p class="text-info">60.0S</p>' in rv.data
-        assert '<p class="text-info">Mike</p>' in rv.data
         assert '<p class="text-info">Bob</p>' in rv.data
+        assert '<p class="text-info">Mike</p>' in rv.data
 
         task = Task.query.get(1)
         self.assertEquals(1, task.time_slots.count())
@@ -84,7 +86,6 @@ class PairTest(unittest.TestCase):
         assert '<p class="text-info">10H</p>' in rv.data
         assert '<p class="text-info">120.0S</p>' in rv.data
         assert '<p class="text-info">Mike</p>' in rv.data
-        assert '<p class="text-info"></p>' in rv.data
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
@@ -112,7 +113,7 @@ class PairTest(unittest.TestCase):
         assert '<p class="text-info">10H</p>' in rv.data
         assert '<p class="text-info">60.0S</p>' in rv.data
         assert '<p class="text-info">Bob</p>' in rv.data
-        assert '<p class="text-info"></p>' in rv.data
+        assert '<button class="btn btn-mini" type="button"> <i class="icon-random"></i>' in rv.data
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)

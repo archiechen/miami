@@ -1,7 +1,16 @@
-<h5>{{task.title}}</h5>
-<small>{{task.status}}</small>
-<p class="text-warning">${{task.price}}</p>
-<p class="text-info">{{task.estimate}}H</p>
-<p class="text-info">{{task.consuming}}S</p>
-<p class="text-info">{% if task.owner %}{{task.owner.name}}{% endif %}</p>
-<p class="text-info">{% if task.partner %}{{task.partner.name}}{% endif %}</p>
+{% for task in tasks %}
+<li id="{{task.id}}" style="display: list-item;">
+    <h5>{{task.title}}</h5>
+    <small>{{task.status}}</small>
+    <p class="text-warning">${{task.price}}</p>
+    <p class="text-info">{{task.estimate}}H</p>
+    <p class="text-info">{{task.consuming}}S</p>
+    <p class="text-info">{% if task.owner %}{{task.owner.name}}{% endif %}</p>
+    {% if task.partner %}
+    <p class="text-info">{{task.partner.name}}</p>
+    {% elif task.status=='PROGRESS' and task.owner.name!=user.name%}
+    <button class="btn btn-mini" type="button"> <i class="icon-random"></i>
+    </button>
+    {% endif %}
+</li>
+{% endfor %}

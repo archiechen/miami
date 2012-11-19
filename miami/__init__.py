@@ -160,6 +160,14 @@ def planning():
     return render_template('planning.html', user=current_user)
 
 
+@app.route('/tasks/<status>', methods=['GET'])
+@login_required
+def load_tasks(status):
+    tasks = Task.query.filter_by(status=status)
+
+    return render_template('task_card.html', tasks=tasks, user=current_user)
+
+
 @app.route('/tasks/PROGRESS/<tid>/<estimate>', methods=['PUT'])
 @login_required
 def estimate(tid, estimate):
@@ -170,7 +178,7 @@ def estimate(tid, estimate):
         task.start_time = now()
         task.owner = current_user
         db.session.commit()
-        return render_template('task_card.html', task=task)
+        return render_template('task_card.html', tasks=[task], user=current_user)
 
     abort(400)
 
@@ -184,7 +192,7 @@ def join_task(tid):
     task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
     task.start_time = current_time
     db.session.commit()
-    return render_template('task_card.html', task=task)
+    return render_template('task_card.html', tasks=[task])
 
 
 @app.route('/leavetask/<tid>', methods=['PUT'])
@@ -196,7 +204,7 @@ def leave_task(tid):
     task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=current_user))
     task.start_time = current_time
     db.session.commit()
-    return render_template('task_card.html', task=task)
+    return render_template('task_card.html', tasks=[task], user=current_user)
 
 
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
@@ -222,7 +230,7 @@ def to_status(status, tid):
     task.status = status
     db.session.commit()
 
-    return render_template('task_card.html', task=task)
+    return render_template('task_card.html', tasks=[task], user=current_user)
 
 
 # Create the Flask-Restless API manager.
