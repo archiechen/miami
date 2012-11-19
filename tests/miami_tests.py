@@ -178,7 +178,7 @@ class MiamiTest(unittest.TestCase):
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
         task.owner = User.query.get(1)
         create_entity(task)
-        create_entity(Task('title3', 'detail3', estimate=10, price=10, status='NEW', start_time=datetime(2012, 11, 11)))
+        create_entity(Task('title3', 'detail3', estimate=10, price=10, status='READY', start_time=datetime(2012, 11, 11)))
         rv = self.app.put('/tasks/PROGRESS/2')
 
         self.assertEquals(403, rv.status_code)

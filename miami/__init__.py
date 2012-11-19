@@ -115,11 +115,9 @@ def now():
 
 
 def zeroing():
-    app.logger.debug('zeroing')
     tasks = Task.query.filter_by(status='PROGRESS')
 
     for task in tasks:
-        app.logger.debug('update status')
         task.status = 'READY'
         end_time = now()
         if end_time.hour > 18:
@@ -201,6 +199,8 @@ def estimate(tid, estimate):
 @app.route('/jointask/<tid>', methods=['PUT'])
 @login_required
 def join_task(tid):
+    if Task.query.filter_by(owner=current_user, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=current_user, status='PROGRESS').count() > 0:
+        abort(403)
     task = Task.query.get_or_404(tid)
     task.partner = current_user
     current_time = now()
@@ -234,7 +234,7 @@ def to_status(status, tid):
     if status == 'READY' and task.price == 0:
         return render_template('price.html', task=task), 400
     if status == 'PROGRESS':
-        if Task.query.filter_by(owner=current_user, status='PROGRESS').count() > 0:
+        if Task.query.filter_by(owner=current_user, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=current_user, status='PROGRESS').count() > 0:
             abort(403)
 
         if task.estimate == 0:

@@ -6,7 +6,7 @@ import tempfile
 import miami
 import simplejson as json
 from datetime import datetime
-from mockito import when,unstub
+from mockito import when, unstub
 from miami import Task, TimeSlot, User
 
 
@@ -116,3 +116,43 @@ class PairTest(unittest.TestCase):
         self.assertEquals(60, task.time_slots[0].consuming)
         self.assertEquals('Bob', task.time_slots[0].user.name)
         self.assertEquals('Mike', task.time_slots[0].partner.name)
+
+    def test_not_allow_join(self):
+        create_entity(User('Bob'))
+        task = Task('title1', 'detail1', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(2)
+        create_entity(task)
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(1)
+        create_entity(task)
+
+        rv = self.app.put('/jointask/1')
+
+        self.assertEquals(403, rv.status_code)
+
+    def test_not_allow_multi_paired(self):
+        create_entity(User('Bob'))
+        create_entity(User('Martin'))
+        task = Task('title1', 'detail1', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.partner = User.query.get(1)
+        task.owner = User.query.get(2)
+        create_entity(task)
+        task = Task('title2', 'detail2', estimate=10, price=10, status='READY', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(3)
+        create_entity(task)
+
+        rv = self.app.put('/jointask/2')
+
+        self.assertEquals(403, rv.status_code)
+
+    def test_not_allow_to_progress(self):
+        create_entity(User('Bob'))
+        task = Task('title1', 'detail1', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.partner = User.query.get(1)
+        task.owner = User.query.get(2)
+        create_entity(task)
+        create_entity(Task('title2', 'detail2', estimate=10, price=10, status='READY', start_time=datetime(2012, 11, 11)))
+
+        rv = self.app.put('/tasks/PROGRESS/2')
+
+        self.assertEquals(403, rv.status_code)
