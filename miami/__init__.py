@@ -187,6 +187,18 @@ def join_task(tid):
     return render_template('task_card.html', task=task)
 
 
+@app.route('/leavetask/<tid>', methods=['PUT'])
+@login_required
+def leave_task(tid):
+    task = Task.query.get_or_404(tid)
+    task.partner = None
+    current_time = now()
+    task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=current_user))
+    task.start_time = current_time
+    db.session.commit()
+    return render_template('task_card.html', task=task)
+
+
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
 @login_required
 def to_status(status, tid):

@@ -95,3 +95,29 @@ class PairTest(unittest.TestCase):
         self.assertEquals(60, task.time_slots[1].consuming)
         self.assertEquals('Mike', task.time_slots[1].user.name)
         self.assertEquals('Bob', task.time_slots[1].partner.name)
+
+    def test_leave_paired(self):
+        create_entity(User('Bob'))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task.owner = User.query.get(2)
+        task.partner = User.query.get(1)
+        create_entity(task)
+
+        rv = self.app.put('/leavetask/1')
+
+        self.assertEquals(200, rv.status_code)
+        assert '<h5>title2</h5>' in rv.data
+        assert '<small>PROGRESS</small>' in rv.data
+        assert '<p class="text-warning">$10</p>' in rv.data
+        assert '<p class="text-info">10H</p>' in rv.data
+        assert '<p class="text-info">60.0S</p>' in rv.data
+        assert '<p class="text-info">Bob</p>' in rv.data
+        assert '<p class="text-info"></p>' in rv.data
+
+        task = Task.query.get(1)
+        self.assertIsNone(task.partner)
+        self.assertEquals(1, task.time_slots.count())
+        self.assertEquals(datetime(2012, 11, 11, 0, 1, 0), task.start_time)
+        self.assertEquals(60, task.time_slots[0].consuming)
+        self.assertEquals('Bob', task.time_slots[0].user.name)
+        self.assertEquals('Mike', task.time_slots[0].partner.name)
