@@ -56,7 +56,7 @@
 
         function make_join($target){
             $('.btn-join',$target).click(function(){
-                var parent = $(this.parentElement);
+                var parent = $(this.parentElement.parentElement);
                 $.ajax({
                     type: 'PUT',
                     url: '/jointask/' + parent.attr('id'),
@@ -69,7 +69,7 @@
                 });
             });
             $('.btn-leave',$target).click(function(){
-                var parent = $(this.parentElement);
+                var parent = $(this.parentElement.parentElement);
                 $.ajax({
                     type: 'PUT',
                     url: '/leavetask/' + parent.attr('id'),
