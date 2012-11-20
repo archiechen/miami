@@ -67,52 +67,28 @@ def load_tasks(status):
 @login_required
 def estimate(tid, estimate):
     task = Task.query.get_or_404(tid)
-    if task.status == 'READY' or task.status == 'DONE':
-        task.estimate = estimate
-        task.status = 'PROGRESS'
-        task.start_time = now()
-        task.owner = current_user
-        db.session.commit()
-        return render_template('task_card.html', tasks=[task], user=current_user)
-
-    abort(400)
+    task.estimating(estimate)
+    return render_template('task_card.html', tasks=[task], user=current_user)
 
 
 @app.route('/pricing/<tid>/<price>', methods=['PUT'])
 @login_required
 def pricing(tid, price):
     task = Task.query.get_or_404(tid)
-    if task.status == 'NEW':
-        task.price = price
-        task.status = 'READY'
-        db.session.commit()
-        return render_template('task_card.html', tasks=[task], user=current_user)
-
-    abort(400)
-
+    task.pricing(price)
+    return render_template('task_card.html', tasks=[task], user=current_user)
 
 @app.route('/jointask/<tid>', methods=['PUT'])
 @login_required
 def join_task(tid):
-    current_user.check_progress()
-    task = Task.query.get_or_404(tid)
-    task.partner = current_user
-    current_time = now()
-    task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
-    task.start_time = current_time
-    db.session.commit()
+    task = current_user.join(tid)
     return render_template('task_card.html', tasks=[task], user=current_user)
 
 
 @app.route('/leavetask/<tid>', methods=['PUT'])
 @login_required
 def leave_task(tid):
-    task = Task.query.get_or_404(tid)
-    task.partner = None
-    current_time = now()
-    task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=current_user))
-    task.start_time = current_time
-    db.session.commit()
+    task = current_user.leave(tid)
     return render_template('task_card.html', tasks=[task], user=current_user)
 
 

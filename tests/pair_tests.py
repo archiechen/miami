@@ -21,7 +21,7 @@ class PairTest(unittest.TestCase):
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
-        when(miami.views).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(miami.models).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):
@@ -57,7 +57,7 @@ class PairTest(unittest.TestCase):
         self.assertEquals(60, task.time_slots[0].consuming)
         self.assertEquals('Bob', task.time_slots[0].user.name)
         self.assertIsNone(task.time_slots[0].partner)
-        self.assertEquals(task.start_time, miami.views.now())
+        self.assertEquals(task.start_time, miami.models.now())
 
     def test_paired_to_done(self):
         create_entity(User('Bob'))

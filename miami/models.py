@@ -90,6 +90,24 @@ class Task(db.Model):
         self.status = status
         db.session.commit()
 
+    def estimating(self,estimate):
+        if self.status == 'READY':
+            self.estimate = estimate
+            self.status = 'PROGRESS'
+            self.start_time = now()
+            self.owner = current_user
+            db.session.commit()
+        else:
+            raise BadRequest()
+
+    def pricing(self,price):
+        if self.status == 'NEW':
+            self.price = price
+            self.status = 'READY'
+            db.session.commit()
+        else:
+            raise BadRequest()
+
 
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -124,6 +142,26 @@ class User(db.Model, UserMixin):
         if Task.query.filter_by(owner=self, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=self, status='PROGRESS').count() > 0:
                 raise Forbidden()
 
+    def join(self,tid):
+        self.check_progress()
+        task = Task.query.get_or_404(tid)
+        task.partner = self
+        current_time = now()
+        task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
+        task.start_time = current_time
+        db.session.commit()
+        return task
+
+    def leave(self,tid):
+        task = Task.query.get_or_404(tid)
+        task.partner = None
+        current_time = now()
+        task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=self))
+        task.start_time = current_time
+        db.session.commit()
+        return task
+
+    
 
 class Anonymous(AnonymousUser):
     name = u"Anonymous"

@@ -73,7 +73,7 @@ class MiamiTest(unittest.TestCase):
         assert '<h3 id="myModalLabel">Estimate</h3>' in rv.data
         assert '<h4>title1</h4>' in rv.data
         assert '<p>detail1</p>' in rv.data
-        assert '<input id="estimate" type="text" class="input-small" placeholder="estimate" value="0"/>' in rv.data
+        assert '<input id="estimate" type="text" class="span1 input-small" placeholder="estimate" value="0"/>' in rv.data
 
     def test_ready_to_progress_without_estimate_logout(self):
         self.logout()
@@ -114,7 +114,7 @@ class MiamiTest(unittest.TestCase):
 
         rv = self.app.put('/pricing/1/10')
 
-        self.assertEquals('200 OK', rv.status)
+        self.assertEquals(200, rv.status_code)
 
         assert '<h5>title1</h5>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
