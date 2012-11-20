@@ -28,10 +28,10 @@
       $.miami.wrapTasks($rtasks,'READY',"#ntasks li",function(ui,data){
         $('#myModal').children().remove();
         $('#myModal').append(data.responseText);  
-        $('.dropdown-menu a').click(function(){
+        $('#btn-price button').click(function(){
           $.ajax({
             type: 'PUT',
-            url: '/pricing/'+ui.draggable[0].id+'/'+$(this).attr('title'),
+            url: '/pricing/'+ui.draggable[0].id+'/'+$(this).attr('value'),
             success: function(data){
               $('#myModal').modal('hide');
               $.miami.moveto(ui.draggable,$rtasks,data);

@@ -2,29 +2,15 @@
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Pricing</h3>
 </div>
-<div class="modal-body" style="overflow:visible">
+<div class="modal-body">
     <blockquote>
         <h4>{{task.title}}</h4>
         <p>{{task.detail}}</p>
     </blockquote>
-    <div class="btn-group" style="float: right;margin-bottom: 10px;">
-        <a class="btn btn-primary" href="#">Price</a>
-        <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" href="#">
-            <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-            <li>
-                <a href="#" title="1">$1</a>
-            </li>
-            <li>
-                <a href="#" title="2">$2</a>
-            </li>
-            <li>
-                <a href="#" title="5">$5</a>
-            </li>
-            <li>
-                <a href="#" title="10">$10</a>
-            </li>
-        </ul>
+    <div id="btn-price" class="btn-group" style="float:right">
+        <button class="btn btn-success" value="1">$1</button>
+        <button class="btn btn-info" value="2">$2</button>
+        <button class="btn btn-primary" value="3">$5</button>
+        <button class="btn btn-warning" value="10">$10</button>
     </div>
 </div>
