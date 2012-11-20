@@ -12,44 +12,45 @@ def now():
 
 
 class NewState(object):
-    def to(self,task,status):
-        if task.status=='NEW' and status=='READY':
-            if task.price==0:
+    def to(self, task, status):
+        if task.status == 'NEW' and status == 'READY':
+            if task.price == 0:
                 raise NotPricing()
-            task.status ='READY'
         else:
             raise BadRequest
 
+
 class ReadyState(object):
-    def to(self,task,status):
-        if task.status=='READY' and (status=='PROGRESS' or status=='NEW'):
-            if status=='PROGRESS':
+    def to(self, task, status):
+        if task.status == 'READY' and (status == 'PROGRESS' or status == 'NEW'):
+            if status == 'PROGRESS':
                 current_user.check_progress()
                 if task.estimate == 0:
                     raise NotEstimate()
                 else:
                     task.start_time = datetime.now()
-            task.status = status
         else:
             raise BadRequest
+
 
 class ProgressState(object):
-    def to(self,task,status):
-        if task.status=='PROGRESS' and (status=='READY' or status=='DONE'):
+    def to(self, task, status):
+        if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
             task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user, partner=task.partner))
             task.partner = None
-            task.status = status
         else:
             raise BadRequest
+
 
 class DoneState(object):
-    def to(self,task,status):
-        if task.status=='DONE' and (status=='READY' or status=='PROGRESS'):
-            task.status = status
+    def to(self, task, status):
+        if task.status == 'DONE' and (status == 'READY' or status == 'PROGRESS'):
+            pass
         else:
             raise BadRequest
 
-task_state = {'NEW':NewState(),'READY':ReadyState(),'PROGRESS':ProgressState(),'DONE':DoneState()}
+task_state = {'NEW': NewState(), 'READY': ReadyState(), 'PROGRESS': ProgressState(), 'DONE': DoneState()}
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -85,7 +86,8 @@ class Task(db.Model):
         if self.owner and self.owner.id != current_user.id:
             raise Unauthorized()
         global task_state
-        task_state[self.status].to(self,status) 
+        task_state[self.status].to(self, status)
+        self.status = status
         db.session.commit()
 
 
