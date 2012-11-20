@@ -25,16 +25,28 @@
         <div class="nav-collapse collapse">
           <ul class="nav">
             <li>
-              <a href="/">Dashborad</a>
+              <a href="/"><i class="icon-th-list icon-white"></i> Dashborad</a>
             </li>
             <li>
-              <a href="/tasks">Tasks</a>
+              <a href="/tasks"><i class="icon-tasks icon-white"></i> Tasks</a>
             </li>
             <li>
-              <a href="/planning">Planning</a>
+              <a href="/planning"><i class="icon-list-alt icon-white"></i> Planning</a>
+            </li>
+            <li>
+              <a href="/planning"><i class="icon-signal icon-white"></i> Burning</a>
             </li>
           </ul>
-          <span>hi,{{user.name}}</span>
+        </div>
+        <div class="btn-group pull-right">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <i class="icon-user"></i> {{user.name}} <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a href="#"><i class="icon-wrench"></i> Settings</a></li>
+            <li class="divider"></li>
+            <li><a href="/logout"><i class="icon-share"></i> Logout</a></li>
+          </ul>
         </div>
         <!--/.nav-collapse --> </div>
     </div>
