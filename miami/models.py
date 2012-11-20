@@ -51,6 +51,19 @@ class DoneState(object):
 
 task_state = {'NEW': NewState(), 'READY': ReadyState(), 'PROGRESS': ProgressState(), 'DONE': DoneState()}
 
+members = db.Table('members',
+    db.Column('team_id', db.Integer, db.ForeignKey('team.id')),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+)
+
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    members = db.relationship('User', secondary=members,
+        backref=db.backref('teams', lazy='dynamic'))
+
+    def __init__(self, name):
+        self.name = name
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
