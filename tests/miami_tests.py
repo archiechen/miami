@@ -4,10 +4,11 @@ import unittest
 import os
 import tempfile
 import miami
+import miami.views as views
 import simplejson as json
 from datetime import datetime
 from mockito import when, unstub
-from miami import Task, TimeSlot, User
+from miami.models import Task, TimeSlot, User
 
 
 def create_entity(entity):
@@ -23,7 +24,7 @@ class MiamiTest(unittest.TestCase):
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
-        when(miami).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(views).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):
@@ -180,7 +181,8 @@ class MiamiTest(unittest.TestCase):
         assert '<h3 id="myModalLabel">Pricing</h3>' in rv.data
         assert '<h4>title</h4>' in rv.data
         assert '<p>detail</p>' in rv.data
-        assert '<input id="price" type="text" class="input-small" placeholder="price" value="0"/>' in rv.data
+        assert '<div id="btn-price" class="btn-group pull-right">' in rv.data
+        assert '<button class="btn btn-warning" value="10">$10</button>' in rv.data
 
     def test_new_to_ready_with_price(self):
         create_entity(Task('title', 'detail', price=20))

@@ -2,7 +2,7 @@ import unittest
 import os
 import tempfile
 import miami
-from miami import Task, TimeSlot, User
+from miami.models import Task, TimeSlot, User
 from datetime import datetime
 from mockito import when, unstub
 

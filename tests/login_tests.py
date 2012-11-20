@@ -4,7 +4,7 @@ import unittest
 import os
 import tempfile
 import miami
-from miami import User
+from miami.models import User
 
 
 def create_entity(entity):
