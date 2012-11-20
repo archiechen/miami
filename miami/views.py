@@ -1,12 +1,13 @@
 from flask import render_template, abort, flash, request, redirect, url_for
 from miami import app, db
-from miami.models import User, Task, TimeSlot
+from miami.models import User, Task, TimeSlot, NotPricing, NotEstimate
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 
 
 def now():
     return datetime.now()
+
 
 @app.errorhandler(401)
 def unauthorized(e):
@@ -93,8 +94,7 @@ def pricing(tid, price):
 @app.route('/jointask/<tid>', methods=['PUT'])
 @login_required
 def join_task(tid):
-    if Task.query.filter_by(owner=current_user, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=current_user, status='PROGRESS').count() > 0:
-        abort(403)
+    current_user.check_progress()
     task = Task.query.get_or_404(tid)
     task.partner = current_user
     current_time = now()
@@ -120,23 +120,10 @@ def leave_task(tid):
 @login_required
 def to_status(status, tid):
     task = Task.query.get_or_404(tid)
-    if task.owner and task.owner.id != current_user.id:
-        abort(401)
-    if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-        task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user, partner=task.partner))
-        task.partner = None
-    if status == 'READY' and task.price == 0:
+    try:
+        task.changeTo(status)
+        return render_template('task_card.html', tasks=[task], user=current_user)
+    except NotPricing:
         return render_template('price.html', task=task), 400
-    if status == 'PROGRESS':
-        if Task.query.filter_by(owner=current_user, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=current_user, status='PROGRESS').count() > 0:
-            abort(403)
-
-        if task.estimate == 0:
-            return render_template('estimate.html', task=task), 400
-        else:
-            task.start_time = datetime.now()
-
-    task.status = status
-    db.session.commit()
-
-    return render_template('task_card.html', tasks=[task], user=current_user)
+    except NotEstimate:
+        return render_template('estimate.html', task=task), 400

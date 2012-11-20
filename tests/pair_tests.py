@@ -68,7 +68,7 @@ class PairTest(unittest.TestCase):
         task.time_slots.append(TimeSlot(task.start_time, 60, task.owner))
         create_entity(task)
 
-        when(miami.views).now().thenReturn(datetime(2012, 11, 11, 0, 2, 0))
+        when(miami.models).now().thenReturn(datetime(2012, 11, 11, 0, 2, 0))
         rv = self.app.put('/tasks/DONE/1')
 
         self.assertEquals(200, rv.status_code)

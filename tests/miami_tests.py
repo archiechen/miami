@@ -4,7 +4,6 @@ import unittest
 import os
 os.environ['MIAMI_ENV'] = 'test'
 import miami
-import miami.views as views
 import simplejson as json
 from datetime import datetime
 from mockito import when, unstub
@@ -22,7 +21,7 @@ class MiamiTest(unittest.TestCase):
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
-        when(views).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(miami.models).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):

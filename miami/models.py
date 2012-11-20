@@ -1,9 +1,55 @@
 from miami import db
 from datetime import datetime
-from flask.ext.login import UserMixin, AnonymousUser
+from flask.ext.login import UserMixin, AnonymousUser, current_user
+from flask import abort, render_template
+from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
 
 import math
 
+
+def now():
+    return datetime.now()
+
+
+class NewState(object):
+    def to(self,task,status):
+        if task.status=='NEW' and status=='READY':
+            if task.price==0:
+                raise NotPricing()
+            task.status ='READY'
+        else:
+            raise BadRequest
+
+class ReadyState(object):
+    def to(self,task,status):
+        if task.status=='READY' and (status=='PROGRESS' or status=='NEW'):
+            if status=='PROGRESS':
+                current_user.check_progress()
+                if task.estimate == 0:
+                    raise NotEstimate()
+                else:
+                    task.start_time = datetime.now()
+            task.status = status
+        else:
+            raise BadRequest
+
+class ProgressState(object):
+    def to(self,task,status):
+        if task.status=='PROGRESS' and (status=='READY' or status=='DONE'):
+            task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user, partner=task.partner))
+            task.partner = None
+            task.status = status
+        else:
+            raise BadRequest
+
+class DoneState(object):
+    def to(self,task,status):
+        if task.status=='DONE' and (status=='READY' or status=='PROGRESS'):
+            task.status = status
+        else:
+            raise BadRequest
+
+task_state = {'NEW':NewState(),'READY':ReadyState(),'PROGRESS':ProgressState(),'DONE':DoneState()}
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +81,13 @@ class Task(db.Model):
 
         return db.Model.__getattr__(self.name)
 
+    def changeTo(self, status):
+        if self.owner and self.owner.id != current_user.id:
+            raise Unauthorized()
+        global task_state
+        task_state[self.status].to(self,status) 
+        db.session.commit()
+
 
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -65,6 +118,18 @@ class User(db.Model, UserMixin):
     def is_active(self):
         return self.active
 
+    def check_progress(self):
+        if Task.query.filter_by(owner=self, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=self, status='PROGRESS').count() > 0:
+                raise Forbidden()
+
 
 class Anonymous(AnonymousUser):
     name = u"Anonymous"
+
+
+class NotPricing(BadRequest):
+    pass
+
+
+class NotEstimate(BadRequest):
+    pass

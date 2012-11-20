@@ -64,7 +64,6 @@ def now():
 
 
 def zeroing():
-    app.logger.debug('zeroing')
     tasks = Task.query.filter_by(status='PROGRESS')
 
     for task in tasks:
