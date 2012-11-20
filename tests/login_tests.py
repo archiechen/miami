@@ -2,7 +2,7 @@
 
 import unittest
 import os
-import tempfile
+os.environ['MIAMI_ENV'] = 'test'
 import miami
 from miami.models import User
 
@@ -15,15 +15,12 @@ def create_entity(entity):
 class LoginTest(unittest.TestCase):
 
     def setUp(self):
-        self.db_fd, miami.app.config['DATABASE'] = tempfile.mkstemp()
-        miami.app.config['TESTING'] = True
         self.app = miami.app.test_client()
         miami.init_db()
         create_entity(User('Mike'))
 
     def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink(miami.app.config['DATABASE'])
+        pass
 
     def login(self, username, password):
         return self.app.post('/login', data=dict(

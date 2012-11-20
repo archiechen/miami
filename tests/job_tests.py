@@ -1,6 +1,6 @@
 import unittest
 import os
-import tempfile
+os.environ['MIAMI_ENV'] = 'test'
 import miami
 from miami.models import Task, TimeSlot, User
 from datetime import datetime
@@ -15,15 +15,11 @@ def create_entity(entity):
 class JobTest(unittest.TestCase):
 
     def setUp(self):
-        self.db_fd, miami.app.config['DATABASE'] = tempfile.mkstemp()
-        miami.app.config['TESTING'] = True
         miami.init_db()
         create_entity(User('Mike'))
         when(miami).now().thenReturn(datetime(2012, 11, 11, 23, 0, 0))
 
     def tearDown(self):
-        os.close(self.db_fd)
-        os.unlink(miami.app.config['DATABASE'])
         unstub()
 
     def test_task_zeroing(self):
