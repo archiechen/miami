@@ -31,14 +31,12 @@
         $('#save').click(function(){
           $.ajax({
             type: 'PUT',
-            url: '/api/task/'+ui.draggable[0].id,
-            data: '{"status":"READY","price":'+$('#price').val()+'}',
+            url: '/pricing/'+ui.draggable[0].id+'/'+$('#price').val(),
             success: function(data){
               $('#myModal').modal('hide');
-              $.miami.moveto(ui.draggable,$rtasks,$.miami.create_taskcard(data));
+              $.miami.moveto(ui.draggable,$rtasks,data);
             },
-            dataType: 'json',
-            contentType: 'application/json'
+            dataType: 'html'
           });
         });
         $('#myModal').modal('show');

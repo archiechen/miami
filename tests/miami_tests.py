@@ -100,7 +100,7 @@ class MiamiTest(unittest.TestCase):
     def test_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
 
-        rv = self.app.put('/tasks/PROGRESS/1/10')
+        rv = self.app.put('/estimate/1/10')
 
         self.assertEquals('200 OK', rv.status)
 
@@ -108,6 +108,23 @@ class MiamiTest(unittest.TestCase):
         assert '<p class="text-warning">$0</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
         assert '<p class="text-info">Mike</p>' in rv.data
+
+        task = Task.query.get(1)
+        self.assertEquals('PROGRESS', task.status)
+        self.assertEquals('Mike', task.owner.name)
+
+    def test_pricing(self):
+        create_entity(Task('title1', 'detail1', status='NEW'))
+
+        rv = self.app.put('/pricing/1/10')
+
+        self.assertEquals('200 OK', rv.status)
+
+        assert '<h5>title1</h5>' in rv.data
+        assert '<p class="text-warning">$10</p>' in rv.data
+        assert '<p class="text-info">0H</p>' in rv.data
+        task = Task.query.get(1)
+        self.assertEquals('READY', task.status)
 
     def test_ready_to_progress_noauth(self):
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))

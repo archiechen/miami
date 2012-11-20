@@ -5,6 +5,11 @@ setup(
     version='0.1',
     packages=['miami'],
     py_modules=['run_server'],
+    entry_points={
+        'console_scripts': [
+            'miamid=run_server:main'
+        ]
+    },
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -15,6 +20,7 @@ setup(
         'flask_restless==0.7.0',
         'flask_login==0.1.3',
         'flask_sqlalchemy==0.16',
-        'apscheduler==2.0.3'
+        'apscheduler==2.0.3',
+        'MySQL-Python==1.2.4c1'
     ]
 )

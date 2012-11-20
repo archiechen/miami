@@ -94,22 +94,9 @@
             });
         }
 
-        function create_taskcard(task) {
-            var consuming = 0;
-            for(var i in task.time_slots) {
-                consuming += task.time_slots[i].consuming;
-            }
-            var owner = '';
-            if(task.owner != null) {
-                owner = task.owner.name;
-            }
-            return '<h5>' + task.title + '</h5><small>' + task.status + '</small><p class="text-warning">$' + task.price + '</p><p class="text-info">' + task.estimate + 'H</p><p class="text-info">' + consuming + 'S</p><p class="text-info">' + owner + '</p>';
-        };
-
         return {
             wrapTasks: wrapTasks,
-            moveto: moveto,
-            create_taskcard: create_taskcard
+            moveto: moveto
         }
     }());
 }(jQuery));

@@ -1,0 +1,2 @@
+recursive-include miami/templates *
+recursive-include miami/static *

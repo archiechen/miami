@@ -15,6 +15,7 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///%s' % DATABASE
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://miami:miami@localhost:3306/miami'
 
 
 db = flask.ext.sqlalchemy.SQLAlchemy(app)
@@ -181,7 +182,7 @@ def load_tasks(status):
     return render_template('task_card.html', tasks=tasks, user=current_user)
 
 
-@app.route('/tasks/PROGRESS/<tid>/<estimate>', methods=['PUT'])
+@app.route('/estimate/<tid>/<estimate>', methods=['PUT'])
 @login_required
 def estimate(tid, estimate):
     task = Task.query.get_or_404(tid)
@@ -190,6 +191,19 @@ def estimate(tid, estimate):
         task.status = 'PROGRESS'
         task.start_time = now()
         task.owner = current_user
+        db.session.commit()
+        return render_template('task_card.html', tasks=[task], user=current_user)
+
+    abort(400)
+
+
+@app.route('/pricing/<tid>/<price>', methods=['PUT'])
+@login_required
+def pricing(tid, price):
+    task = Task.query.get_or_404(tid)
+    if task.status == 'NEW':
+        task.price = price
+        task.status = 'READY'
         db.session.commit()
         return render_template('task_card.html', tasks=[task], user=current_user)
 

@@ -35,7 +35,7 @@
         $('#save').click(function(){
           $.ajax({
             type: 'PUT',
-            url: '/tasks/PROGRESS/'+ui.draggable[0].id+'/'+$('#estimate').val(),
+            url: '/estimate/'+ui.draggable[0].id+'/'+$('#estimate').val(),
             success: function(data){
               $('#myModal').modal('hide');
               $.miami.moveto(ui.draggable,$ptasks,data);
