@@ -1,8 +1,9 @@
-from flask import render_template, abort, flash, request, redirect, url_for
+from flask import render_template, abort, flash, request, redirect, url_for, jsonify
 from miami import app, db
 from miami.models import User, Task, TimeSlot, NotPricing, NotEstimate
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from datetime import datetime
+import simplejson as json
 
 
 def now():
@@ -47,6 +48,16 @@ def index():
 @login_required
 def new_task():
     return render_template('tasks.html', user=current_user)
+
+
+@app.route('/tasks', methods=['POST'])
+@login_required
+def create_task():
+    jsons = json.loads(request.data)
+    task = Task(jsons.get('title'), jsons.get('detail'), team=current_user.teams[0])
+    db.session.add(task)
+    db.session.commit()
+    return jsonify(id=task.id), 201
 
 
 @app.route('/planning', methods=['GET'])

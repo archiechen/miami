@@ -43,7 +43,7 @@
       $('#save').click(function(){
         $.ajax({
           type: 'POST',
-          url: '/api/task',
+          url: '/tasks',
           data: '{"title":"'+$('#title').val()+'","detail":"'+$('#detail').val()+'"}',
           success: function(data){
             $('#taskForm').modal('hide');    

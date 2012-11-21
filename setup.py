@@ -1,4 +1,4 @@
-from setuptools import setup
+setfrom setuptools import setup
 
 setup(
     name='miami',
@@ -20,6 +20,7 @@ setup(
         'flask_restless==0.7.0',
         'flask_login==0.1.3',
         'flask_sqlalchemy==0.16',
+        'flask-gravatar==0.2.3',
         'apscheduler==2.0.3',
         'MySQL-Python==1.2.4c1'
     ]

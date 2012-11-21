@@ -41,9 +41,10 @@
             </li>
           </ul>
         </div>
+
         <div class="btn-group pull-right">
           <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-            <i class="icon-user"></i> {{user.name}} <span class="caret"></span>
+            <img src="{{ 'gen.li@chinacahce.com' | gravatar(size=20, rating='x') }}"></img> {{user.name}} <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
             <li><a href="#"><i class="icon-wrench"></i> Settings</a></li>

@@ -1,6 +1,7 @@
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 import flask.ext.restless
+from flask.ext.gravatar import Gravatar
 from datetime import datetime
 import math
 import os
@@ -34,6 +35,12 @@ from miami.models import Anonymous, Task, TimeSlot, User, Team
 login_manager = LoginManager()
 login_manager.anonymous_user = Anonymous
 
+gravatar = Gravatar(app,
+                    size=100,
+                    rating='g',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False)
 
 @login_manager.user_loader
 def load_user(id):
@@ -47,12 +54,20 @@ manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 
 # Create API endpoints, which will be available at /api/<tablename> by
 # default. Allowed HTTP methods can be specified as well.
+
+
 manager.create_api(Task, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
                    authentication_function=auth_func)
 manager.create_api(Team, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
                    authentication_function=auth_func)
 import miami.views
 
+gravatar = Gravatar(app,
+                    size=100,
+                    rating='g',
+                    default='retro',
+                    force_default=False,
+                    force_lower=False)
 
 def init_db():
     with app.app_context():
@@ -72,7 +87,7 @@ def zeroing():
         end_time = now()
         if end_time.hour > 18:
             end_time = end_time.replace(hour=18, minute=0, second=0)
-        task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner,partner=task.partner))
+        task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner, partner=task.partner))
         task.owner = None
         task.partner = None
 

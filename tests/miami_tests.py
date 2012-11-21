@@ -39,13 +39,14 @@ class MiamiTest(unittest.TestCase):
         return self.app.get('/logout', follow_redirects=True)
 
     def test_create_task(self):
-        rv = self.app.post('/api/task', data='{"title":"title1","detail":"detail1"}')
+        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1"}')
 
         self.assertEquals(201, rv.status_code)
         self.assertEquals({"id": 1}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
+        self.assertEquals(Team.query.get(1),task.team)
 
     def test_create_task_logout(self):
         self.logout()
