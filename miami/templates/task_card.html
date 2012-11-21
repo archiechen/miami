@@ -12,13 +12,13 @@
    
     {% if task.partner %}
         {% if task.partner.name ==  user.name%}
-    <button class="btn btn-mini btn-leave" type="button"> <i class="icon-share"></i>
+    <button class="btn btn-mini btn-leave" type="button">离开
     </button>
     {%else%}
     <img src="{{ task.partner.email | gravatar(size=20, rating='x') }}" title="{{task.partner.name}}"></img>
 {% endif %}
     {% elif task.status=='PROGRESS' and task.owner.name!=user.name%}
-<button class="btn btn-mini btn-join" type="button"> <i class="icon-random"></i>
+<button class="btn btn-mini btn-join" type="button">加入
 </button>
 {% endif %}
 </div>
