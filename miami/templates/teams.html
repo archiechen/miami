@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class='nav'>
+<a href="#teamForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
+</a>
+</div>
+
+<!-- NEW team Form -->
+<div id="teamForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="teamFormLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="teamFormLabel">New Teams</h3>
+  </div>
+  <div class="modal-body">
+    <input id="name" type="text" class="input-block-level" placeholder="name">
+    <!--<textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>-->
+  </div>
+  <div class="modal-footer">
+    <button id="save" class="btn btn-primary">Save</button>
+  </div>
+</div>
+
+<div id="teams" class="ui-teams">
+<ul class="ui-helper-reset"></ul>
+</div>
+
+
+<script type="text/javascript">
+    (function() {
+    "use strict";
+    $(document).ready(function() {
+
+      $('li').removeClass('active');
+      $("ul li:nth-child(5)").addClass('active');
+
+      reloadTeams();
+      
+      $('#save').click(function(){
+        $.ajax({
+          type: 'POST',
+          url: '/api/team',          
+          data: '{"name":"'+$('#name').val()+'"}',
+          success: function(data){
+            $('#teamForm').modal('hide');    
+            reloadTeams();
+          },
+          dataType: 'json',
+          contentType: 'application/json'
+        });
+      });
+    });
+
+    function reloadTeams(){
+      $.ajax({
+        type: 'GET',
+        url: '/api/team',
+        success: function(data){
+          $('#teams ul').children().remove();
+          for(var i in data.objects) {           
+            $('#teams ul').append("<li id="+data.objects[i].id+ "style='display: list-item;'>"+"<div class='left'><p class='text-warning'>"+data.objects[i].name+"</p></div>");
+          }
+        },
+        dataType: 'json'
+      });
+    }
+  }());
+</script>
+{% endblock %}
+
+<div class="left">
+        <p class="text-warning">${{task.price}}</p>
+        <p class="text-info">{{task.estimate}}H</p>
+    </div>
+    
+
