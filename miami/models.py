@@ -81,13 +81,17 @@ class Task(db.Model):
     partner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     partner = db.relationship("User", primaryjoin='User.id==Task.partner_id')
 
-    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now()):
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    team = db.relationship("Team")
+
+    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(),team = None):
         self.title = title
         self.detail = detail
         self.price = price
         self.estimate = estimate
         self.status = status
         self.start_time = start_time
+        self.team = team
 
     def __getattr__(self, name):
         if name == 'consuming':

@@ -7,7 +7,7 @@ import miami
 import simplejson as json
 from datetime import datetime
 from mockito import when, unstub
-from miami.models import Task, TimeSlot, User
+from miami.models import Task, TimeSlot, User, Team
 
 
 def create_entity(entity):
@@ -20,7 +20,9 @@ class MiamiTest(unittest.TestCase):
     def setUp(self):
         self.app = miami.app.test_client()
         miami.init_db()
-        create_entity(User('Mike'))
+        team = Team('Log')
+        team.members.append(User('Mike'))
+        create_entity(team)
         when(miami.models).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
@@ -52,8 +54,8 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(401, rv.status_code)
 
     def test_load_task(self):
-        create_entity(Task('title2', 'detail2', status='READY', price=10))
-
+        create_entity(Task('title2', 'detail2', status='READY', price=10 ,team = Team.query.get(1)))
+        create_entity(Task('title1', 'detail1', status='READY', price=10 ,team = Team('Refresh')))
         rv = self.app.get('/tasks/READY')
 
         self.assertEquals(200, rv.status_code)
@@ -62,6 +64,7 @@ class MiamiTest(unittest.TestCase):
         assert '<h5>title2</h5>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">0H</p>' in rv.data
+        assert '<h5>title1</h5>' not in rv.data
 
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))

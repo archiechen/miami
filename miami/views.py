@@ -58,7 +58,9 @@ def planning():
 @app.route('/tasks/<status>', methods=['GET'])
 @login_required
 def load_tasks(status):
-    tasks = Task.query.filter_by(status=status)
+    tasks = []
+    for team in current_user.teams:
+        [tasks.append(t) for t in Task.query.filter(Task.status == status, Task.team == team)]
 
     return render_template('task_card.html', tasks=tasks, user=current_user)
 
@@ -77,6 +79,7 @@ def pricing(tid, price):
     task = Task.query.get_or_404(tid)
     task.pricing(price)
     return render_template('task_card.html', tasks=[task], user=current_user)
+
 
 @app.route('/jointask/<tid>', methods=['PUT'])
 @login_required
