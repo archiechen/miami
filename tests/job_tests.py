@@ -31,5 +31,6 @@ class JobTest(unittest.TestCase):
 
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
+        self.assertIsNone(task.partner)
         self.assertEquals(28800.0, task.consuming)
         self.assertEquals(1, task.time_slots.count())
