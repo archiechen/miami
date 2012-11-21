@@ -53,6 +53,8 @@ def new_task():
 @app.route('/tasks', methods=['POST'])
 @login_required
 def create_task():
+    if current_user.teams.count()==0:
+        abort(403)
     jsons = json.loads(request.data)
     task = Task(jsons.get('title'), jsons.get('detail'), team=current_user.teams[0])
     db.session.add(task)

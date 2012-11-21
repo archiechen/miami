@@ -48,6 +48,14 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals('NEW', task.status)
         self.assertEquals(Team.query.get(1),task.team)
 
+    def test_create_task_noteam(self):
+        create_entity(User('Bob'))
+        self.logout()
+        self.login('Bob','')
+        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1"}')
+
+        self.assertEquals(403, rv.status_code)
+
     def test_create_task_logout(self):
         self.logout()
         rv = self.app.post('/api/task', data='{"title":"title1","detail":"detail1"}')
