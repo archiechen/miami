@@ -106,3 +106,10 @@ def to_status(status, tid):
         return render_template('price.html', task=task), 400
     except NotEstimate:
         return render_template('estimate.html', task=task), 400
+
+
+@app.route('/teams', methods=['GET'])
+@login_required
+def new_team():
+    return render_template('teams.html', user=current_user)
+

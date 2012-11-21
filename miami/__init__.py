@@ -29,7 +29,7 @@ elif os.getenv('MIAMI_ENV') == 'prod':
 
 db = SQLAlchemy(app)
 import miami.models
-from miami.models import Anonymous, Task, TimeSlot, User
+from miami.models import Anonymous, Task, TimeSlot, User, Team
 
 login_manager = LoginManager()
 login_manager.anonymous_user = Anonymous
@@ -49,7 +49,8 @@ manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 # default. Allowed HTTP methods can be specified as well.
 manager.create_api(Task, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
                    authentication_function=auth_func)
-
+manager.create_api(Team, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
+                   authentication_function=auth_func)
 import miami.views
 
 
