@@ -1,7 +1,7 @@
 {% for team in teams %}
 <li id="{{team.id}}" style="display: list-item;">
     <h5>{{team.name}}</h5>
-    <div>
+    <div class="members">
     {% for member in team.members %}
     <img src="{{ member.email | gravatar(size=20, rating='x') }}" title="{{member.name}}"></img>
     {% endfor %}
