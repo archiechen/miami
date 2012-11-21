@@ -69,6 +69,16 @@ class Team(db.Model):
     def __init__(self, name):
         self.name = name
 
+    def has_member(self,user):
+        for member in self.members:
+            if member.id == user.id:
+                return True
+        return False
+
+    def remove_member(self,user):
+        for member in self.members:
+            if member.id == user.id:
+                self.members.remove(member)
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -154,7 +164,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100))
     active = db.Column(db.Boolean)
 
-    def __init__(self, name, email=None ,active=True):
+    def __init__(self, name, email='default@gmail.com' ,active=True):
         self.name = name
         self.email = email
         self.active = active

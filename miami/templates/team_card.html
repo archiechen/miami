@@ -1,0 +1,12 @@
+{% for team in teams %}
+<li id="{{team.id}}" style="display: list-item;">
+    <h5>{{team.name}}</h5>
+    <div class="pull-right">
+        {% if team.has_member(user) %}
+        <button class="btn btn-mini btn-leave" type="button">离开</button>
+        {%else%}
+        <button class="btn btn-mini btn-join" type="button">加入</button>
+        {% endif %}
+    </div>
+</li>
+{% endfor %}

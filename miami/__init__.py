@@ -25,7 +25,6 @@ elif os.getenv('MIAMI_ENV') == 'test':
 # Production run mode
 elif os.getenv('MIAMI_ENV') == 'prod':
     # Get port number from Heroku environment variable
-    app_run_args['port'] = 5000
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://miami:miami@localhost:3306/miami'
 
 db = SQLAlchemy(app)

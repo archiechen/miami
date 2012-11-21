@@ -1,6 +1,6 @@
 from flask import render_template, abort, flash, request, redirect, url_for, jsonify
 from miami import app, db
-from miami.models import User, Task, TimeSlot, NotPricing, NotEstimate
+from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 import simplejson as json
@@ -53,7 +53,7 @@ def new_task():
 @app.route('/tasks', methods=['POST'])
 @login_required
 def create_task():
-    if current_user.teams.count()==0:
+    if current_user.teams.count() == 0:
         abort(403)
     jsons = json.loads(request.data)
     task = Task(jsons.get('title'), jsons.get('detail'), team=current_user.teams[0])
@@ -126,3 +126,26 @@ def to_status(status, tid):
 def new_team():
     return render_template('teams.html', user=current_user)
 
+
+@app.route('/load_teams', methods=['GET'])
+@login_required
+def load_teams():
+    return render_template('team_card.html', teams=Team.query.all(), user=current_user)
+
+
+@app.route('/teams/join/<team_id>', methods=['PUT'])
+@login_required
+def join_team(team_id):
+    team = Team.query.get_or_404(team_id)
+    team.members.append(current_user)
+    db.session.commit()
+    return render_template('team_card.html', teams=[team], user=current_user)
+
+
+@app.route('/teams/leave/<team_id>', methods=['PUT'])
+@login_required
+def leave_team(team_id):
+    team = Team.query.get_or_404(team_id)
+    team.remove_member(current_user)
+    db.session.commit()
+    return render_template('team_card.html', teams=[team], user=current_user)

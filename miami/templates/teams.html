@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block body %}
 <div class='nav'>
-<a href="#teamForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
-</a>
+  <a href="#teamForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
+  </a>
 </div>
 
 <!-- NEW team Form -->
@@ -13,17 +13,19 @@
   </div>
   <div class="modal-body">
     <input id="name" type="text" class="input-block-level" placeholder="name">
-    <!--<textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>-->
-  </div>
-  <div class="modal-footer">
-    <button id="save" class="btn btn-primary">Save</button>
-  </div>
+    <!--<textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>
+  -->
+</div>
+<div class="modal-footer">
+  <button id="save" class="btn btn-primary">Save</button>
+</div>
 </div>
 
 <div id="teams" class="ui-teams">
-<ul class="ui-helper-reset"></ul>
-</div>
+<ul class="ui-helper-reset">
 
+</ul>
+</div>
 
 <script type="text/javascript">
     (function() {
@@ -50,26 +52,52 @@
       });
     });
 
+    function make_join($target){
+      $('.btn-join',$target).click(function(){
+          var parent = $(this.parentElement.parentElement);
+          $.ajax({
+              type: 'PUT',
+              url: '/teams/join/' + parent.attr('id'),
+              success: function(data) {
+                  parent.children().remove();
+                  parent.append($(data).children());
+                  make_join(parent);
+              },
+              dataType: 'html'
+          });
+      });
+      $('.btn-leave',$target).click(function(){
+          var parent = $(this.parentElement.parentElement);
+          $.ajax({
+              type: 'PUT',
+              url: '/teams/leave/' + parent.attr('id'),
+              success: function(data) {
+                  parent.children().remove();
+                  parent.append($(data).children());
+                  make_join(parent);
+              },
+              dataType: 'html'
+          });
+      });
+
+    }
+
     function reloadTeams(){
       $.ajax({
         type: 'GET',
-        url: '/api/team',
+        url: '/load_teams',
         success: function(data){
           $('#teams ul').children().remove();
-          for(var i in data.objects) {           
-            $('#teams ul').append("<li id="+data.objects[i].id+ "style='display: list-item;'>"+"<div class='left'><p class='text-warning'>"+data.objects[i].name+"</p></div>");
-          }
+          $('#teams ul').append(data);
+          make_join($('#teams'))
         },
-        dataType: 'json'
+        dataType: 'html'
       });
     }
   }());
 </script>
 {% endblock %}
-
 <div class="left">
-        <p class="text-warning">${{task.price}}</p>
-        <p class="text-info">{{task.estimate}}H</p>
-    </div>
-    
-
+<p class="text-warning">${{task.price}}</p>
+<p class="text-info">{{task.estimate}}H</p>
+</div>
