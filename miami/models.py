@@ -27,8 +27,9 @@ class ReadyState(object):
                 current_user.check_progress()
                 if task.estimate == 0:
                     raise NotEstimate()
-                else:
-                    task.start_time = datetime.now()
+                
+                task.start_time = datetime.now()
+                task.owner = current_user
         else:
             raise BadRequest
 
@@ -38,6 +39,7 @@ class ProgressState(object):
         if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
             task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user, partner=task.partner))
             task.partner = None
+            task.owner = None
         else:
             raise BadRequest
 
@@ -45,25 +47,28 @@ class ProgressState(object):
 class DoneState(object):
     def to(self, task, status):
         if task.status == 'DONE' and (status == 'READY' or status == 'PROGRESS'):
-            pass
+            if status == 'PROGRESS':
+                task.owner = current_user
         else:
             raise BadRequest
 
 task_state = {'NEW': NewState(), 'READY': ReadyState(), 'PROGRESS': ProgressState(), 'DONE': DoneState()}
 
 members = db.Table('members',
-    db.Column('team_id', db.Integer, db.ForeignKey('team.id')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
-)
+                   db.Column('team_id', db.Integer, db.ForeignKey('team.id')),
+                   db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
+                   )
+
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     members = db.relationship('User', secondary=members,
-        backref=db.backref('teams', lazy='dynamic'))
+                              backref=db.backref('teams', lazy='dynamic'))
 
     def __init__(self, name):
         self.name = name
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,7 +89,7 @@ class Task(db.Model):
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     team = db.relationship("Team")
 
-    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(),team = None):
+    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(), team=None):
         self.title = title
         self.detail = detail
         self.price = price
@@ -107,7 +112,7 @@ class Task(db.Model):
         self.status = status
         db.session.commit()
 
-    def estimating(self,estimate):
+    def estimating(self, estimate):
         if self.status == 'READY':
             self.estimate = estimate
             self.status = 'PROGRESS'
@@ -117,7 +122,7 @@ class Task(db.Model):
         else:
             raise BadRequest()
 
-    def pricing(self,price):
+    def pricing(self, price):
         if self.status == 'NEW':
             self.price = price
             self.status = 'READY'
@@ -159,7 +164,7 @@ class User(db.Model, UserMixin):
         if Task.query.filter_by(owner=self, status='PROGRESS').count() > 0 or Task.query.filter_by(partner=self, status='PROGRESS').count() > 0:
                 raise Forbidden()
 
-    def join(self,tid):
+    def join(self, tid):
         self.check_progress()
         task = Task.query.get_or_404(tid)
         task.partner = self
@@ -169,7 +174,7 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return task
 
-    def leave(self,tid):
+    def leave(self, tid):
         task = Task.query.get_or_404(tid)
         task.partner = None
         current_time = now()
@@ -178,7 +183,6 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return task
 
-    
 
 class Anonymous(AnonymousUser):
     name = u"Anonymous"

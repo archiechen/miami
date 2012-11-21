@@ -75,7 +75,7 @@ class PairTest(unittest.TestCase):
         assert '<h5>title2</h5>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<p class="text-info">Mike</p>' in rv.data
+        assert '<p class="text-info"></p>' in rv.data
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)

@@ -72,6 +72,7 @@ def zeroing():
         if end_time.hour > 18:
             end_time = end_time.replace(hour=18, minute=0, second=0)
         task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner,partner=task.partner))
+        task.owner = None
         task.partner = None
 
     db.session.commit()
