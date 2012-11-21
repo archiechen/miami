@@ -1,23 +1,26 @@
 {% for task in tasks %}
 <li id="{{task.id}}" style="display: list-item;">
     <h5>{{task.title}}</h5>
-    <div class="left">
+    <div class="pull-left">
         <p class="text-warning">${{task.price}}</p>
         <p class="text-info">{{task.estimate}}H</p>
     </div>
-    <div class="right">
-        <p class="text-info">{% if task.owner %}{{task.owner.name}}{% endif %}</p>
-        {% if task.partner %}
+    <div class="pull-right">
+        {% if task.owner %}
+        <img src="{{ task.owner.email | gravatar(size=20, rating='x') }}" title="{{task.owner.name}}"></img>
+    {% endif %}
+   
+    {% if task.partner %}
         {% if task.partner.name ==  user.name%}
-        <button class="btn btn-mini btn-leave" type="button"> <i class="icon-share"></i>
-        </button>
-        {%else%}
-        <p class="text-info">{{task.partner.name}}</p>
-        {% endif %}
+    <button class="btn btn-mini btn-leave" type="button"> <i class="icon-share"></i>
+    </button>
+    {%else%}
+    <img src="{{ task.partner.email | gravatar(size=20, rating='x') }}" title="{{task.partner.name}}"></img>
+{% endif %}
     {% elif task.status=='PROGRESS' and task.owner.name!=user.name%}
-        <button class="btn btn-mini btn-join" type="button"> <i class="icon-random"></i>
-        </button>
-        {% endif %}
-    </div>
+<button class="btn btn-mini btn-join" type="button"> <i class="icon-random"></i>
+</button>
+{% endif %}
+</div>
 </li>
 {% endfor %}

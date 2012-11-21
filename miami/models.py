@@ -151,10 +151,12 @@ class TimeSlot(db.Model):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
+    email = db.Column(db.String(100))
     active = db.Column(db.Boolean)
 
-    def __init__(self, name, active=True):
+    def __init__(self, name, email=None ,active=True):
         self.name = name
+        self.email = email
         self.active = active
 
     def is_active(self):
