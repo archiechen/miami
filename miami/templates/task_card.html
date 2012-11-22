@@ -1,11 +1,11 @@
 {% for task in tasks %}
 <li id="{{task.id}}" style="display: list-item;">
     <h5>{{task.title}}</h5>
-    <div class="pull-left">
+    <div class="left">
         <p class="text-warning">${{task.price}}</p>
         <p class="text-info">{{task.estimate}}H</p>
     </div>
-    <div class="pull-right">
+    <div class="right">
         {% if task.owner %}
         <img src="{{ task.owner.email | gravatar(size=20, rating='x') }}" title="{{task.owner.name}}"></img>
     {% endif %}
