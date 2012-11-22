@@ -1,3 +1,5 @@
+#-*- coding:utf-8 -*-
+
 from miami import db
 from datetime import datetime
 from flask.ext.login import UserMixin, AnonymousUser, current_user
@@ -5,6 +7,7 @@ from flask import abort, render_template
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
 
 import math
+import hashlib
 
 
 def now():
@@ -27,7 +30,7 @@ class ReadyState(object):
                 current_user.check_progress()
                 if task.estimate == 0:
                     raise NotEstimate()
-                
+
                 task.start_time = datetime.now()
                 task.owner = current_user
         else:
@@ -69,16 +72,23 @@ class Team(db.Model):
     def __init__(self, name):
         self.name = name
 
-    def has_member(self,user):
+    def __getattr__(self, name):
+        if name == 'color':
+            return hashlib.sha224(self.name).hexdigest()[0:6]
+
+        return db.Model.__getattr__(name)
+
+    def has_member(self, user):
         for member in self.members:
             if member.id == user.id:
                 return True
         return False
 
-    def remove_member(self,user):
+    def remove_member(self, user):
         for member in self.members:
             if member.id == user.id:
                 self.members.remove(member)
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -112,7 +122,7 @@ class Task(db.Model):
         if name == 'consuming':
             return math.fsum([ts.consuming for ts in self.time_slots])
 
-        return db.Model.__getattr__(self.name)
+        return db.Model.__getattr__(name)
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -164,7 +174,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100))
     active = db.Column(db.Boolean)
 
-    def __init__(self, name, email='default@gmail.com' ,active=True):
+    def __init__(self, name, email='default@gmail.com', active=True):
         self.name = name
         self.email = email
         self.active = active

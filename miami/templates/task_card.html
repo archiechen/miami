@@ -6,6 +6,7 @@
         <p class="text-info">{{task.estimate}}H</p>
     </div>
     <div class="right">
+        <div style="float:right;background-color:#{{task.team.color}};height:20px;width:20px;margin-top: 1px" title="{{task.team.name}}"></div>
         {% if task.owner %}
         <img src="{{ task.owner.email | gravatar(size=20, rating='x') }}" title="{{task.owner.name}}"></img>
     {% endif %}
