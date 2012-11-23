@@ -41,12 +41,16 @@
       reloadTasks();
       
       $('#save').click(function(){
+        $('#save').attr('disabled','true');
         $.ajax({
           type: 'POST',
           url: '/tasks',
           data: '{"title":"'+$('#title').val()+'","detail":"'+$('#detail').val()+'"}',
           success: function(data){
-            $('#taskForm').modal('hide');    
+            $('#taskForm').modal('hide'); 
+            $('#title').val('');
+            $('#detail').val(''); 
+            $('#save').removeAttr('disabled');  
             reloadTasks();
           },
           dataType: 'json',
