@@ -1,13 +1,18 @@
 from flask import render_template, abort, flash, request, redirect, url_for, jsonify
 from miami import app, db
-from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate
+from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData
 from flask.ext.login import login_user, logout_user, login_required, current_user
-from datetime import datetime
+from datetime import datetime,timedelta
 import simplejson as json
 
 
 def now():
     return datetime.now()
+
+def get_last_monday():
+    ctime = now().replace(hour=0)
+    td = timedelta(days=(ctime.weekday()+7))
+    return ctime - td
 
 
 @app.errorhandler(401)
@@ -149,3 +154,14 @@ def leave_team(team_id):
     team.remove_member(current_user)
     db.session.commit()
     return render_template('team_card.html', teams=[team], user=current_user)
+
+
+@app.route('/review', methods=['GET'])
+@login_required
+def review():
+    time_slots = TimeSlot.query.filter(TimeSlot.start_time > get_last_monday())
+    review_data = ReviewData()
+    for ts in time_slots:
+        review_data.merge(ts)
+
+    return render_template('review.html', review_data=review_data, user=current_user)

@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="ui-charts">
+    <ul class="ui-helper-reset">
+        <li>
+            <div id="price_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+        <li>
+            <div id="estimate_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+        <li>
+            <div id="paired_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+    </ul>
+</div>
+<script type="text/javascript">
+  (function() {
+    "use strict";
+    $(document).ready(function() {
+      $('li').removeClass('active');
+      $("ul li:nth-child(6)").addClass('active');
+      $.jqplot('price_chart', 
+            [[{{review_data.done_price}},{{review_data.price}}]],{
+                title:'完成率',
+                seriesDefaults:{
+                    renderer:$.jqplot.BarRenderer,
+                    pointLabels: { show: true ,formatString:'$%d',location: 'e', edgeTolerance: -15},
+                    shadowAngle: 135,
+                    rendererOptions: {
+                        barDirection: 'horizontal'
+                    }
+                },
+                axes: {
+                    yaxis: {
+                        renderer: $.jqplot.CategoryAxisRenderer,
+                        ticks: ['Done','Price']
+                    }
+                }
+        });
+      $.jqplot('estimate_chart', 
+            [[{{review_data.actual}},{{review_data.estimate}}]],{
+                title:'估算 vs 实际',
+                seriesDefaults:{
+                    renderer:$.jqplot.BarRenderer,
+                    pointLabels: { show: true,formatString:'%dH',location: 'e', edgeTolerance: -15},
+                    shadowAngle: 135,
+                    rendererOptions: {
+                        barDirection: 'horizontal'
+                    }
+                },
+                axes: {
+                    yaxis: {
+                        renderer: $.jqplot.CategoryAxisRenderer,
+                        ticks: ['Actual','Estimate']
+                    }
+                }
+        });
+        jQuery.jqplot ('paired_chart', [ [
+            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.actual - review_data.paired_time}}]
+        ]] , 
+        { 
+          title:'结对率',
+          seriesDefaults: {
+            renderer: jQuery.jqplot.PieRenderer, 
+            rendererOptions: {
+              showDataLabels: true
+            }
+          }, 
+          legend: { show:true, location: 'e' }
+        }
+);
+    });  
+  }());
+</script>
+{% endblock %}

@@ -206,6 +206,27 @@ class User(db.Model, UserMixin):
         return task
 
 
+class ReviewData(object):
+    def __init__(self):
+        self.price = 0
+        self.done_price = 0
+        self.estimate = 0
+        self.actual = 0
+        self.paired_time = 0
+        self.tasks={}
+
+    def merge(self, ts):
+        if ts.task.id not in self.tasks:
+            self.price += ts.task.price
+            self.estimate += ts.task.estimate
+            if ts.task.status == 'DONE':
+                self.done_price += ts.task.price
+            self.tasks[ts.task.id] = ts.task
+        self.actual += ts.consuming / 3600
+        if ts.partner:
+            self.paired_time += ts.consuming / 3600
+
+
 class Anonymous(AnonymousUser):
     name = u"Anonymous"
 
