@@ -11,6 +11,9 @@
         <li>
             <div id="paired_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
         </li>
+        <li>
+            <div id="price_ratio_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
     </ul>
 </div>
 <script type="text/javascript">
@@ -55,20 +58,31 @@
                     }
                 }
         });
-        jQuery.jqplot ('paired_chart', [ [
-            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.actual - review_data.paired_time}}]
-        ]] , 
-        { 
-          title:'结对率',
-          seriesDefaults: {
-            renderer: jQuery.jqplot.PieRenderer, 
-            rendererOptions: {
-              showDataLabels: true
+        $.jqplot ('paired_chart', [ [
+            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.actual - review_data.paired_time}}]]] , 
+            { 
+              title:'结对率',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true
+                }
+              }, 
+              legend: { show:true, location: 'e' }
             }
-          }, 
-          legend: { show:true, location: 'e' }
-        }
-);
+        );
+        $.jqplot ('price_ratio_chart', [{{review_data.price_ratio()|safe}}] , 
+            { 
+              title:'价值分配',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
     });  
   }());
 </script>

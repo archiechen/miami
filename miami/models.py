@@ -8,6 +8,7 @@ from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
 
 import math
 import hashlib
+import simplejson as json
 
 
 def now():
@@ -225,6 +226,20 @@ class ReviewData(object):
         self.actual += ts.consuming / 3600
         if ts.partner:
             self.paired_time += ts.consuming / 3600
+
+    def price_ratio(self):
+        ratio=[['$1',0],['$2',0],['$5',0],['$10',0]]
+        for tid,task in self.tasks.iteritems():
+            if task.status=='DONE':
+                if task.price==1:
+                    ratio[0][1]+=1;
+                if task.price==2:
+                    ratio[1][1]+=1;
+                if task.price==5:
+                    ratio[2][1]+=1;
+                if task.price==10:
+                    ratio[3][1]+=1;
+        return str(ratio)
 
 
 class Anonymous(AnonymousUser):
