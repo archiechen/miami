@@ -10,6 +10,7 @@
     <h3 id="taskFormLabel">New Tasks</h3>
   </div>
   <div class="modal-body">
+    还可以输入<span id="charsLeft"></span>字
     <input id="title" type="text" class="input-block-level" placeholder="title">
     <textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>
   </div>
@@ -91,6 +92,7 @@
 
       $('.nav li').removeClass('active');
       $(".nav li:nth-child(2)").addClass('active');
+      $('#title').limit('33','#charsLeft');
 
       $('#save').click(function(){
         $('#save').attr('disabled','true');
