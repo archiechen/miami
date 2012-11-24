@@ -40,10 +40,18 @@
     {% endif %}
     </tbody>
   </table>
-
   {% macro render_pagination(pagination, endpoint) %}
   <div class="pagination">
     <ul>
+      {% if pagination.page==1 %}
+       <li class="active">
+        <a href="#">«</a>
+      </li>
+      {% else %}
+      <li>
+        <a href="{{ url_for(endpoint, page=pagination.page - 1) }}">«</a>
+      </li>
+      {% endif %}
       {%- for page in pagination.iter_pages() %}
     {% if page %}
       {% if page != pagination.page %}
@@ -51,20 +59,32 @@
         <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
       </li>
       {% else %}
-      <li class="active"> <a href="#">{{ page }}</a>
+      <li class="active">
+        <a href="#">{{ page }}</a>
       </li>
       {% endif %}
     {% else %}
-       <li> <span class=ellipsis>…</span></li>
+      <li>
+        <span class=ellipsis>…</span>
+      </li>
       {% endif %}
   {%- endfor %}
-    </ul>
-  </div>
-  {% endmacro %}
+  {% if pagination.page ==pagination.pages %}
+        <li class="active">
+          <a href="#">»</a>
+        </li>
+        {% else %}
+        <li>
+          <a href="{{ url_for(endpoint, page=pagination.page+1) }}">»</a>
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endmacro %}
 {{render_pagination(pagination,'load_tasks_page')}}
-</div>
+  </div>
 
-<script type="text/javascript">
+  <script type="text/javascript">
     (function() {
     "use strict";
     $(document).ready(function() {
@@ -88,4 +108,4 @@
     });
   }());
 </script>
-{% endblock %}
+  {% endblock %}
