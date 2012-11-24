@@ -166,7 +166,7 @@ def leave_team(team_id):
 @app.route('/review', methods=['GET'])
 @login_required
 def review():
-    time_slots = TimeSlot.query.filter(TimeSlot.start_time > get_last_monday())
+    time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > get_last_monday(),Task.team==current_user.teams[0])
     review_data = ReviewData()
     for ts in time_slots:
         review_data.merge(ts)
