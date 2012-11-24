@@ -31,9 +31,6 @@ class ReviewTest(BaseTestCase):
 
         rv = self.app.get('/review')
 
+        print rv.data
+
         self.assertEquals(200, rv.status_code)
-        assert 'Price:$4' in rv.data
-        assert 'Done Price:$2' in rv.data
-        assert 'Estimate:8Hours' in rv.data
-        assert 'Actual:2Hours' in rv.data
-        assert 'Paired Time:1Hours' in rv.data

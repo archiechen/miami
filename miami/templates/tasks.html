@@ -17,29 +17,61 @@
     <button id="save" class="btn btn-primary">Save</button>
   </div>
 </div>
+<div id="tasks_table">
+  <table class="table .table-striped">
+    <thead>
+      <tr>
+        <td>Id</td>
+        <td>Status</td>
+        <td>Title</td>
+        <td>Created</td>
+      </tr>
+    </thead>
+    <tbody>
+      {% if pagination.page %}
+      {%for task in pagination.items%}
+      <tr>
+        <td>{{task.id}}</td>
+        <td>{{task.status}}</td>
+        <td>{{task.title}}</td>
+        <td>{{task.created_time}}</td>
+      </tr>
+      {% endfor %}
+    {% endif %}
+    </tbody>
+  </table>
 
-<table class="table .table-striped">
-  <thead>
-    <tr>
-      <td>Id</td>
-      <td>Status</td>
-      <td>Title</td>
-      <td>Created</td>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-</table>
+  {% macro render_pagination(pagination, endpoint) %}
+  <div class="pagination">
+    <ul>
+      {%- for page in pagination.iter_pages() %}
+    {% if page %}
+      {% if page != pagination.page %}
+      <li>
+        <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+      </li>
+      {% else %}
+      <li class="active"> <a href="#">{{ page }}</a>
+      </li>
+      {% endif %}
+    {% else %}
+       <li> <span class=ellipsis>…</span></li>
+      {% endif %}
+  {%- endfor %}
+    </ul>
+  </div>
+  {% endmacro %}
+{{render_pagination(pagination,'load_tasks_page')}}
+</div>
+
 <script type="text/javascript">
     (function() {
     "use strict";
     $(document).ready(function() {
 
-      $('li').removeClass('active');
-      $("ul li:nth-child(2)").addClass('active');
+      $('.nav li').removeClass('active');
+      $(".nav li:nth-child(2)").addClass('active');
 
-      reloadTasks();
-      
       $('#save').click(function(){
         $('#save').attr('disabled','true');
         $.ajax({
@@ -47,31 +79,13 @@
           url: '/tasks',
           data: '{"title":"'+$('#title').val()+'","detail":"'+$('#detail').val()+'"}',
           success: function(data){
-            $('#taskForm').modal('hide'); 
-            $('#title').val('');
-            $('#detail').val(''); 
-            $('#save').removeAttr('disabled');  
-            reloadTasks();
+            location=location; 
           },
           dataType: 'json',
           contentType: 'application/json'
         });
       });
     });
-
-    function reloadTasks(){
-      $.ajax({
-        type: 'GET',
-        url: '/api/task',
-        success: function(data){
-          $('tbody > tr').remove();
-          for(var i in data.objects) {
-            $('.table > tbody').append('<tr><td>' + data.objects[i].id + '</td><td>' + data.objects[i].status + '</td><td>' + data.objects[i].title+ '</td><td>' + $.format.date(data.objects[i].created_time,'yyyy-MM-dd')+ '</td></tr>');
-          }
-        },
-        dataType: 'json'
-      });
-    }
   }());
 </script>
 {% endblock %}

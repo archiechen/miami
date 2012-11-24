@@ -2,16 +2,18 @@ from flask import render_template, abort, flash, request, redirect, url_for, jso
 from miami import app, db
 from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData
 from flask.ext.login import login_user, logout_user, login_required, current_user
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
+from sqlalchemy import or_
 import simplejson as json
 
 
 def now():
     return datetime.now()
 
+
 def get_last_monday():
     ctime = now().replace(hour=0)
-    td = timedelta(days=(ctime.weekday()+7))
+    td = timedelta(days=(ctime.weekday() + 7))
     return ctime - td
 
 
@@ -49,12 +51,6 @@ def index():
     return render_template('dashborad.html', user=current_user)
 
 
-@app.route('/tasks', methods=['GET'])
-@login_required
-def new_task():
-    return render_template('tasks.html', user=current_user)
-
-
 @app.route('/tasks', methods=['POST'])
 @login_required
 def create_task():
@@ -73,13 +69,24 @@ def planning():
     return render_template('planning.html', user=current_user)
 
 
+@app.route('/tasks/page/<page>', methods=['GET'])
+@login_required
+def load_tasks_page(page):
+    team_conditions = [Task.team==None]
+    for team in current_user.teams:
+        team_conditions.append(Task.team == team)
+
+    tasks = Task.query.filter(or_(*team_conditions)).order_by(Task.created_time.desc()).paginate(int(page), per_page=15, error_out=True)
+    return render_template('tasks.html', pagination=tasks, user=current_user)
+   
 @app.route('/tasks/<status>', methods=['GET'])
 @login_required
 def load_tasks(status):
-    tasks = []
+    team_conditions = [Task.team==None]
     for team in current_user.teams:
-        [tasks.append(t) for t in Task.query.filter(Task.status == status, Task.team == team)]
-
+        team_conditions.append(Task.team == team)
+    
+    tasks = Task.query.filter(Task.status == status, or_(*team_conditions))
     return render_template('task_card.html', tasks=tasks, user=current_user)
 
 

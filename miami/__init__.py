@@ -41,6 +41,7 @@ gravatar = Gravatar(app,
                     force_default=False,
                     force_lower=False)
 
+
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -56,7 +57,7 @@ manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 
 
 manager.create_api(Task, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
-                   authentication_function=auth_func)
+                   authentication_function=auth_func, results_per_page=2)
 manager.create_api(Team, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
                    authentication_function=auth_func)
 import miami.views
@@ -67,6 +68,7 @@ gravatar = Gravatar(app,
                     default='retro',
                     force_default=False,
                     force_lower=False)
+
 
 def init_db():
     with app.app_context():
