@@ -1,66 +1,28 @@
-{% extends "layout.html" %}
-{% block body %}
-<ul id="myTab" class="nav nav-tabs">
-    <li class="active">
-        <a href="#team" data-toggle="tab">Team</a>
-    </li>
-    <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-            Personal <b class="caret"></b>
-        </a>
-        <ul class="dropdown-menu">
-            {% for member in user.teams[0].members %}
-            <li>
-                <a href="#personal" data-toggle="tab" id="{{member.id}}">@{{member.name}}</a>
-            </li>
-            {% endfor %}
-        </ul>
-    </li>
-</ul>
-<div id="myTabContent" class="tab-content">
-    <div class="tab-pane fade in active" id="team">
-        <div class="ui-charts">
-            <ul class="ui-helper-reset">
-                <li>
-                    <div id="price_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
-                </li>
-                <li>
-                    <div id="estimate_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
-                </li>
-                <li>
-                    <div id="paired_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
-                </li>
-                <li>
-                    <div id="price_ratio_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="tab-pane fade" id="personal">
-        
-    </div>
+<div class="ui-charts">
+    <ul class="ui-helper-reset">
+        <li>
+            <img src="{{ user.email | gravatar(size=80, rating='x') }}"></img>
+        </li>
+        <li>
+            <div id="price_chart_personal" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+        <li>
+            <div id="estimate_chart_personal" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+        <li>
+            <div id="paired_chart_personal" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+        <li>
+            <div id="price_ratio_chart_personal" class="jqplot-target" style="width:360px; height:200px;"></div>
+        </li>
+    </ul>
 </div>
 
 <script type="text/javascript">
   (function() {
     "use strict";
     $(document).ready(function() {
-      $('.navbar-inner li').removeClass('active');
-      $(".navbar-inner li:nth-child(6)").addClass('active');
-
-      $('a[data-toggle="tab"]').on('shown', function (e) {
-            $.ajax({
-                type: 'GET',
-                url: '/review/1/'+e.target.id,
-                success: function(data){
-                    $('#personal').children().remove();
-                    $('#personal').append(data); 
-                },
-                dataType: 'html'
-            });
-       })
-
-      $.jqplot('price_chart', 
+      $.jqplot('price_chart_personal', 
             [[{{review_data.done_price}},{{review_data.price}}]],{
                 title:'完成率',
                 seriesDefaults:{
@@ -78,7 +40,7 @@
                     }
                 }
         });
-      $.jqplot('estimate_chart', 
+      $.jqplot('estimate_chart_personal', 
             [[{{review_data.actual}},{{review_data.estimate}}]],{
                 title:'估算 vs 实际',
                 seriesDefaults:{
@@ -96,7 +58,7 @@
                     }
                 }
         });
-        $.jqplot ('paired_chart', [ [
+        $.jqplot ('paired_chart_personal', [ [
             ['Paired', {{review_data.paired_time}}],['Single', {{review_data.actual - review_data.paired_time}}]]] , 
             { 
               title:'结对率',
@@ -109,7 +71,7 @@
               legend: { show:true, location: 'e' }
             }
         );
-        $.jqplot ('price_ratio_chart', [{{review_data.price_ratio()|safe}}] , 
+        $.jqplot ('price_ratio_chart_personal', [{{review_data.price_ratio()|safe}}] , 
             { 
               title:'价值分配',
               seriesDefaults: {
@@ -124,4 +86,3 @@
     });  
   }());
 </script>
-{% endblock %}

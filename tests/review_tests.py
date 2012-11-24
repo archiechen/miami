@@ -16,10 +16,9 @@ class ReviewTest(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
         when(miami.views).now().thenReturn(datetime(2012, 11, 5, 9, 0, 0))
-
-    def test_review(self):
         team = Team('Miami')
         team.members.append(User('Bob'))
+        team.members.append(User.query.get(1))
         task = Task('title1', 'detail', status='DONE', price=2, estimate=4, team=team)
         ts = TimeSlot(datetime(2012, 11, 1, 10, 0, 0), 3600, User.query.get(1))
         task.time_slots.append(ts)
@@ -29,8 +28,12 @@ class ReviewTest(BaseTestCase):
         task.time_slots.append(ts)
         self.create_entity(task)
 
+    def test_review(self):
         rv = self.app.get('/review')
 
-        print rv.data
-
         self.assertEquals(200, rv.status_code)
+
+    def test_review_personal(self):
+        rv = self.app.get('/review/1/1')
+        self.assertEquals(200, rv.status_code)
+

@@ -172,3 +172,14 @@ def review():
         review_data.merge(ts)
 
     return render_template('review.html', review_data=review_data, user=current_user)
+
+@app.route('/review/<team_id>/<member_id>', methods=['GET'])
+@login_required
+def review_member(team_id,member_id):
+    member = User.query.get(member_id)
+    time_slots = TimeSlot.query.join(TimeSlot.task).filter(or_(TimeSlot.user==member,TimeSlot.partner==member),TimeSlot.start_time > get_last_monday(),Task.team==Team.query.get(team_id))
+    review_data = ReviewData()
+    for ts in time_slots:
+        review_data.merge(ts)
+
+    return render_template('review_personal.html', review_data=review_data, user=member)
