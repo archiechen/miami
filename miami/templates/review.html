@@ -33,6 +33,9 @@
                 <li>
                     <div id="price_ratio_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
                 </li>
+                <li>
+                    <div id="valuable_ratio_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
+                </li>
             </ul>
         </div>
     </div>
@@ -112,6 +115,19 @@
         $.jqplot ('price_ratio_chart', [{{review_data.price_ratio()|safe}}] , 
             { 
               title:'价值分配',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+        $.jqplot ('valuable_ratio_chart', [ [
+            ['Valuable', {{review_data.valuable_hours}}],['Invalid', {{review_data.working_hours - review_data.valuable_hours}}]]]  , 
+            { 
+              title:'有效工时',
               seriesDefaults: {
                 renderer: jQuery.jqplot.PieRenderer, 
                 rendererOptions: {
