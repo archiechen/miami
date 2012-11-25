@@ -38,12 +38,14 @@ class ReviewModelsTest(unittest.TestCase):
         db.session.add(task)
         db.session.commit()
 
+        ###Ready###
         task = Task('title4', 'detail4', status='Ready', price=2, estimate=4, team=Team.query.get(1))
         ts = TimeSlot(miami.views.get_last_monday().replace(hour=14), 3600, User.query.get(2), partner=User.query.get(1))
         task.time_slots.append(ts)
         db.session.add(task)
         db.session.commit()
 
+        ###history###
         task = Task('title5', 'detail5', status='DONE', price=2, estimate=4, team=Team.query.get(1))
         ts = TimeSlot((miami.views.get_last_monday() - timedelta(days=5)).replace(hour=14), 3600, User.query.get(2))
         task.time_slots.append(ts)
@@ -53,17 +55,31 @@ class ReviewModelsTest(unittest.TestCase):
     def tearDown(self):
         unstub()
 
-    def test_personal_review_data(self):
-        member = User.query.get(1)
+    def test_review_data(self):
+        team = Team.query.get(1)
 
-        rd = member.review_data(miami.views.get_last_monday(), 1)
+        rd = team.review_data(miami.views.get_last_monday())
 
         self.assertEquals(8, rd.price)
         self.assertEquals(6, rd.done_price)
-        self.assertEquals(8, rd.estimate)
+        self.assertEquals(12, rd.estimate)
         self.assertEquals(5, rd.working_hours)
         self.assertEquals(4, rd.valuable_hours)
         self.assertEquals(3, rd.paired_time)
+        self.assertEquals("[['$1', 0], ['$2', 3], ['$5', 0], ['$10', 0]]",rd.price_ratio())
+
+
+    def test_personal_review_data(self):
+        member = User.query.get(2)
+
+        rd = member.review_data(miami.views.get_last_monday(), 1)
+
+        self.assertEquals(6, rd.price)
+        self.assertEquals(4, rd.done_price)
+        self.assertEquals(4, rd.estimate)
+        self.assertEquals(3.0, rd.working_hours)
+        self.assertEquals(2.0, rd.valuable_hours)
+        self.assertEquals(3.0, rd.paired_time)
 
     def test_personal_review_data_nodata(self):
         member = User.query.get(3)

@@ -91,6 +91,13 @@ class Team(db.Model):
             if member.id == user.id:
                 self.members.remove(member)
 
+    def review_data(self,last_monday):
+        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, Task.team == self)
+        review_data = ReviewData()
+        for ts in time_slots:
+            review_data.merge(ts)
+        return review_data
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -221,6 +228,11 @@ class User(db.Model, UserMixin):
             review_data.merge_personal(self, ts)
         return review_data
 
+    def team_id(self):
+        if self.teams.count():
+            return self.teams[0].id
+        return 0
+
 
 class PersonCard(object):
     def __init__(self, user):
@@ -280,17 +292,16 @@ class ReviewData(object):
     def merge_personal(self, person, ts):
         if ts.task.id not in self.tasks:
             self.price += ts.task.price
-            if ts.user == person:
-                self.estimate += ts.task.estimate
             if ts.task.status == 'DONE':
+                if ts.user == person:
+                    self.estimate += ts.task.estimate
                 self.done_price += ts.task.price
                 self.valuable_hours += ts.consuming / 3600.0
             self.tasks[ts.task.id] = ts.task
-            self.working_hours+=ts.consuming / 3600.0
-        if ts.user == person and ts.partner:
+        self.working_hours+=ts.consuming / 3600.0
+        if ts.partner:
             self.paired_time += ts.consuming / 3600.0
-        if ts.partner == person:
-            self.paired_time += ts.consuming / 3600.0
+        
 
     def price_ratio(self):
         ratio = [['$1', 0], ['$2', 0], ['$5', 0], ['$10', 0]]

@@ -164,15 +164,11 @@ def leave_team(team_id):
     return render_template('team_card.html', teams=[team], user=current_user)
 
 
-@app.route('/review', methods=['GET'])
+@app.route('/review/<team_id>', methods=['GET'])
 @login_required
-def review():
-    time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > get_last_monday(), Task.team == current_user.teams[0])
-    review_data = ReviewData()
-    for ts in time_slots:
-        review_data.merge(ts)
-
-    return render_template('review.html', review_data=review_data, user=current_user)
+def review(team_id):
+    team = Team.query.get(team_id)
+    return render_template('review.html', review_data=team.review_data(get_last_monday()), user=current_user)
 
 
 @app.route('/review/<team_id>/<member_id>', methods=['GET'])
