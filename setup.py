@@ -14,6 +14,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'simplejson==2.6.1',
+        'flup==1.0.3.dev_20110405',
         'flask==0.9',
         'flup==1.0.3.dev_20110405',
         'sqlalchemy==0.7.9',
