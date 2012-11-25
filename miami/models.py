@@ -270,6 +270,9 @@ class PersonCard(object):
     def paired_ratio(self):
         return'{0:0.2%}'.format(self.paired_hours / self.working_hours if self.working_hours > 0 else 0)
 
+    def total_hours(self):
+        return'{0:0.2g}'.format(self.working_hours)
+
 
 class ReviewData(object):
     def __init__(self):
