@@ -31,9 +31,13 @@ task.time_slots.append(ts)
 db.session.add(task)
 db.session.commit()
 
-task = Task('title4', 'detail4', status='Ready', price=2, estimate=4, team=Team.query.get(1), start_time=miami.views.get_last_monday().replace(hour=15))
+task = Task('title4', 'detail4', status='READY', price=2, estimate=4, team=Team.query.get(1), start_time=miami.views.get_last_monday().replace(hour=15))
 ts = TimeSlot(miami.views.get_last_monday().replace(hour=15), 3600, User.query.get(2), partner=User.query.get(1))
 task.time_slots.append(ts)
+db.session.add(task)
+db.session.commit()
+
+task = Task('title6', 'detail4', status='READY', price=1, estimate=4, team=Team.query.get(1), start_time=miami.views.get_last_monday().replace(hour=15))
 db.session.add(task)
 db.session.commit()
 

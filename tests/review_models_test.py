@@ -20,33 +20,37 @@ class ReviewModelsTest(unittest.TestCase):
         db.session.add(team)
         db.session.commit()
 
-        task = Task('title1', 'detail', status='DONE', price=2, estimate=4, team=Team.query.get(1))
+        task = Task('title1', 'detail', status='DONE', price=2, estimate=4, team=Team.query.get(1),start_time=miami.views.get_last_monday().replace(hour=10))
         ts = TimeSlot(miami.views.get_last_monday().replace(hour=10), 7200, User.query.get(1))
         task.time_slots.append(ts)
         db.session.add(task)
         db.session.commit()
 
-        task = Task('title2', 'detail2', status='DONE', price=2, estimate=4, team=Team.query.get(1))
+        task = Task('title2', 'detail2', status='DONE', price=2, estimate=4, team=Team.query.get(1),start_time=miami.views.get_last_monday().replace(hour=12))
         ts = TimeSlot(miami.views.get_last_monday().replace(hour=12), 3600, User.query.get(1), partner=User.query.get(2))
         task.time_slots.append(ts)
         db.session.add(task)
         db.session.commit()
 
-        task = Task('title3', 'detail3', status='DONE', price=2, estimate=4, team=Team.query.get(1))
+        task = Task('title3', 'detail3', status='DONE', price=2, estimate=4, team=Team.query.get(1),start_time=miami.views.get_last_monday().replace(hour=14))
         ts = TimeSlot(miami.views.get_last_monday().replace(hour=14), 3600, User.query.get(2), partner=User.query.get(1))
         task.time_slots.append(ts)
         db.session.add(task)
         db.session.commit()
 
         ###Ready###
-        task = Task('title4', 'detail4', status='Ready', price=2, estimate=4, team=Team.query.get(1))
+        task = Task('title4', 'detail4', status='READY', price=2, estimate=4, team=Team.query.get(1),start_time=miami.views.get_last_monday().replace(hour=14))
         ts = TimeSlot(miami.views.get_last_monday().replace(hour=14), 3600, User.query.get(2), partner=User.query.get(1))
         task.time_slots.append(ts)
         db.session.add(task)
         db.session.commit()
 
+        task = Task('title6', 'detail6', status='READY', price=1, estimate=4, team=Team.query.get(1),start_time=miami.views.get_last_monday().replace(hour=10))
+        db.session.add(task)
+        db.session.commit()
+
         ###history###
-        task = Task('title5', 'detail5', status='DONE', price=2, estimate=4, team=Team.query.get(1))
+        task = Task('title5', 'detail5', status='DONE', price=2, estimate=4, team=Team.query.get(1),start_time=(miami.views.get_last_monday() - timedelta(days=5)).replace(hour=14))
         ts = TimeSlot((miami.views.get_last_monday() - timedelta(days=5)).replace(hour=14), 3600, User.query.get(2))
         task.time_slots.append(ts)
         db.session.add(task)
@@ -60,7 +64,7 @@ class ReviewModelsTest(unittest.TestCase):
 
         rd = team.review_data(miami.views.get_last_monday())
 
-        self.assertEquals(8, rd.price)
+        self.assertEquals(9, rd.price)
         self.assertEquals(6, rd.done_price)
         self.assertEquals(12, rd.estimate)
         self.assertEquals(5, rd.working_hours)

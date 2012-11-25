@@ -1,7 +1,7 @@
 #-*- coding:utf-8 -*-
 
 from miami import db
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask.ext.login import UserMixin, AnonymousUser, current_user
 from flask import abort, render_template
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
@@ -21,6 +21,7 @@ class NewState(object):
         if task.status == 'NEW' and status == 'READY':
             if task.price == 0:
                 raise NotPricing()
+            task.start_time=now()
         else:
             raise BadRequest
 
@@ -91,11 +92,13 @@ class Team(db.Model):
             if member.id == user.id:
                 self.members.remove(member)
 
-    def review_data(self,last_monday):
-        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, Task.team == self)
+    def review_data(self, last_monday):
+        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, TimeSlot.start_time < last_monday + timedelta(days=7), Task.team == self)
         review_data = ReviewData()
         for ts in time_slots:
             review_data.merge(ts)
+        review_data.merge_ready(Task.query.filter(Task.start_time > last_monday, Task.start_time < last_monday + timedelta(days=7), Task.status == 'READY', Task.team == self))
+
         return review_data
 
 
@@ -155,6 +158,7 @@ class Task(db.Model):
         if self.status == 'NEW':
             self.price = price
             self.status = 'READY'
+            self.start_time = now()
             db.session.commit()
         else:
             raise BadRequest()
@@ -222,7 +226,7 @@ class User(db.Model, UserMixin):
         return card
 
     def review_data(self, last_monday, team_id):
-        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, Task.team == Team.query.get(team_id), or_(TimeSlot.user == self, TimeSlot.partner == self))
+        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, TimeSlot.start_time < last_monday + timedelta(days=7), Task.team == Team.query.get(team_id), or_(TimeSlot.user == self, TimeSlot.partner == self))
         review_data = ReviewData()
         for ts in time_slots:
             review_data.merge_personal(self, ts)
@@ -249,7 +253,7 @@ class PersonCard(object):
             self.tasks[ts.task.id] = ts.task
             if ts.task.status == 'DONE':
                 self.fortune += ts.task.price
-                self.valuable_hours+=ts.consuming / 3600.0
+                self.valuable_hours += ts.consuming / 3600.0
                 if ts.user == self.user:
                     self.estimate += ts.task.estimate
         self.working_hours += ts.consuming / 3600.0
@@ -272,7 +276,7 @@ class ReviewData(object):
         self.price = 0
         self.done_price = 0
         self.estimate = 0
-        self.working_hours=0
+        self.working_hours = 0
         self.valuable_hours = 0
         self.paired_time = 0
         self.tasks = {}
@@ -289,6 +293,11 @@ class ReviewData(object):
         if ts.partner:
             self.paired_time += ts.consuming / 3600.0
 
+    def merge_ready(self, ready_tasks):
+        for rt in ready_tasks:
+            if rt.id not in self.tasks:
+                self.price += rt.price
+
     def merge_personal(self, person, ts):
         if ts.task.id not in self.tasks:
             self.price += ts.task.price
@@ -298,10 +307,9 @@ class ReviewData(object):
                 self.done_price += ts.task.price
                 self.valuable_hours += ts.consuming / 3600.0
             self.tasks[ts.task.id] = ts.task
-        self.working_hours+=ts.consuming / 3600.0
+        self.working_hours += ts.consuming / 3600.0
         if ts.partner:
             self.paired_time += ts.consuming / 3600.0
-        
 
     def price_ratio(self):
         ratio = [['$1', 0], ['$2', 0], ['$5', 0], ['$10', 0]]
