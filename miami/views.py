@@ -17,6 +17,12 @@ def get_last_monday():
     return ctime - td
 
 
+def get_current_monday():
+    ctime = now().replace(hour=0)
+    td = timedelta(days=ctime.weekday())
+    return ctime - td
+
+
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template('login.html', message='please login.'), 401
@@ -86,9 +92,9 @@ def load_tasks(status):
     team_conditions = [Task.team is None]
     for team in current_user.teams:
         team_conditions.append(Task.team == team)
-
-    tasks = Task.query.filter(Task.status == status, or_(*team_conditions))
-    return render_template('task_card.html', tasks=tasks, user=current_user)
+    if status == 'DONE':
+        return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
+    return render_template('task_card.html', tasks=Task.query.filter(Task.status == status, or_(*team_conditions)), user=current_user)
 
 
 @app.route('/estimate/<tid>/<estimate>', methods=['PUT'])
@@ -176,4 +182,4 @@ def review(team_id):
 def review_member(team_id, member_id):
     member = User.query.get(member_id)
 
-    return render_template('review_personal.html', review_data=member.review_data(get_last_monday(),team_id), personal_card=member.personal_card())
+    return render_template('review_personal.html', review_data=member.review_data(get_last_monday(), team_id), personal_card=member.personal_card())

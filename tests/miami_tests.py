@@ -5,7 +5,7 @@ import os
 os.environ['MIAMI_ENV'] = 'test'
 import miami
 import simplejson as json
-from datetime import datetime
+from datetime import datetime,timedelta
 from mockito import when, unstub
 from miami.models import Task, TimeSlot, User, Team
 
@@ -24,6 +24,7 @@ class MiamiTest(unittest.TestCase):
         team.members.append(User('Mike'))
         create_entity(team)
         when(miami.models).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(miami.views).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):
@@ -74,6 +75,23 @@ class MiamiTest(unittest.TestCase):
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">0H</p>' in rv.data
         assert '<h5>title1</h5>' not in rv.data
+
+    def test_load_task_done(self):
+        create_entity(Task('title2', 'detail2', status='DONE', price=10 ,team = Team.query.get(1)))
+        create_entity(Task('title1', 'detail1', status='DONE', price=10 ,start_time=miami.views.now()-timedelta(days=7),team = Team.query.get(1)))
+        rv = self.app.get('/tasks/DONE')
+
+        self.assertEquals(200, rv.status_code)
+
+        assert '<li id="1" style="display: list-item;">' in rv.data
+        assert '<h5>title2</h5>' in rv.data
+        assert '<p class="text-warning">$10</p>' in rv.data
+        assert '<p class="text-info">0H</p>' in rv.data
+        assert '<h5>title1</h5>' not in rv.data
+
+        assert '<li id="2" style="display: list-item;">' not in rv.data
+        assert '<h5>title1</h5>' not in rv.data
+
 
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
