@@ -5,6 +5,7 @@ from datetime import datetime
 from flask.ext.login import UserMixin, AnonymousUser, current_user
 from flask import abort, render_template
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
+from sqlalchemy import or_
 
 import math
 import hashlib
@@ -206,39 +207,103 @@ class User(db.Model, UserMixin):
         db.session.commit()
         return task
 
+    def personal_card(self):
+        card = PersonCard(self)
+        ts = TimeSlot.query.filter(or_(TimeSlot.user == self, TimeSlot.partner == self))
+        for m_ts in ts:
+            card.merge(m_ts)
+        return card
+
+    def review_data(self, last_monday, team_id):
+        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, Task.team == Team.query.get(team_id), or_(TimeSlot.user == self, TimeSlot.partner == self))
+        review_data = ReviewData()
+        for ts in time_slots:
+            review_data.merge_personal(self, ts)
+        return review_data
+
+
+class PersonCard(object):
+    def __init__(self, user):
+        self.user = user
+        self.fortune = 0
+        self.working_hours = 0
+        self.valuable_hours = 0
+        self.estimate = 0
+        self.paired_hours = 0
+        self.tasks = {}
+
+    def merge(self, ts):
+        if ts.task.id not in self.tasks:
+            self.tasks[ts.task.id] = ts.task
+            if ts.task.status == 'DONE':
+                self.fortune += ts.task.price
+                self.valuable_hours+=ts.consuming / 3600.0
+                if ts.user == self.user:
+                    self.estimate += ts.task.estimate
+        self.working_hours += ts.consuming / 3600.0
+        if ts.user == self.user and ts.partner:
+            self.paired_hours += ts.consuming / 3600.0
+        if ts.partner == self.user:
+            self.paired_hours += ts.consuming / 3600.0
+
+    def estimate_deviation(self):
+        if self.estimate < self.valuable_hours:
+            return'{0:0.2%}'.format(self.estimate / self.valuable_hours if self.valuable_hours > 0 else 0)
+        return'{0:0.2%}'.format(self.valuable_hours / self.estimate if self.estimate > 0 else 0)
+
+    def paired_ratio(self):
+        return'{0:0.2%}'.format(self.paired_hours / self.working_hours if self.working_hours > 0 else 0)
+
 
 class ReviewData(object):
     def __init__(self):
         self.price = 0
         self.done_price = 0
         self.estimate = 0
-        self.actual = 0
+        self.working_hours=0
+        self.valuable_hours = 0
         self.paired_time = 0
-        self.tasks={}
+        self.tasks = {}
 
     def merge(self, ts):
         if ts.task.id not in self.tasks:
             self.price += ts.task.price
-            self.estimate += ts.task.estimate
+            if ts.task.status == 'DONE':
+                self.estimate += ts.task.estimate
+                self.done_price += ts.task.price
+                self.valuable_hours += ts.consuming / 3600.0
+            self.tasks[ts.task.id] = ts.task
+        self.working_hours += ts.consuming / 3600.0
+        if ts.partner:
+            self.paired_time += ts.consuming / 3600.0
+
+    def merge_personal(self, person, ts):
+        if ts.task.id not in self.tasks:
+            self.price += ts.task.price
+            if ts.user == person:
+                self.estimate += ts.task.estimate
             if ts.task.status == 'DONE':
                 self.done_price += ts.task.price
+                self.valuable_hours += ts.consuming / 3600.0
             self.tasks[ts.task.id] = ts.task
-        self.actual += ts.consuming / 3600
-        if ts.partner:
-            self.paired_time += ts.consuming / 3600
+            self.working_hours+=ts.consuming / 3600.0
+        if ts.user == person and ts.partner:
+            self.paired_time += ts.consuming / 3600.0
+        if ts.partner == person:
+            self.paired_time += ts.consuming / 3600.0
 
     def price_ratio(self):
-        ratio=[['$1',0],['$2',0],['$5',0],['$10',0]]
-        for tid,task in self.tasks.iteritems():
-            if task.status=='DONE':
-                if task.price==1:
-                    ratio[0][1]+=1;
-                if task.price==2:
-                    ratio[1][1]+=1;
-                if task.price==5:
-                    ratio[2][1]+=1;
-                if task.price==10:
-                    ratio[3][1]+=1;
+        ratio = [['$1', 0], ['$2', 0], ['$5', 0], ['$10', 0]]
+        for tid, task in self.tasks.iteritems():
+            if task.status == 'DONE':
+                if task.price == 1:
+                    ratio[0][1] += 1
+                if task.price == 2:
+                    ratio[1][1] += 1
+                if task.price == 5:
+                    ratio[2][1] += 1
+                if task.price == 10:
+                    ratio[3][1] += 1
         return str(ratio)
 
 

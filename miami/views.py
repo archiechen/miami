@@ -72,20 +72,21 @@ def planning():
 @app.route('/tasks/page/<page>', methods=['GET'])
 @login_required
 def load_tasks_page(page):
-    team_conditions = [Task.team==None]
+    team_conditions = [Task.team is None]
     for team in current_user.teams:
         team_conditions.append(Task.team == team)
 
     tasks = Task.query.filter(or_(*team_conditions)).order_by(Task.created_time.desc()).paginate(int(page), per_page=15, error_out=True)
     return render_template('tasks.html', pagination=tasks, user=current_user)
-   
+
+
 @app.route('/tasks/<status>', methods=['GET'])
 @login_required
 def load_tasks(status):
-    team_conditions = [Task.team==None]
+    team_conditions = [Task.team is None]
     for team in current_user.teams:
         team_conditions.append(Task.team == team)
-    
+
     tasks = Task.query.filter(Task.status == status, or_(*team_conditions))
     return render_template('task_card.html', tasks=tasks, user=current_user)
 
@@ -166,20 +167,17 @@ def leave_team(team_id):
 @app.route('/review', methods=['GET'])
 @login_required
 def review():
-    time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > get_last_monday(),Task.team==current_user.teams[0])
+    time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > get_last_monday(), Task.team == current_user.teams[0])
     review_data = ReviewData()
     for ts in time_slots:
         review_data.merge(ts)
 
     return render_template('review.html', review_data=review_data, user=current_user)
 
+
 @app.route('/review/<team_id>/<member_id>', methods=['GET'])
 @login_required
-def review_member(team_id,member_id):
+def review_member(team_id, member_id):
     member = User.query.get(member_id)
-    time_slots = TimeSlot.query.join(TimeSlot.task).filter(or_(TimeSlot.user==member,TimeSlot.partner==member),TimeSlot.start_time > get_last_monday(),Task.team==Team.query.get(team_id))
-    review_data = ReviewData()
-    for ts in time_slots:
-        review_data.merge(ts)
 
-    return render_template('review_personal.html', review_data=review_data, user=member)
+    return render_template('review_personal.html', review_data=member.review_data(get_last_monday(),team_id), personal_card=member.personal_card())

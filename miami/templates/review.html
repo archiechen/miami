@@ -79,7 +79,7 @@
                 }
         });
       $.jqplot('estimate_chart', 
-            [[{{review_data.actual}},{{review_data.estimate}}]],{
+            [[{{review_data.valuable_hours}},{{review_data.estimate}}]],{
                 title:'估算 vs 实际',
                 seriesDefaults:{
                     renderer:$.jqplot.BarRenderer,
@@ -97,7 +97,7 @@
                 }
         });
         $.jqplot ('paired_chart', [ [
-            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.actual - review_data.paired_time}}]]] , 
+            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.working_hours - review_data.paired_time}}]]] , 
             { 
               title:'结对率',
               seriesDefaults: {

@@ -1,7 +1,37 @@
 <div class="ui-charts">
     <ul class="ui-helper-reset">
         <li>
-            <img src="{{ user.email | gravatar(size=80, rating='x') }}"></img>
+            <div class="span4 well well-small">
+                <div class="row">
+                    <div class="span1">
+                        <a href="#" class="thumbnail">
+                            <img src="{{ personal_card.user.email | gravatar(size=80, rating='x') }}" alt=""></a>
+                    </div>
+                    <div class="span3">
+                        <p>{{personal_card.user.teams[0].name}}</p>
+                        <p> <strong>{{personal_card.user.name}}</strong>
+                        </p>
+                        <span class=" badge badge-warning">财富 ${{personal_card.fortune}}</span>
+                        <span class=" badge badge-info">
+                            总工时 {{personal_card.working_hours+personal_card.paired_hours}} Hours
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="span4">
+                        <strong>估算准确度</strong>
+                        <span class="pull-right">{{personal_card.estimate_deviation()}}</span>
+                        <div class="progress progress-success active">
+                            <div class="bar" style="width: {{personal_card.estimate_deviation()}};"></div>
+                        </div>
+                        <strong>结对比例</strong>
+                        <span class="pull-right">{{personal_card.paired_ratio()}}</span>
+                        <div class="progress progress-info active">
+                            <div class="bar" style="width: {{personal_card.paired_ratio()}};"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </li>
         <li>
             <div id="price_chart_personal" class="jqplot-target" style="width:360px; height:200px;"></div>
@@ -41,7 +71,7 @@
                 }
         });
       $.jqplot('estimate_chart_personal', 
-            [[{{review_data.actual}},{{review_data.estimate}}]],{
+            [[{{review_data.valuable_hours}},{{review_data.estimate}}]],{
                 title:'估算 vs 实际',
                 seriesDefaults:{
                     renderer:$.jqplot.BarRenderer,
@@ -59,7 +89,7 @@
                 }
         });
         $.jqplot ('paired_chart_personal', [ [
-            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.actual - review_data.paired_time}}]]] , 
+            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.working_hours - review_data.paired_time}}]]] , 
             { 
               title:'结对率',
               seriesDefaults: {
