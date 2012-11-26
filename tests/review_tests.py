@@ -34,6 +34,10 @@ class ReviewTest(BaseTestCase):
         self.assertEquals(200, rv.status_code)
 
     def test_review_personal(self):
-        rv = self.app.get('/review/1/1')
+        rv = self.app.get('/review/1/member/1')
+        self.assertEquals(200, rv.status_code)
+
+    def test_review_tasks(self):
+        rv = self.app.get('/review/1/tasks')
         self.assertEquals(200, rv.status_code)
 

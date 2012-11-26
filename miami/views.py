@@ -177,9 +177,15 @@ def review(team_id):
     return render_template('review.html', review_data=team.review_data(get_last_monday()), user=current_user)
 
 
-@app.route('/review/<team_id>/<member_id>', methods=['GET'])
+@app.route('/review/<team_id>/member/<member_id>', methods=['GET'])
 @login_required
 def review_member(team_id, member_id):
     member = User.query.get(member_id)
 
     return render_template('review_personal.html', review_data=member.review_data(get_last_monday(), team_id), personal_card=member.personal_card())
+
+@app.route('/review/<team_id>/tasks', methods=['GET'])
+@login_required
+def review_tasks(team_id):
+    team = Team.query.get(team_id)
+    return render_template('review_tasks.html', tasks=team.review_tasks(get_last_monday()), user=current_user)
