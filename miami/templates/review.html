@@ -54,7 +54,7 @@
       $('a[data-toggle="tab"]').on('shown', function (e) {
             $.ajax({
                 type: 'GET',
-                url: '/review/1/'+e.target.id,
+                url: '/review/{{user.teams[0].id}}/'+e.target.id,
                 success: function(data){
                     $('#personal').children().remove();
                     $('#personal').append(data); 
