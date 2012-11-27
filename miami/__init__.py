@@ -9,7 +9,7 @@ from flask.ext.login import LoginManager, UserMixin, AnonymousUser, login_user, 
 
 app = Flask(__name__)
 app.config.from_object('miami.default_config')
-app.config["DEBUG"] = False
+app.config["DEBUG"] = True
 
 # Dev run mode
 if os.getenv('MIAMI_ENV') == 'dev':
