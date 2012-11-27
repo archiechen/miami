@@ -133,7 +133,8 @@ class MiamiTest(unittest.TestCase):
         assert '<h5>title1</h5>' in rv.data
         assert '<p class="text-warning">$0</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Mike"></img>' in rv.data
+        assert '<div style="float:right;background-color:#;height:20px;width:20px;margin-top: 1px" title=""></div>' in rv.data
+        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Mike">' in rv.data
 
         task = Task.query.get(1)
         self.assertEquals('PROGRESS', task.status)
@@ -203,11 +204,13 @@ class MiamiTest(unittest.TestCase):
         rv = self.app.put('/tasks/READY/1')
         self.assertEquals(400, rv.status_code)
 
+        print rv.data
+
         assert '<h3 id="myModalLabel">Pricing</h3>' in rv.data
         assert '<h4>title</h4>' in rv.data
         assert '<p>detail</p>' in rv.data
         assert '<div id="btn-price" class="btn-group pull-right">' in rv.data
-        assert '<button class="btn btn-warning" value="10">$10</button>' in rv.data
+        assert '<button class="btn btn-danger" value="10">$10</button>' in rv.data
 
     def test_new_to_ready_with_price(self):
         create_entity(Task('title', 'detail', price=20))

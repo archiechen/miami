@@ -1,7 +1,7 @@
 import os
 os.environ['MIAMI_ENV'] = 'dev'
 import miami
-from miami.models import User, Team, Task, TimeSlot
+from miami.models import User, Team, Task, TimeSlot, Burning
 from miami import db
 from datetime import timedelta
 
@@ -16,7 +16,7 @@ db.session.commit()
 task = Task('title1', 'detail', status='DONE', price=1, estimate=4, team=Team.query.get(1), start_time=miami.views.get_last_monday().replace(hour=10))
 ts = TimeSlot(miami.views.get_last_monday().replace(hour=10), 7200, User.query.get(1))
 task.time_slots.append(ts)
-task.time_slots.append(TimeSlot(miami.views.get_last_monday().replace(hour=14), 7200, User.query.get(1),partner=User.query.get(2)))
+task.time_slots.append(TimeSlot(miami.views.get_last_monday().replace(hour=14), 7200, User.query.get(1), partner=User.query.get(2)))
 db.session.add(task)
 db.session.commit()
 
@@ -46,4 +46,16 @@ task = Task('title5', 'detail5', status='DONE', price=2, estimate=4, team=Team.q
 ts = TimeSlot((miami.views.get_last_monday() - timedelta(days=5)).replace(hour=14), 3600, User.query.get(2))
 task.time_slots.append(ts)
 db.session.add(task)
+db.session.commit()
+
+burning=Burning(Team.query.get(1),miami.views.get_current_monday())
+burning.burning=1
+burning.remaining=10
+db.session.add(burning)
+db.session.commit()
+
+burning=Burning(Team.query.get(1),miami.views.get_current_monday()+timedelta(days=1))
+burning.burning=2
+burning.remaining=8
+db.session.add(burning)
 db.session.commit()

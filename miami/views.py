@@ -6,22 +6,28 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_
 import simplejson as json
 
-price_colors={1:'btn-success',2:'btn-info',5:'btn-primary',10:'btn-warning'}
+price_colors = {1: 'btn-success', 2: 'btn-info', 5: 'btn-primary', 10: 'btn-warning'}
+
 
 def now():
     return datetime.now()
 
 
 def get_last_monday():
-    ctime = now().replace(hour=0)
+    ctime = now().replace(hour=0,minute=0, second=0, microsecond=0)
     td = timedelta(days=(ctime.weekday() + 7))
     return ctime - td
 
 
 def get_current_monday():
-    ctime = now().replace(hour=0)
+    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
     td = timedelta(days=ctime.weekday())
     return ctime - td
+
+
+def get_next_monday():
+    td = timedelta(days=7)
+    return get_current_monday() + td
 
 
 @app.errorhandler(401)
@@ -184,3 +190,9 @@ def review_member(team_id, member_id):
     member = User.query.get(member_id)
 
     return render_template('review_personal.html', review_data=member.review_data(get_last_monday(), team_id), personal_card=member.personal_card())
+
+
+@app.route('/burning/<team_id>', methods=['GET'])
+@login_required
+def burning(team_id):
+    return render_template('burning.html',team = Team.query.get(team_id),user=current_user)

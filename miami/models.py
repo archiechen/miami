@@ -11,17 +11,36 @@ import math
 import hashlib
 import simplejson as json
 
-price_colors={1:'badge-success',2:'badge-info',5:'badge-warning',10:'badge-important'}
+price_colors = {1: 'badge-success', 2: 'badge-info', 5: 'badge-warning', 10: 'badge-important'}
+
 
 def now():
     return datetime.now()
+
+
+def get_last_monday():
+    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    td = timedelta(days=(ctime.weekday() + 7))
+    return ctime - td
+
+
+def get_current_monday():
+    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    td = timedelta(days=ctime.weekday())
+    return ctime - td
+
+
+def get_next_monday():
+    td = timedelta(days=7)
+    return get_current_monday() + td
+
 
 class NewState(object):
     def to(self, task, status):
         if task.status == 'NEW' and status == 'READY':
             if task.price == 0:
                 raise NotPricing()
-            task.start_time=now()
+            task.start_time = now()
         else:
             raise BadRequest
 
@@ -101,6 +120,31 @@ class Team(db.Model):
 
         return review_data
 
+    def burning_data(self):
+        burnings = Burning.query.filter(Burning.team == self, Burning.day >= get_current_monday(), Burning.day < get_next_monday())
+        return [[b.remaining for b in burnings],[b.burning for b in burnings]]
+
+
+class Burning(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    day = db.Column(db.DateTime)
+    burning = db.Column(db.Integer, default=0)
+    remaining = db.Column(db.Integer, default=0)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    team = db.relationship("Team")
+
+    def __init__(self, team, day):
+        self.team = team
+        self.day = day
+        self.burning = 0
+        self.remaining = 0
+
+    def add(self, task):
+        if task.status == 'DONE':
+            self.burning += task.price
+        else:
+            self.remaining += task.price
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -166,6 +210,7 @@ class Task(db.Model):
     def price_color(self):
         global price_colors
         return price_colors[self.price]
+
 
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)

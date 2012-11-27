@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+<div id="burning_chart" class="jqplot-target" style="width:800px; height:400px;"></div>
+<script type="text/javascript">
+  (function() {
+    "use strict";
+    $(document).ready(function() {
+      $('ul.nav > li').removeClass('active');
+      $("ul.nav > li:nth-child(4)").addClass('active');
+      
+      var line1={{team.burning_data()}};
+      var plot1 = $.jqplot('burning_chart', line1, {
+          title:'本周任务燃尽图',
+          stackSeries: false,
+          legend: { show:true, location: 'e',labels:['剩余','完成'] },
+          axes:{
+            xaxis:{
+              renderer:$.jqplot.CategoryAxisRenderer,
+              tickOptions:{
+                formatString:'%b&nbsp;%#d'
+              },
+              ticks:['Mon', 'Tue','Wed', 'Thu', 'Fri', 'Sat','Sun'] 
+            },
+            yaxis:{
+              rendererOptions: {
+                forceTickAt0: true
+                },
+              tickOptions:{
+                formatString:'$%.2f',
+                }
+            }
+          },
+          highlighter: {
+            show: true,
+            sizeAdjust: 7.5
+          },
+          cursor: {
+            show: false
+          }
+      });
+    });
+  }());
+  </script>
+{% endblock %}

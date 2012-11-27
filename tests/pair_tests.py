@@ -48,7 +48,7 @@ class PairTest(unittest.TestCase):
         assert '<h5>title2</h5>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Bob"></img>' in rv.data
+        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Bob">' in rv.data
         assert '<button class="btn btn-mini btn-leave" type="button">' in rv.data
 
         task = Task.query.get(1)
@@ -101,7 +101,7 @@ class PairTest(unittest.TestCase):
         assert '<h5>title2</h5>' in rv.data
         assert '<p class="text-warning">$10</p>' in rv.data
         assert '<p class="text-info">10H</p>' in rv.data
-        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Bob"></img>' in rv.data
+        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Bob">' in rv.data
         assert '<button class="btn btn-mini btn-join" type="button">' in rv.data
 
         task = Task.query.get(1)

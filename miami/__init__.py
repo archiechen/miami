@@ -29,7 +29,7 @@ elif os.getenv('MIAMI_ENV') == 'prod':
 
 db = SQLAlchemy(app)
 import miami.models
-from miami.models import Anonymous, Task, TimeSlot, User, Team
+from miami.models import Anonymous, Task, TimeSlot, User, Team, Burning
 
 login_manager = LoginManager()
 login_manager.anonymous_user = Anonymous
@@ -81,15 +81,21 @@ def now():
 
 
 def zeroing():
-    tasks = Task.query.filter_by(status='PROGRESS')
-
+    begin = now().replace(hour=0, minute=0, second=0, microsecond=0)
+    tasks = Task.query.filter(Task.start_time > begin, Task.start_time < now())
+    burnings = {}
     for task in tasks:
-        task.status = 'READY'
-        end_time = now()
-        if end_time.hour > 18:
-            end_time = end_time.replace(hour=18, minute=0, second=0)
-        task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner, partner=task.partner))
-        task.owner = None
-        task.partner = None
+        if task.status == 'PROGRESS':
+            task.status = 'READY'
+            end_time = now()
+            if end_time.hour > 18:
+                end_time = end_time.replace(hour=18, minute=0, second=0)
+            task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner, partner=task.partner))
+            task.owner = None
+            task.partner = None
+        burning = burnings.setdefault(task.team.id, Burning(task.team, begin))
+        burning.add(task)
 
+    for key, item in burnings.iteritems():
+        db.session.add(item)
     db.session.commit()
