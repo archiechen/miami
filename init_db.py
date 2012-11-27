@@ -16,6 +16,7 @@ db.session.commit()
 task = Task('title1', 'detail', status='DONE', price=1, estimate=4, team=Team.query.get(1), start_time=miami.views.get_last_monday().replace(hour=10))
 ts = TimeSlot(miami.views.get_last_monday().replace(hour=10), 7200, User.query.get(1))
 task.time_slots.append(ts)
+task.time_slots.append(TimeSlot(miami.views.get_last_monday().replace(hour=14), 7200, User.query.get(1),partner=User.query.get(2)))
 db.session.add(task)
 db.session.commit()
 

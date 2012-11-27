@@ -89,6 +89,20 @@
     width: 95px;
 }
 
+.accordion-heading span{
+    float: right;
+    margin-right: 10px;
+}
+
+.accordion-inner img{
+    float: left;
+    margin:2px;
+}
+
+.accordion-inner .progress{
+    margin:2px;
+}
+
 .form-signin {
     -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
     -webkit-border-radius: 5px;

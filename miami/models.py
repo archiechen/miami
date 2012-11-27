@@ -101,9 +101,6 @@ class Team(db.Model):
 
         return review_data
 
-    def review_tasks(self,last_monday):
-        return []
-
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
