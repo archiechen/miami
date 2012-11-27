@@ -48,6 +48,12 @@ task.time_slots.append(ts)
 db.session.add(task)
 db.session.commit()
 
+task = Task('title7', 'detail5', status='DONE', price=2, estimate=4, team=Team.query.get(1), start_time=miami.models.yestoday().replace(hour=14))
+ts = TimeSlot(task.start_time, 3600, User.query.get(2))
+task.time_slots.append(ts)
+db.session.add(task)
+db.session.commit()
+
 burning=Burning(Team.query.get(1),miami.views.get_current_monday())
 burning.burning=1
 burning.remaining=10

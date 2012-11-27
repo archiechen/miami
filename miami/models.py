@@ -17,6 +17,12 @@ price_colors = {1: 'badge-success', 2: 'badge-info', 5: 'badge-warning', 10: 'ba
 def now():
     return datetime.now()
 
+def yestoday():
+    return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
+
+def today():
+    return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+
 
 def get_last_monday():
     ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -124,6 +130,8 @@ class Team(db.Model):
         burnings = Burning.query.filter(Burning.team == self, Burning.day >= get_current_monday(), Burning.day < get_next_monday())
         return [[b.remaining for b in burnings],[b.burning for b in burnings]]
 
+    def daily_meeting_tasks(self):
+        return Task.query.filter(Task.team == self, Task.start_time >= yestoday(), Task.start_time < today())
 
 class Burning(db.Model):
     id = db.Column(db.Integer, primary_key=True)

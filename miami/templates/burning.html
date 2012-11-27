@@ -1,6 +1,8 @@
+{% from 'macros.html' import task_accordion %} 
 {% extends "layout.html" %}
 {% block body %}
-<div id="burning_chart" class="jqplot-target" style="width:800px; height:400px;"></div>
+<div id="burning_chart" class="jqplot-target" style="width:100%; height:400px;"></div>
+{{task_accordion(team.daily_meeting_tasks())}}
 <script type="text/javascript">
   (function() {
     "use strict";

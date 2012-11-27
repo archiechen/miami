@@ -1,3 +1,4 @@
+{% from 'macros.html' import task_accordion %} 
 {% extends "layout.html" %}
 {% block body %}
 <ul id="myTab" class="nav nav-tabs">
@@ -43,47 +44,7 @@
         </div>
     </div>
     <div class="tab-pane fade" id="tasks">
-        <div class="accordion" id="accordion2">
-            {% for tid,task in review_data.tasks.iteritems() %}
-            <div class="accordion-group">
-                <div class="accordion-heading">
-                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{task.id}}">
-                        {{task.title}}
-                        <span class="badge{% if task.status=='DONE' %} badge-success {%else%} badge-important {% endif %}">{{task.status}}</span>
-                        <span class="badge {{task.price_color()}}">${{task.price}}</span>
-                        <span class="badge badge-info">{{task.estimate}}Hours</span>
-                    </a>
-                </div>
-                <div id="collapse{{task.id}}" class="accordion-body collapse" style="height: 0px; ">
-                    <div class="accordion-inner">
-                        <div class="span8">
-                            <div class="row">
-                                <span class="label label-info">实际工时{{'{0:0.2g}'.format(task.consuming/3600.0)}}Hours</span>
-                            </div>
-                            {% for ts in task.time_slots %}
-                            <div class="row">
-                                <div class="span5">
-                                    {% if ts.partner %}
-                                    <img src="{{ ts.partner.email | gravatar(size=20, rating='x') }}">
-                                    {%else%}
-                                    <div style="float:left;height:20px;width:20px;margin: 2px"></div>
-                                    {% endif %}
-                                    <img src="{{ ts.user.email | gravatar(size=20, rating='x') }}">
-                                    <div class="progress {% if ts.partner %} progress-success {%else%}progress-warning{% endif %}">
-                                        <div class="bar" style="width: {{'{0:0.2%}'.format(ts.consuming/task.consuming)}}">{{'{0:0.2g}'.format(ts.consuming/3600.0)}}Hours</div>
-                                    </div>
-                                </div>
-                                <div class="span3">
-                                    <span class="label">Start@{{ts.start_time.strftime('%Y-%m-%d %H:%m')}}</span>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+        {{task_accordion(review_data.tasks.values())}}
     </div>
     <div class="tab-pane fade" id="personal"></div>
 </div>
