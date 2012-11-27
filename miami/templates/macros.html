@@ -42,4 +42,90 @@
             {% endfor %}
         </div>
 {%- endmacro %} 
+{% macro review_price_js(name,review_data) -%} 
+        $.jqplot('{{name}}', 
+            [[{{review_data.done_price}},{{review_data.price}}]],{
+                title:'完成率',
+                seriesDefaults:{
+                    renderer:$.jqplot.BarRenderer,
+                    pointLabels: { show: true ,formatString:'$%d',location: 'e', edgeTolerance: -15},
+                    shadowAngle: 135,
+                    rendererOptions: {
+                        barDirection: 'horizontal',
+                        varyBarColor: true
+                    }
+                },
+                axes: {
+                    yaxis: {
+                        renderer: $.jqplot.CategoryAxisRenderer,
+                        ticks: ['Done','Price']
+                    }
+                }
+        });
+{%- endmacro %} 
+{% macro review_estimate_js(name,review_data) -%} 
+        $.jqplot('{{name}}', 
+            [[{{review_data.valuable_hours}},{{review_data.estimate}}]],{
+                title:'估算 vs 实际',
+                seriesDefaults:{
+                    renderer:$.jqplot.BarRenderer,
+                    pointLabels: { show: true,formatString:'%dH',location: 'e', edgeTolerance: -15},
+                    shadowAngle: 135,
+                    rendererOptions: {
+                        barDirection: 'horizontal',
+                        varyBarColor: true
+                    }
+                },
+                axes: {
+                    yaxis: {
+                        renderer: $.jqplot.CategoryAxisRenderer,
+                        ticks: ['Actual','Estimate']
+                    }
+                }
+        });
+{%- endmacro %} 
+{% macro review_paired_js(name,review_data) -%} 
+        $.jqplot ('{{name}}', [ [
+            ['Paired', {{review_data.paired_time}}],['Single', {{review_data.working_hours - review_data.paired_time}}]]] , 
+            { 
+              title:'结对率',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+{%- endmacro %} 
+{% macro review_price_ratio_js(name,review_data) -%} 
+        $.jqplot ('{{name}}', [{{review_data.price_ratio()|safe}}] , 
+            { 
+              title:'价值分配',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+{%- endmacro %}
+{% macro review_valuable_ratio_js(name,review_data) -%} 
+        $.jqplot ('{{name}}', [ [
+            ['Valuable', {{review_data.valuable_hours}}],['Invalid', {{review_data.working_hours - review_data.valuable_hours}}]]]  , 
+            { 
+              title:'有效工时',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+{%- endmacro %} 
 </pre>
