@@ -50,7 +50,7 @@
                     <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{task.id}}">
                         {{task.title}}
                         <span class="badge{% if task.status=='DONE' %} badge-success {%else%} badge-important {% endif %}">{{task.status}}</span>
-                        <span class="badge badge-warning">${{task.price}}</span>
+                        <span class="badge {{task.price_color()}}">${{task.price}}</span>
                         <span class="badge badge-info">{{task.estimate}}Hours</span>
                     </a>
                 </div>

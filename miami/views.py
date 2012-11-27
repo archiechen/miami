@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import or_
 import simplejson as json
 
+price_colors={1:'btn-success',2:'btn-info',5:'btn-primary',10:'btn-warning'}
 
 def now():
     return datetime.now()
@@ -183,9 +184,3 @@ def review_member(team_id, member_id):
     member = User.query.get(member_id)
 
     return render_template('review_personal.html', review_data=member.review_data(get_last_monday(), team_id), personal_card=member.personal_card())
-
-@app.route('/review/<team_id>/tasks', methods=['GET'])
-@login_required
-def review_tasks(team_id):
-    team = Team.query.get(team_id)
-    return render_template('review_tasks.html', tasks=team.review_tasks(get_last_monday()), user=current_user)

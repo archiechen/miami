@@ -11,10 +11,10 @@ import math
 import hashlib
 import simplejson as json
 
+price_colors={1:'badge-success',2:'badge-info',5:'badge-warning',10:'badge-important'}
 
 def now():
     return datetime.now()
-
 
 class NewState(object):
     def to(self, task, status):
@@ -163,6 +163,9 @@ class Task(db.Model):
         else:
             raise BadRequest()
 
+    def price_color(self):
+        global price_colors
+        return price_colors[self.price]
 
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
