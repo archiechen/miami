@@ -8,20 +8,17 @@
     <div class="right">
         <div style="float:right;background-color:#{{task.team.color}};height:20px;width:20px;margin-top: 1px" title="{{task.team.name}}"></div>
         {% if task.owner %}
-        <img src="{{ task.owner.email | gravatar(size=20, rating='x') }}" title="{{task.owner.name}}"></img>
-    {% endif %}
+        <img src="{{ task.owner.email | gravatar(size=20, rating='x') }}" title="{{task.owner.name}}">
+        {% endif %}
    
     {% if task.partner %}
+        <img src="{{ task.partner.email | gravatar(size=20, rating='x') }}" title="{{task.partner.name}}">
         {% if task.partner.name ==  user.name%}
-    <button class="btn btn-mini btn-leave" type="button">离开
-    </button>
-    {%else%}
-    <img src="{{ task.partner.email | gravatar(size=20, rating='x') }}" title="{{task.partner.name}}"></img>
-{% endif %}
+        <button class="btn btn-mini btn-leave" type="button">离开</button>
+        {% endif %}
     {% elif task.status=='PROGRESS' and task.owner.name!=user.name%}
-<button class="btn btn-mini btn-join" type="button">加入
-</button>
-{% endif %}
-</div>
+        <button class="btn btn-mini btn-join" type="button">加入</button>
+        {% endif %}
+    </div>
 </li>
 {% endfor %}

@@ -13,19 +13,26 @@
     background-color: white;
     border: 1px solid #AAA;
     color: #222;
+    display: list-item;
     float: left;
     height: 84px;
     list-style: none;
     margin: 0.3em;
     padding: 0.2em;
     width: 164px;
-    display: list-item;
 }
 .ui-tasks li a { cursor: move; margin: 0 0 0.4em; }
 .ui-tasks li p { float: left; margin: 0 2px 2px; }
-.ui-tasks li .left { float: left; width: 40%; }
-.ui-tasks li .right button{ float: right;  margin-right: 4px}
-.ui-tasks h5 { margin: 0.1em 0.1em 0 0.1em;width: 100%;height: 60px; }
+.ui-tasks li .left { float: left; width: 38%; }
+.ui-tasks li .right button {
+    float: right;
+    margin-right: 2px;
+    padding-bottom: 0px;
+    padding-left: 1px;
+    padding-right: 1px;
+    padding-top: 0px;
+}
+.ui-tasks h5 { height: 60px; margin: 0.1em 0.1em 0 0.1em; width: 100%; }
 
 .ui-teams {
     border: 0px;
@@ -38,17 +45,17 @@
     background-color: white;
     border: 1px solid #AAA;
     color: #222;
+    display: list-item;
     float: left;
     height: 120px;
     list-style: none;
     margin: 0.3em;
     padding: 0.2em;
     width: 264px;
-    display: list-item;
 }
-.ui-teams h5 { margin: 0.1em 0.1em 0 0.1em;width: 100%;height: 25px; }
+.ui-teams h5 { height: 25px; margin: 0.1em 0.1em 0 0.1em; width: 100%; }
 
-.ui-teams .members { margin: 0.1em;width: 100%;height: 65px; }
+.ui-teams .members { height: 65px; margin: 0.1em; width: 100%; }
 
 .ui-charts {
     border: 0px;
@@ -61,47 +68,27 @@
     background-color: white;
     border: 1px solid #AAA;
     color: #222;
+    display: list-item;
     float: left;
     height: 200px;
     list-style: none;
     margin: 0.3em;
     padding: 0.2em;
     width: 360px;
-    display: list-item;
 }
-.ui-charts .progress {
-    height: 15px;
-    margin-bottom: 0px;
-}
-.ui-charts .well {
-    margin-left: 10px;
-    margin-top: 10px;
-}
-.ui-charts .span4 {
-    width: 320px;
-}
+.ui-charts .progress { height: 15px; margin-bottom: 0px; }
+.ui-charts .well { margin-left: 10px; margin-top: 10px; }
+.ui-charts .span4 { width: 320px; }
 
-.ui-charts .span3 {
-    width: 180px;
-}
+.ui-charts .span3 { width: 180px; }
 
-.ui-charts .span1 {
-    width: 95px;
-}
+.ui-charts .span1 { width: 95px; }
 
-.accordion-heading span{
-    float: right;
-    margin-right: 10px;
-}
+.accordion-heading span { float: right; margin-right: 10px; }
 
-.accordion-inner img{
-    float: left;
-    margin:2px;
-}
+.accordion-inner img { float: left; margin: 2px; }
 
-.accordion-inner .progress{
-    margin:2px;
-}
+.accordion-inner .progress { margin: 2px; }
 
 .form-signin {
     -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
