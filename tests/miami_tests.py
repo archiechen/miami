@@ -58,10 +58,12 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(403, rv.status_code)
 
     def test_create_task_invalid_status(self):
-        create_entity(User('Bob'))
-        self.logout()
-        self.login('Bob','')
         rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","status":"PROGRESS"}')
+
+        self.assertEquals(403, rv.status_code)
+
+    def test_create_task_ready_noprice(self):
+        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","status":"READY","price":0}')
 
         self.assertEquals(403, rv.status_code)
 

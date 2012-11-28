@@ -73,7 +73,10 @@ def create_task():
     status = jsons.get('status', 'NEW')
     if status not in ['NEW', 'READY']:
         abort(403)
-    task = Task(jsons.get('title'), jsons.get('detail'), status=status, team=current_user.teams[0])
+    price = jsons.get('price', 0)
+    if status == 'READY' and price == 0:
+        abort(403)
+    task = Task(jsons.get('title'), jsons.get('detail'), status=status, price=price, team=current_user.teams[0])
     db.session.add(task)
     db.session.commit()
     return jsonify(id=task.id), 201
