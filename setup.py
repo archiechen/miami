@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='miami',
-    version='0.1.2',
+    version='0.1.3',
     packages=['miami'],
     py_modules=['run_server'],
     entry_points={
