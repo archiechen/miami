@@ -128,7 +128,7 @@ class Team(db.Model):
 
     def burning_data(self):
         burnings = Burning.query.filter(Burning.team == self, Burning.day >= get_current_monday(), Burning.day < get_next_monday())
-        return [[b.remaining for b in burnings],[b.burning for b in burnings]]
+        return json.dumps([[b.remaining for b in burnings],[b.burning for b in burnings]])
 
     def daily_meeting_tasks(self):
         return Task.query.filter(Task.team == self, Task.start_time >= yestoday(), Task.start_time < today())
