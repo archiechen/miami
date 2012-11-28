@@ -1,3 +1,4 @@
+{% from 'macros_task.html' import task_form,task_form_js %}
 {% extends "layout.html" %}
 {% block body %}
 
@@ -5,9 +6,13 @@
 <div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
  
 </div>
+<!-- NEW Task Form -->
+{{task_form()}}
+
 <div id ="tasks">
   <div id="rtasks" class="ui-tasks col3">
-    <h4 class="page-header">Ready</h4>
+    <h4 class="page-header">Ready<a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
+</a></h4>
     <ul class="ui-helper-reset"></ul>
   </div>
   <div id="ptasks" class="ui-tasks col3">
@@ -49,6 +54,8 @@
       $rtasks.loadtasks();
       $ptasks.loadtasks();
       $dtasks.loadtasks();
+
+      {{task_form_js(status='READY',success_func="$rtasks.loadtasks();$('#taskForm').modal('hide');"|safe)}}
     });
   }());
   </script>

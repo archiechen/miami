@@ -14,7 +14,7 @@ def now():
 
 
 def get_last_monday():
-    ctime = now().replace(hour=0,minute=0, second=0, microsecond=0)
+    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
     td = timedelta(days=(ctime.weekday() + 7))
     return ctime - td
 
@@ -70,7 +70,10 @@ def create_task():
     if current_user.teams.count() == 0:
         abort(403)
     jsons = json.loads(request.data)
-    task = Task(jsons.get('title'), jsons.get('detail'), team=current_user.teams[0])
+    status = jsons.get('status', 'NEW')
+    if status not in ['NEW', 'READY']:
+        abort(403)
+    task = Task(jsons.get('title'), jsons.get('detail'), status=status, team=current_user.teams[0])
     db.session.add(task)
     db.session.commit()
     return jsonify(id=task.id), 201

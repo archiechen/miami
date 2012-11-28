@@ -1,23 +1,11 @@
+{% from 'macros_task.html' import task_form,task_form_js %} 
 {% extends "layout.html" %}
 {% block body %}
 <a href="#taskForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
 </a>
 
 <!-- NEW Task Form -->
-<div id="taskForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="taskFormLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="taskFormLabel">New Tasks</h3>
-  </div>
-  <div class="modal-body">
-    还可以输入<span id="charsLeft"></span>字
-    <input id="title" type="text" class="input-block-level" placeholder="title">
-    <textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>
-  </div>
-  <div class="modal-footer">
-    <button id="save" class="btn btn-primary">Save</button>
-  </div>
-</div>
+{{task_form()}}
 <div id="tasks_table">
   <table class="table .table-striped">
     <thead>
@@ -92,21 +80,7 @@
 
       $('.nav li').removeClass('active');
       $(".nav li:nth-child(2)").addClass('active');
-      $('#title').limit('33','#charsLeft');
-
-      $('#save').click(function(){
-        $('#save').attr('disabled','true');
-        $.ajax({
-          type: 'POST',
-          url: '/tasks',
-          data: '{"title":"'+$('#title').val()+'","detail":"'+$('#detail').val()+'"}',
-          success: function(data){
-            location=location; 
-          },
-          dataType: 'json',
-          contentType: 'application/json'
-        });
-      });
+      {{task_form_js()}}
     });
   }());
 </script>

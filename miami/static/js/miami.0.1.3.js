@@ -33,6 +33,7 @@
                     url: '/tasks/'+$status,
                     success: function(data) {
                         var $list = $("ul", $tasks).length ? $("ul", $tasks) : $("<ul class='ui-tasks-ul ui-helper-reset'/>").appendTo($tasks);
+                        $('ul',$tasks).children().remove();
                         $('ul',$tasks).append(data);
                         make_draggable($tasks);
                     },

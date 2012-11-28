@@ -1,14 +1,17 @@
+{% from 'macros_task.html' import task_form,task_form_js %} 
 {% extends "layout.html" %}
 {% block body %}
-
 <!-- NEW Task Form -->
-<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
- 
-</div>
-
+<div id="priceForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="priceFormLabel" aria-hidden="true"></div>
+<!-- NEW Task Form -->
+{{task_form()}}
 <div id ="tasks">
   <div id="ntasks" class="ui-tasks col2">
-    <h4 class="page-header">New</h4>
+    <h4 class="page-header">
+      New
+      <a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
+      </a>
+    </h4>
     <ul class="ui-helper-reset"></ul>
   </div>
   <div id="rtasks" class="ui-tasks col2">
@@ -26,24 +29,25 @@
         $rtasks = $('#rtasks');
       $.miami.wrapTasks($ntasks,'NEW',"#rtasks li",function(ui,data){});
       $.miami.wrapTasks($rtasks,'READY',"#ntasks li",function(ui,data){
-        $('#myModal').children().remove();
-        $('#myModal').append(data.responseText);  
+        $('#priceForm').children().remove();
+        $('#priceForm').append(data.responseText);  
         $('#btn-price button').click(function(){
           $.ajax({
             type: 'PUT',
             url: '/pricing/'+ui.draggable[0].id+'/'+$(this).attr('value'),
             success: function(data){
-              $('#myModal').modal('hide');
+              $('#priceForm').modal('hide');
               $.miami.moveto(ui.draggable,$rtasks,data);
             },
             dataType: 'html'
           });
         });
-        $('#myModal').modal('show');
+        $('#priceForm').modal('show');
       });
       $ntasks.loadtasks();
       $rtasks.loadtasks();
 
+      {{task_form_js(success_func="$ntasks.loadtasks();$('#taskForm').modal('hide');"|safe)}}
 
     });  
   }());
