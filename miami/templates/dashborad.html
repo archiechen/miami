@@ -7,22 +7,22 @@
  
 </div>
 <!-- NEW Task Form -->
-{{task_form(is_ready=True)}}
+{{task_form(status='READY',is_ready=True)}}
 
-<div id ="tasks">
-  <div id="rtasks" class="ui-tasks col3">
+<div id ="tasks" class="row">
+  <div id="rtasks" class="ui-tasks span4">
     <h4 class="page-header">Ready<a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
 </a></h4>
     <ul class="ui-helper-reset"></ul>
   </div>
-  <div id="ptasks" class="ui-tasks col3">
+  <div id="ptasks" class="ui-tasks span4">
     <h4 class="page-header">Progress</h4>
   </div>
-  <div id="dtasks" class="ui-tasks col3">
+  <div id="dtasks" class="ui-tasks span4">
     <h4 class="page-header">Done</h4>
   </div>
 </div>
-
+<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
 <script type="text/javascript">
   (function() {
     "use strict";
@@ -55,7 +55,6 @@
       $ptasks.loadtasks();
       $dtasks.loadtasks();
 
-      {{task_form_js(status='READY',success_func="$rtasks.loadtasks();$('#taskForm').modal('hide');"|safe)}}
     });
   }());
   </script>

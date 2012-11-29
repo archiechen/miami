@@ -1,5 +1,5 @@
 <<pre>
-{% macro task_form(is_ready=false) -%} 
+{% macro task_form(status='NEW',is_ready=false) -%} 
 <div id="taskForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="taskFormLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -8,19 +8,20 @@
   <div class="modal-body">
     还可以输入<span id="charsLeft"></span>字
     <input id="title" type="text" class="input-block-level" placeholder="title">
+    <input id="status" type="hidden" value="{{status}}">
     <textarea id = "detail"class="input-block-level" rows="10" placeholder="detail"></textarea>
   </div>
   <div class="modal-footer">
     {% if not is_ready %}
-    <div class="btn-group pull-right">
-        <button id="saveTask" class="btn-save btn btn-primary" style="margin-left: 4px">Save</button>
+    <div class="btn-group pull-right" style="margin-left: 4px">
+        <button id="saveTask" class="btn-save btn btn-primary" name="NEW">Save</button>
     </div>
     {% endif %}
-    <div id="taskform-price" class="btn-group pull-right">
-        <button class="btn btn-success" value="1">$1</button>
-        <button class="btn btn-info" value="2">$2</button>
-        <button class="btn btn-warning" value="5">$5</button>
-        <button class="btn btn-danger" value="10">$10</button>
+    <div id="taskform-price" class="btn-group pull-right" >
+        <button class="btn btn-success" value="1" name="NEW">$1</button>
+        <button class="btn btn-info" value="2" name="NEW">$2</button>
+        <button class="btn btn-warning" value="5" name="NEW">$5</button>
+        <button class="btn btn-danger" value="10" name="NEW">$10</button>
     </div>
   </div>
 </div>

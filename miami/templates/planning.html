@@ -6,7 +6,7 @@
 <!-- NEW Task Form -->
 {{task_form()}}
 <div id ="tasks">
-  <div id="ntasks" class="ui-tasks col2">
+  <div id="ntasks" class="ui-tasks span6">
     <h4 class="page-header">
       New
       <a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
@@ -14,11 +14,12 @@
     </h4>
     <ul class="ui-helper-reset"></ul>
   </div>
-  <div id="rtasks" class="ui-tasks col2">
+  <div id="rtasks" class="ui-tasks span6">
     <h4 class="page-header">Ready</h4>
   </div>
 </div>
 
+<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
 <script type="text/javascript">
   (function() {
     "use strict";
@@ -46,9 +47,6 @@
       });
       $ntasks.loadtasks();
       $rtasks.loadtasks();
-
-      {{task_form_js(success_func="$ntasks.loadtasks();$('#taskForm').modal('hide');"|safe)}}
-
     });  
   }());
 </script>

@@ -4,8 +4,7 @@
     margin-left: 10px;
     min-height: 46em;
 }
-.col2 { padding-left: 0.7em; width: 47%; }
-.col3 { padding-left: 0.2em; width: 31%; }
+
 .ui-tasks h4 { line-height: 16px; margin: 0 0 0.4em; }
 
 .ui-tasks.custom-state-active { background: #eee; }

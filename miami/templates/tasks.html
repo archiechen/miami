@@ -33,7 +33,7 @@
   <div class="pagination">
     <ul>
       {% if pagination.page==1 %}
-       <li class="active">
+      <li class="active">
         <a href="#">«</a>
       </li>
       {% else %}
@@ -59,29 +59,30 @@
       {% endif %}
   {%- endfor %}
   {% if pagination.page ==pagination.pages %}
-        <li class="active">
-          <a href="#">»</a>
-        </li>
-        {% else %}
-        <li>
-          <a href="{{ url_for(endpoint, page=pagination.page+1) }}">»</a>
-        </li>
-        {% endif %}
-      </ul>
-    </div>
-    {% endmacro %}
-{{render_pagination(pagination,'load_tasks_page')}}
+      <li class="active">
+        <a href="#">»</a>
+      </li>
+      {% else %}
+      <li>
+        <a href="{{ url_for(endpoint, page=pagination.page+1) }}">»</a>
+      </li>
+      {% endif %}
+    </ul>
   </div>
+  {% endmacro %}
+{{render_pagination(pagination,'load_tasks_page')}}
+</div>
 
-  <script type="text/javascript">
-    (function() {
-    "use strict";
-    $(document).ready(function() {
-
-      $('.nav li').removeClass('active');
-      $(".nav li:nth-child(2)").addClass('active');
-      {{task_form_js()}}
-    });
-  }());
+<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+<script type="text/javascript">
+(function() {
+  "use strict";
+  $(document).ready(function() {
+    $('.nav li').removeClass('active');
+    $(".nav li:nth-child(2)").addClass('active');
+  });
+}());
 </script>
-  {% endblock %}
+
+
+{% endblock %}
