@@ -80,6 +80,12 @@
   $(document).ready(function() {
     $('.nav li').removeClass('active');
     $(".nav li:nth-child(2)").addClass('active');
+
+    var taskFormView = new Miami.views.TaskForm({
+      success_handle: function() {
+          location = location;
+      }
+    });
   });
 }());
 </script>

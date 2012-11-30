@@ -47,6 +47,14 @@
       });
       $ntasks.loadtasks();
       $rtasks.loadtasks();
+
+      var taskFormView = new Miami.views.TaskForm({
+        success_handle: function() {
+          $ntasks.loadtasks();
+          $('#taskForm').modal('hide');
+          taskFormView.initialize();
+        }
+      });
     });  
   }());
 </script>

@@ -55,6 +55,13 @@
       $ptasks.loadtasks();
       $dtasks.loadtasks();
 
+      var taskFormView = new Miami.views.TaskForm({
+        success_handle: function() {
+          $rtasks.loadtasks();
+          $('#taskForm').modal('hide');
+          taskFormView.initialize();
+        }
+      });
     });
   }());
   </script>
