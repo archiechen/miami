@@ -20,6 +20,7 @@ class JobTest(unittest.TestCase):
         team.members.append(User('Mike'))
         create_entity(team)
         when(miami).now().thenReturn(datetime(2012, 11, 11, 23, 0, 0))
+        when(miami.views).now().thenReturn(datetime(2012, 11, 11, 23, 0, 0))
 
     def tearDown(self):
         unstub()
@@ -42,12 +43,13 @@ class JobTest(unittest.TestCase):
         task.owner = User.query.get(1)
         create_entity(task)
         create_entity(Task('title1', 'detail1', estimate=10, price=5, status='DONE', start_time=datetime(2012, 11, 11, 12, 0, 0), team=Team.query.get(1)))
+        create_entity(Task('title3', 'detail3', estimate=0, price=5, status='READY', start_time=datetime(2012, 11, 10, 12, 0, 0), team=Team.query.get(1)))
 
         miami.zeroing()
 
         burning = Burning.query.get(1)
         self.assertEquals(datetime(2012, 11, 11, 0, 0, 0),burning.day)
         self.assertEquals(5,burning.burning)
-        self.assertEquals(10,burning.remaining)
+        self.assertEquals(15,burning.remaining)
         self.assertEquals(Team.query.get(1),burning.team)
 

@@ -82,7 +82,7 @@ def now():
 
 def zeroing():
     begin = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    tasks = Task.query.filter(Task.start_time > begin, Task.start_time < now())
+    tasks = Task.query.filter(Task.start_time > miami.views.get_current_monday(), Task.start_time < now())
     burnings = {}
     for task in tasks:
         if task.status == 'PROGRESS':
