@@ -19,8 +19,7 @@ class JobTest(unittest.TestCase):
         team = Team('Log')
         team.members.append(User('Mike'))
         create_entity(team)
-        when(miami).now().thenReturn(datetime(2012, 11, 11, 23, 0, 0))
-        when(miami.views).now().thenReturn(datetime(2012, 11, 11, 23, 0, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 23, 0, 0))
 
     def tearDown(self):
         unstub()

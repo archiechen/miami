@@ -15,14 +15,14 @@ class TeamTest(BaseTestCase):
 
     def setUp(self):
         BaseTestCase.setUp(self)
-        when(miami.models).now().thenReturn(datetime(2012, 11, 5, 9, 0, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 5, 9, 0, 0))
         self.create_entity(Team('Log'))
-        burning = Burning(Team.query.get(1), miami.models.get_current_monday())
+        burning = Burning(Team.query.get(1), miami.utils.get_current_monday())
         burning.burning = 1
         burning.remaining = 10
         self.create_entity(burning)
 
-        burning = Burning(Team.query.get(1), miami.models.get_current_monday() + timedelta(days=1))
+        burning = Burning(Team.query.get(1), miami.utils.get_current_monday() + timedelta(days=1))
         burning.burning = 2
         burning.remaining = 8
         self.create_entity(burning)

@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 
-from miami import db
+from miami import db,utils
 from datetime import datetime, timedelta
 from flask.ext.login import UserMixin, AnonymousUser, current_user
 from flask import abort, render_template
@@ -14,39 +14,12 @@ import simplejson as json
 price_colors = {1: 'badge-success', 2: 'badge-info', 5: 'badge-warning', 10: 'badge-important'}
 
 
-def now():
-    return datetime.now()
-
-def yestoday():
-    return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
-
-def today():
-    return datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-
-def get_last_monday():
-    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    td = timedelta(days=(ctime.weekday() + 7))
-    return ctime - td
-
-
-def get_current_monday():
-    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    td = timedelta(days=ctime.weekday())
-    return ctime - td
-
-
-def get_next_monday():
-    td = timedelta(days=7)
-    return get_current_monday() + td
-
-
 class NewState(object):
     def to(self, task, status):
         if task.status == 'NEW' and status == 'READY':
             if task.price == 0:
                 raise NotPricing()
-            task.start_time = now()
+            task.start_time = utils.now()
         else:
             raise BadRequest
 
@@ -59,7 +32,7 @@ class ReadyState(object):
                 if task.estimate == 0:
                     raise NotEstimate()
 
-                task.start_time = datetime.now()
+                task.start_time = utils.now()
                 task.owner = current_user
         else:
             raise BadRequest
@@ -68,7 +41,7 @@ class ReadyState(object):
 class ProgressState(object):
     def to(self, task, status):
         if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-            task.time_slots.append(TimeSlot(task.start_time, (now() - task.start_time).total_seconds(), current_user, partner=task.partner))
+            task.time_slots.append(TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
             task.partner = None
             task.owner = None
         else:
@@ -127,11 +100,11 @@ class Team(db.Model):
         return review_data
 
     def burning_data(self):
-        burnings = Burning.query.filter(Burning.team == self, Burning.day >= get_current_monday(), Burning.day < get_next_monday())
+        burnings = Burning.query.filter(Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
         return json.dumps([[b.remaining for b in burnings],[b.burning for b in burnings]])
 
     def daily_meeting_tasks(self):
-        return Task.query.filter(Task.team == self, Task.start_time >= yestoday(), Task.start_time < today())
+        return Task.query.filter(Task.team == self, Task.start_time >= utils.yestoday(), Task.start_time < utils.today())
 
 class Burning(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -200,7 +173,7 @@ class Task(db.Model):
         if self.status == 'READY':
             self.estimate = estimate
             self.status = 'PROGRESS'
-            self.start_time = now()
+            self.start_time = utils.now()
             self.owner = current_user
             db.session.commit()
         else:
@@ -210,7 +183,7 @@ class Task(db.Model):
         if self.status == 'NEW':
             self.price = price
             self.status = 'READY'
-            self.start_time = now()
+            self.start_time = utils.now()
             db.session.commit()
         else:
             raise BadRequest()
@@ -259,7 +232,7 @@ class User(db.Model, UserMixin):
         self.check_progress()
         task = Task.query.get_or_404(tid)
         task.partner = self
-        current_time = now()
+        current_time = utils.now()
         task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
         task.start_time = current_time
         db.session.commit()
@@ -268,7 +241,7 @@ class User(db.Model, UserMixin):
     def leave(self, tid):
         task = Task.query.get_or_404(tid)
         task.partner = None
-        current_time = now()
+        current_time = utils.now()
         task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=self))
         task.start_time = current_time
         db.session.commit()

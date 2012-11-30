@@ -1,5 +1,5 @@
 from flask import render_template, abort, flash, request, redirect, url_for, jsonify
-from miami import app, db
+from miami import app, db , utils
 from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
@@ -9,25 +9,7 @@ import simplejson as json
 price_colors = {1: 'btn-success', 2: 'btn-info', 5: 'btn-primary', 10: 'btn-warning'}
 
 
-def now():
-    return datetime.now()
 
-
-def get_last_monday():
-    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    td = timedelta(days=(ctime.weekday() + 7))
-    return ctime - td
-
-
-def get_current_monday():
-    ctime = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    td = timedelta(days=ctime.weekday())
-    return ctime - td
-
-
-def get_next_monday():
-    td = timedelta(days=7)
-    return get_current_monday() + td
 
 
 @app.errorhandler(401)
@@ -106,7 +88,7 @@ def load_tasks(status):
     for team in current_user.teams:
         team_conditions.append(Task.team == team)
     if status == 'DONE':
-        return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
+        return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
     return render_template('task_card.html', tasks=Task.query.filter(Task.status == status, or_(*team_conditions)), user=current_user)
 
 
@@ -187,7 +169,7 @@ def leave_team(team_id):
 @login_required
 def review(team_id):
     team = Team.query.get(team_id)
-    return render_template('review.html', review_data=team.review_data(get_last_monday()), user=current_user)
+    return render_template('review.html', review_data=team.review_data(utils.get_last_monday()), user=current_user)
 
 
 @app.route('/review/<team_id>/member/<member_id>', methods=['GET'])
@@ -195,7 +177,7 @@ def review(team_id):
 def review_member(team_id, member_id):
     member = User.query.get(member_id)
 
-    return render_template('review_personal.html', review_data=member.review_data(get_last_monday(), team_id), personal_card=member.personal_card())
+    return render_template('review_personal.html', review_data=member.review_data(utils.get_last_monday(), team_id), personal_card=member.personal_card())
 
 
 @app.route('/burning/<team_id>', methods=['GET'])

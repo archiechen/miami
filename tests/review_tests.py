@@ -15,7 +15,7 @@ from mockito import when
 class ReviewTest(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
-        when(miami.views).now().thenReturn(datetime(2012, 11, 5, 9, 0, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 5, 9, 0, 0))
         team = Team('Miami')
         team.members.append(User('Bob'))
         team.members.append(User.query.get(1))

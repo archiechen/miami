@@ -5,6 +5,7 @@ from flask.ext.gravatar import Gravatar
 from datetime import datetime
 import math
 import os
+from miami import utils
 from flask.ext.login import LoginManager, UserMixin, AnonymousUser, login_user, logout_user, login_required, current_user
 
 app = Flask(__name__)
@@ -76,18 +77,14 @@ def init_db():
         db.create_all()
 
 
-def now():
-    return datetime.now()
-
-
 def zeroing():
-    begin = now().replace(hour=0, minute=0, second=0, microsecond=0)
-    tasks = Task.query.filter(Task.start_time > miami.views.get_current_monday(), Task.start_time < now())
+    begin = utils.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    tasks = Task.query.filter(Task.start_time > utils.get_current_monday(), Task.start_time < utils.now())
     burnings = {}
     for task in tasks:
         if task.status == 'PROGRESS':
             task.status = 'READY'
-            end_time = now()
+            end_time = utils.now()
             if end_time.hour > 18:
                 end_time = end_time.replace(hour=18, minute=0, second=0)
             task.time_slots.append(TimeSlot(task.start_time, (end_time - task.start_time).total_seconds(), task.owner, partner=task.partner))

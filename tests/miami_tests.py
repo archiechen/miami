@@ -23,8 +23,7 @@ class MiamiTest(unittest.TestCase):
         team = Team('Log')
         team.members.append(User('Mike'))
         create_entity(team)
-        when(miami.models).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
-        when(miami.views).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
     def tearDown(self):
@@ -88,7 +87,7 @@ class MiamiTest(unittest.TestCase):
 
     def test_load_task_done(self):
         create_entity(Task('title2', 'detail2', status='DONE', price=10 ,team = Team.query.get(1)))
-        create_entity(Task('title1', 'detail1', status='DONE', price=10 ,start_time=miami.views.now()-timedelta(days=7),team = Team.query.get(1)))
+        create_entity(Task('title1', 'detail1', status='DONE', price=10 ,start_time=miami.utils.now()-timedelta(days=7),team = Team.query.get(1)))
         rv = self.app.get('/tasks/DONE')
 
         self.assertEquals(200, rv.status_code)
