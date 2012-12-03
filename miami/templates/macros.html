@@ -128,4 +128,19 @@
             }
         );
 {%- endmacro %} 
+{% macro review_unplanned_ratio_js(name,review_data) -%} 
+        $.jqplot ('{{name}}', [ [
+            ['Planned', {{review_data.planneds()}}],['Unplanned', {{review_data.unplanneds}}]]]  , 
+            { 
+              title:'计划 vs 变化',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+{%- endmacro %} 
 </pre>

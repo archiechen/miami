@@ -229,6 +229,7 @@ class MiamiTest(unittest.TestCase):
 
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
+        self.assertEquals(miami.utils.now(),task.ready_time)
 
     def test_owner_one_task(self):
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))

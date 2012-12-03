@@ -19,12 +19,12 @@ class ReviewTest(BaseTestCase):
         team = Team('Miami')
         team.members.append(User('Bob'))
         team.members.append(User.query.get(1))
-        task = Task('title1', 'detail', status='DONE', price=2, estimate=4, team=team)
+        task = Task('title1', 'detail', status='DONE', price=2, estimate=4, team=team, ready_time=datetime(2012, 11, 1, 10, 0, 0))
         ts = TimeSlot(datetime(2012, 11, 1, 10, 0, 0), 3600, User.query.get(1))
         task.time_slots.append(ts)
         self.create_entity(task)
-        task = Task('title2', 'detai2', status='NEW', price=2, estimate=4, team=team)
-        ts = TimeSlot(datetime(2012, 11, 2, 10, 0, 0), 3600, User.query.get(1),partner=User.query.get(2))
+        task = Task('title2', 'detai2', status='NEW', price=2, estimate=4, team=team, ready_time=datetime(2012, 11, 1, 10, 0, 0))
+        ts = TimeSlot(datetime(2012, 11, 2, 10, 0, 0), 3600, User.query.get(1), partner=User.query.get(2))
         task.time_slots.append(ts)
         self.create_entity(task)
 
@@ -41,4 +41,3 @@ class ReviewTest(BaseTestCase):
     def test_review_personal(self):
         rv = self.app.get('/review/1/member/1')
         self.assertEquals(200, rv.status_code)
-

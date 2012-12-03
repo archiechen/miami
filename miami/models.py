@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 
-from miami import db,utils
+from miami import db, utils
 from datetime import datetime, timedelta
 from flask.ext.login import UserMixin, AnonymousUser, current_user
 from flask import abort, render_template
@@ -20,6 +20,7 @@ class NewState(object):
             if task.price == 0:
                 raise NotPricing()
             task.start_time = utils.now()
+            task.ready_time = utils.now()
         else:
             raise BadRequest
 
@@ -100,10 +101,11 @@ class Team(db.Model):
 
     def burning_data(self):
         burnings = Burning.query.filter(Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
-        return json.dumps([[b.remaining for b in burnings],[b.burning for b in burnings]])
+        return json.dumps([[b.remaining for b in burnings], [b.burning for b in burnings]])
 
     def daily_meeting_tasks(self):
         return Task.query.filter(Task.team == self, Task.start_time >= utils.yestoday(), Task.start_time < utils.today())
+
 
 class Burning(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -134,6 +136,7 @@ class Task(db.Model):
     price = db.Column(db.Integer, default=0)
     estimate = db.Column(db.Integer, default=0)
     created_time = db.Column(db.DateTime, default=datetime.now)
+    ready_time = db.Column(db.DateTime)
     start_time = db.Column(db.DateTime)
     time_slots = db.relationship('TimeSlot', backref='task',
                                  lazy='dynamic')
@@ -145,13 +148,14 @@ class Task(db.Model):
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     team = db.relationship("Team")
 
-    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(), team=None):
+    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(), ready_time=None, team=None):
         self.title = title
         self.detail = detail
         self.price = price
         self.estimate = estimate
         self.status = status
         self.start_time = start_time
+        self.ready_time = ready_time
         self.team = team
 
     def __getattr__(self, name):
@@ -312,6 +316,7 @@ class ReviewData(object):
         self.valuable_hours = 0
         self.actual_hours = 0
         self.paired_time = 0
+        self.unplanneds = 0
         self.tasks = {}
 
     def merge(self, ts):
@@ -320,10 +325,12 @@ class ReviewData(object):
             if ts.task.status == 'DONE':
                 self.estimate += ts.task.estimate
                 self.done_price += ts.task.price
+            if ts.task.ready_time and ts.task.ready_time > utils.get_last_tuesday():
+                self.unplanneds += 1
             self.tasks[ts.task.id] = ts.task
         if ts.task.status == 'DONE':
             self.valuable_hours += ts.consuming / 3600.0
-            self.actual_hours+=ts.consuming / 3600.0
+            self.actual_hours += ts.consuming / 3600.0
         self.working_hours += ts.consuming / 3600.0
         if ts.partner:
             self.paired_time += ts.consuming / 3600.0
@@ -332,6 +339,7 @@ class ReviewData(object):
         for rt in ready_tasks:
             if rt.id not in self.tasks:
                 self.price += rt.price
+                self.tasks[rt.id] = rt
 
     def merge_personal(self, person, ts):
         if ts.task.id not in self.tasks:
@@ -343,7 +351,7 @@ class ReviewData(object):
             self.tasks[ts.task.id] = ts.task
         if ts.task.status == 'DONE':
             if ts.user == person:
-                self.actual_hours+=ts.consuming / 3600.0
+                self.actual_hours += ts.consuming / 3600.0
             self.valuable_hours += ts.consuming / 3600.0
         self.working_hours += ts.consuming / 3600.0
         if ts.partner:
@@ -362,6 +370,9 @@ class ReviewData(object):
                 if task.price == 10:
                     ratio[3][1] += 1
         return str(ratio)
+
+    def planneds(self):
+        return len(self.tasks) - self.unplanneds
 
 
 class Anonymous(AnonymousUser):

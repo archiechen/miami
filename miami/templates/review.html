@@ -1,4 +1,4 @@
-{% from 'macros.html' import task_accordion,review_price_js,review_estimate_js,review_paired_js,review_price_ratio_js,review_valuable_ratio_js %} 
+{% from 'macros.html' import task_accordion,review_price_js,review_estimate_js,review_paired_js,review_price_ratio_js,review_valuable_ratio_js,review_unplanned_ratio_js %} 
 {% extends "layout.html" %}
 {% block body %}
 <ul id="myTab" class="nav nav-tabs">
@@ -40,6 +40,9 @@
                 <li>
                     <div id="valuable_ratio_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
                 </li>
+                <li>
+                    <div id="unplanned_ratio_chart" class="jqplot-target" style="width:360px; height:200px;"></div>
+                </li>
             </ul>
         </div>
     </div>
@@ -77,6 +80,7 @@
       {{review_paired_js('paired_chart',review_data)}}
       {{review_price_ratio_js('price_ratio_chart',review_data)}}
       {{review_valuable_ratio_js('valuable_ratio_chart',review_data)}}
+      {{review_unplanned_ratio_js('unplanned_ratio_chart',review_data)}}
         
     });  
   }());
