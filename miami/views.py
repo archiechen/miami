@@ -95,6 +95,8 @@ def load_tasks(status):
 @app.route('/estimate/<tid>/<estimate>', methods=['PUT'])
 @login_required
 def estimate(tid, estimate):
+    if estimate <= 0:
+        abort(403)
     task = Task.query.get_or_404(tid)
     task.estimating(estimate)
     return render_template('task_card.html', tasks=[task], user=current_user)
@@ -103,6 +105,8 @@ def estimate(tid, estimate):
 @app.route('/pricing/<tid>/<price>', methods=['PUT'])
 @login_required
 def pricing(tid, price):
+    if price<=0:
+        abort(403)
     task = Task.query.get_or_404(tid)
     task.pricing(price)
     return render_template('task_card.html', tasks=[task], user=current_user)
