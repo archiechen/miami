@@ -16,7 +16,9 @@ class TeamTest(BaseTestCase):
     def setUp(self):
         BaseTestCase.setUp(self)
         when(miami.utils).now().thenReturn(datetime(2012, 11, 5, 9, 0, 0))
-        self.create_entity(Team('Log'))
+        team = Team('Miami')
+        team.members.append(User.query.get(1))
+        self.create_entity(team)
         burning = Burning(Team.query.get(1), miami.utils.get_current_monday())
         burning.burning = 1
         burning.remaining = 10
@@ -29,9 +31,16 @@ class TeamTest(BaseTestCase):
         
     def test_burning(self):
 
+        rv = self.app.get('/burning')
+
+        self.assertEquals(200, rv.status_code)
+
+        assert 'var line1=[[10, 8], [1, 2]];' in rv.data
+
+    def test_burning_team(self):
+
         rv = self.app.get('/burning/1')
 
         self.assertEquals(200, rv.status_code)
-        print rv.data
 
         assert 'var line1=[[10, 8], [1, 2]];' in rv.data

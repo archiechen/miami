@@ -29,6 +29,11 @@ class ReviewTest(BaseTestCase):
         self.create_entity(task)
 
     def test_review(self):
+        rv = self.app.get('/review')
+
+        self.assertEquals(200, rv.status_code)
+
+    def test_review_team(self):
         rv = self.app.get('/review/1')
 
         self.assertEquals(200, rv.status_code)

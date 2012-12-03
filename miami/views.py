@@ -169,9 +169,14 @@ def leave_team(team_id):
     return render_template('team_card.html', teams=[team], user=current_user)
 
 
+@app.route('/review', methods=['GET'])
+@login_required
+def review():
+   return review_team(current_user.teams[0].id)
+
 @app.route('/review/<team_id>', methods=['GET'])
 @login_required
-def review(team_id):
+def review_team(team_id):
     team = Team.query.get(team_id)
     return render_template('review.html', review_data=team.review_data(utils.get_last_monday()), user=current_user)
 
@@ -183,8 +188,12 @@ def review_member(team_id, member_id):
 
     return render_template('review_personal.html', review_data=member.review_data(utils.get_last_monday(), team_id), personal_card=member.personal_card())
 
+@app.route('/burning', methods=['GET'])
+@login_required
+def burning():
+    return burning_team(current_user.teams[0].id)
 
 @app.route('/burning/<team_id>', methods=['GET'])
 @login_required
-def burning(team_id):
+def burning_team(team_id):
     return render_template('burning.html',team = Team.query.get(team_id),user=current_user)
