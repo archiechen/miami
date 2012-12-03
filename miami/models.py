@@ -96,7 +96,6 @@ class Team(db.Model):
         for ts in time_slots:
             review_data.merge(ts)
         review_data.merge_ready(Task.query.filter(Task.start_time > last_monday, Task.start_time < last_monday + timedelta(days=7), Task.status == 'READY', Task.team == self))
-
         return review_data
 
     def burning_data(self):
@@ -259,6 +258,7 @@ class User(db.Model, UserMixin):
         review_data = ReviewData()
         for ts in time_slots:
             review_data.merge_personal(self, ts)
+
         return review_data
 
     def team_id(self):
@@ -310,6 +310,7 @@ class ReviewData(object):
         self.estimate = 0
         self.working_hours = 0
         self.valuable_hours = 0
+        self.actual_hours = 0
         self.paired_time = 0
         self.tasks = {}
 
@@ -319,8 +320,10 @@ class ReviewData(object):
             if ts.task.status == 'DONE':
                 self.estimate += ts.task.estimate
                 self.done_price += ts.task.price
-                self.valuable_hours += ts.consuming / 3600.0
             self.tasks[ts.task.id] = ts.task
+        if ts.task.status == 'DONE':
+            self.valuable_hours += ts.consuming / 3600.0
+            self.actual_hours+=ts.consuming / 3600.0
         self.working_hours += ts.consuming / 3600.0
         if ts.partner:
             self.paired_time += ts.consuming / 3600.0
@@ -337,8 +340,11 @@ class ReviewData(object):
                 if ts.user == person:
                     self.estimate += ts.task.estimate
                 self.done_price += ts.task.price
-                self.valuable_hours += ts.consuming / 3600.0
             self.tasks[ts.task.id] = ts.task
+        if ts.task.status == 'DONE':
+            if ts.user == person:
+                self.actual_hours+=ts.consuming / 3600.0
+            self.valuable_hours += ts.consuming / 3600.0
         self.working_hours += ts.consuming / 3600.0
         if ts.partner:
             self.paired_time += ts.consuming / 3600.0

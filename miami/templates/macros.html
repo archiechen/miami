@@ -65,7 +65,7 @@
 {%- endmacro %} 
 {% macro review_estimate_js(name,review_data) -%} 
         $.jqplot('{{name}}', 
-            [[{{review_data.valuable_hours}},{{review_data.estimate}}]],{
+            [[{{review_data.actual_hours}},{{review_data.estimate}}]],{
                 title:'估算 vs 实际',
                 seriesDefaults:{
                     renderer:$.jqplot.BarRenderer,
