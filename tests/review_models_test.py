@@ -70,20 +70,27 @@ class ReviewModelsTest(unittest.TestCase):
         unstub()
 
     def test_review_data(self):
+        ##uncategories
+        task = Task('title2', 'detail2', status='DONE', price=2, estimate=4, team=Team.query.get(1), start_time=miami.utils.get_last_monday().replace(hour=12), ready_time=miami.utils.get_last_monday().replace(hour=12))
+        ts = TimeSlot(miami.utils.get_last_monday().replace(hour=12), 3600, User.query.get(1), partner=User.query.get(2))
+        task.time_slots.append(ts)
+        db.session.add(task)
+        db.session.commit()
+
         team = Team.query.get(1)
 
         rd = team.review_data(miami.utils.get_last_monday())
 
-        self.assertEquals(9, rd.price)
-        self.assertEquals(6, rd.done_price)
-        self.assertEquals(12, rd.estimate)
-        self.assertEquals(5, rd.working_hours)
-        self.assertEquals(4, rd.valuable_hours)
-        self.assertEquals(3, rd.paired_time)
+        self.assertEquals(11, rd.price)
+        self.assertEquals(8, rd.done_price)
+        self.assertEquals(16, rd.estimate)
+        self.assertEquals(6, rd.working_hours)
+        self.assertEquals(5, rd.valuable_hours)
+        self.assertEquals(4, rd.paired_time)
         self.assertEquals(1, rd.unplanneds)
-        self.assertEquals("[['$1', 0], ['$2', 3], ['$5', 0], ['$10', 0]]", rd.price_ratio())
-        self.assertEquals("[['Feature', 2], ['Bug', 1]]", rd.categories_ratio())
-        self.assertEquals("[['Feature', 4], ['Bug', 2]]", rd.categories_price_ratio())
+        self.assertEquals("[['$1', 0], ['$2', 4], ['$5', 0], ['$10', 0]]", rd.price_ratio())
+        self.assertEquals("[['Uncategorized', 1], ['Feature', 2], ['Bug', 1]]", rd.categories_ratio())
+        self.assertEquals("[['Uncategorized', 2], ['Feature', 4], ['Bug', 2]]", rd.categories_price_ratio())
 
     def test_personal_review_data(self):
         member = User.query.get(2)

@@ -373,7 +373,7 @@ class ReviewData(object):
             self.paired_time += ts.consuming / 3600.0
 
     def unit_price(self):
-        return'{0:0.2g}'.format(self.done_price*1.0/self.valuable_hours)
+        return'{0:0.2g}'.format(self.done_price * 1.0 / self.valuable_hours)
 
     def price_ratio(self):
         ratio = [['$1', 0], ['$2', 0], ['$5', 0], ['$10', 0]]
@@ -393,25 +393,31 @@ class ReviewData(object):
         ratio = {}
         for tid, task in self.tasks.iteritems():
             if task.status == 'DONE':
+                if not task.categories:
+                    ratio.setdefault('Uncategorized', 0)
+                    ratio['Uncategorized'] += 1
                 for category in task.categories:
                     category_name = str(category.name)
                     if category_name in ratio:
                         ratio[category_name] += 1
                     else:
                         ratio[category_name] = 1
-        return str([[k,v] for k,v in ratio.iteritems()])
+        return str([[k, v] for k, v in ratio.iteritems()])
 
     def categories_price_ratio(self):
         ratio = {}
         for tid, task in self.tasks.iteritems():
             if task.status == 'DONE':
+                if not task.categories:
+                    ratio.setdefault('Uncategorized', 0)
+                    ratio['Uncategorized'] += task.price
                 for category in task.categories:
                     category_name = str(category.name)
                     if category_name in ratio:
                         ratio[category_name] += task.price
                     else:
                         ratio[category_name] = task.price
-        return str([[k,v] for k,v in ratio.iteritems()])
+        return str([[k, v] for k, v in ratio.iteritems()])
 
     def planneds(self):
         return len(self.tasks) - self.unplanneds
