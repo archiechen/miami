@@ -372,6 +372,9 @@ class ReviewData(object):
         if ts.partner:
             self.paired_time += ts.consuming / 3600.0
 
+    def unit_price(self):
+        return'{0:0.2g}'.format(self.done_price*1.0/self.valuable_hours)
+
     def price_ratio(self):
         ratio = [['$1', 0], ['$2', 0], ['$5', 0], ['$10', 0]]
         for tid, task in self.tasks.iteritems():
