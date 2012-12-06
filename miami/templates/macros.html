@@ -113,6 +113,34 @@
             }
         );
 {%- endmacro %}
+{% macro review_categories_ratio_js(name,review_data) -%} 
+        $.jqplot ('{{name}}', [{{review_data.categories_ratio()|safe}}] , 
+            { 
+              title:'分类数量',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+{%- endmacro %}
+{% macro review_categories_price_ratio_js(name,review_data) -%} 
+        $.jqplot ('{{name}}', [{{review_data.categories_price_ratio()|safe}}] , 
+            { 
+              title:'分类价值',
+              seriesDefaults: {
+                renderer: jQuery.jqplot.PieRenderer, 
+                rendererOptions: {
+                  showDataLabels: true,
+                }
+              }, 
+              legend: { show:true, location: 'e' }
+            }
+        );
+{%- endmacro %}
 {% macro review_valuable_ratio_js(name,review_data) -%} 
         $.jqplot ('{{name}}', [ [
             ['Valuable', {{review_data.valuable_hours}}],['Invalid', {{review_data.working_hours - review_data.valuable_hours}}]]]  , 

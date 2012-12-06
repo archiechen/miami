@@ -64,16 +64,18 @@ members = db.Table('members',
                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
                    )
 categories = db.Table('categories',
-                   db.Column('task_id', db.Integer, db.ForeignKey('task.id')),
-                   db.Column('category_id', db.Integer, db.ForeignKey('category.id'))
-                   )
+                      db.Column('task_id', db.Integer, db.ForeignKey('task.id')),
+                      db.Column('category_id', db.Integer, db.ForeignKey('category.id'))
+                      )
+
 
 class Category(db.Model):
-    id = db.Column(db.Integer,primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
 
-    def __init__(self,name):
+    def __init__(self, name):
         self.name = name
+
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -159,7 +161,7 @@ class Task(db.Model):
     team = db.relationship("Team")
 
     categories = db.relationship('Category', secondary=categories,
-                          backref=db.backref('tasks', lazy='dynamic'))
+                                 backref=db.backref('tasks', lazy='dynamic'))
 
     def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(), ready_time=None, team=None):
         self.title = title
@@ -383,6 +385,30 @@ class ReviewData(object):
                 if task.price == 10:
                     ratio[3][1] += 1
         return str(ratio)
+
+    def categories_ratio(self):
+        ratio = {}
+        for tid, task in self.tasks.iteritems():
+            if task.status == 'DONE':
+                for category in task.categories:
+                    category_name = str(category.name)
+                    if category_name in ratio:
+                        ratio[category_name] += 1
+                    else:
+                        ratio[category_name] = 1
+        return str([[k,v] for k,v in ratio.iteritems()])
+
+    def categories_price_ratio(self):
+        ratio = {}
+        for tid, task in self.tasks.iteritems():
+            if task.status == 'DONE':
+                for category in task.categories:
+                    category_name = str(category.name)
+                    if category_name in ratio:
+                        ratio[category_name] += task.price
+                    else:
+                        ratio[category_name] = task.price
+        return str([[k,v] for k,v in ratio.iteritems()])
 
     def planneds(self):
         return len(self.tasks) - self.unplanneds
