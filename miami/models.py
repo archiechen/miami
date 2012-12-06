@@ -63,7 +63,17 @@ members = db.Table('members',
                    db.Column('team_id', db.Integer, db.ForeignKey('team.id')),
                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'))
                    )
+categories = db.Table('categories',
+                   db.Column('task_id', db.Integer, db.ForeignKey('task.id')),
+                   db.Column('category_id', db.Integer, db.ForeignKey('category.id'))
+                   )
 
+class Category(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(100))
+
+    def __init__(self,name):
+        self.name = name
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -147,6 +157,9 @@ class Task(db.Model):
 
     team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
     team = db.relationship("Team")
+
+    categories = db.relationship('Category', secondary=categories,
+                          backref=db.backref('tasks', lazy='dynamic'))
 
     def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(), ready_time=None, team=None):
         self.title = title

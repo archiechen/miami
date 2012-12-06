@@ -1,15 +1,12 @@
 from flask import render_template, abort, flash, request, redirect, url_for, jsonify
-from miami import app, db , utils
-from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData
+from miami import app, db, utils
+from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData, Category
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
 from sqlalchemy import or_
 import simplejson as json
 
 price_colors = {1: 'btn-success', 2: 'btn-info', 5: 'btn-primary', 10: 'btn-warning'}
-
-
-
 
 
 @app.errorhandler(401)
@@ -45,6 +42,10 @@ def logout():
 def index():
     return render_template('dashborad.html', user=current_user)
 
+@app.route('/categories', methods=['GET'])
+@login_required
+def load_categories():
+    return render_template('categories.html', categories=Category.query.all())
 
 @app.route('/tasks', methods=['POST'])
 @login_required
@@ -58,7 +59,14 @@ def create_task():
     price = jsons.get('price', 0)
     if status == 'READY' and price == 0:
         abort(403)
+
     task = Task(jsons.get('title'), jsons.get('detail'), status=status, price=price, team=current_user.teams[0])
+    for category_name in jsons.get('categories', '').split(','):
+        category = Category.query.filter(Category.name == category_name).first()
+        if category:
+            task.categories.append(category)
+        else:
+            task.categories.append(Category(category_name))
     db.session.add(task)
     db.session.commit()
     return jsonify(id=task.id), 201
@@ -105,7 +113,7 @@ def estimate(tid, estimate):
 @app.route('/pricing/<tid>/<price>', methods=['PUT'])
 @login_required
 def pricing(tid, price):
-    if price<=0:
+    if price <= 0:
         abort(403)
     task = Task.query.get_or_404(tid)
     task.pricing(price)
@@ -172,7 +180,8 @@ def leave_team(team_id):
 @app.route('/review', methods=['GET'])
 @login_required
 def review():
-   return review_team(current_user.teams[0].id)
+    return review_team(current_user.teams[0].id)
+
 
 @app.route('/review/<team_id>', methods=['GET'])
 @login_required
@@ -188,12 +197,14 @@ def review_member(team_id, member_id):
 
     return render_template('review_personal.html', review_data=member.review_data(utils.get_last_monday(), team_id), personal_card=member.personal_card())
 
+
 @app.route('/burning', methods=['GET'])
 @login_required
 def burning():
     return burning_team(current_user.teams[0].id)
 
+
 @app.route('/burning/<team_id>', methods=['GET'])
 @login_required
 def burning_team(team_id):
-    return render_template('burning.html',team = Team.query.get(team_id),user=current_user)
+    return render_template('burning.html', team=Team.query.get(team_id), user=current_user)

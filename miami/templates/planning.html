@@ -24,8 +24,8 @@
   (function() {
     "use strict";
     $(document).ready(function() {
-      $('li').removeClass('active');
-      $("ul li:nth-child(3)").addClass('active');
+      $('.nav li').removeClass('active');
+      $(".nav li:nth-child(3)").addClass('active');
       var $ntasks =$( "#ntasks" ),
         $rtasks = $('#rtasks');
       $.miami.wrapTasks($ntasks,'NEW',"#rtasks li",function(ui,data){});

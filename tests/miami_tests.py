@@ -5,9 +5,9 @@ import os
 os.environ['MIAMI_ENV'] = 'test'
 import miami
 import simplejson as json
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from mockito import when, unstub
-from miami.models import Task, TimeSlot, User, Team
+from miami.models import Task, TimeSlot, User, Team, Category
 
 
 def create_entity(entity):
@@ -23,6 +23,7 @@ class MiamiTest(unittest.TestCase):
         team = Team('Log')
         team.members.append(User('Mike'))
         create_entity(team)
+        create_entity(Category('BUG'))
         when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
@@ -46,12 +47,35 @@ class MiamiTest(unittest.TestCase):
 
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
-        self.assertEquals(Team.query.get(1),task.team)
+        self.assertEquals(Team.query.get(1), task.team)
+
+    def test_create_task_categories(self):
+        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","categories":"Feature,Athena"}')
+
+        self.assertEquals(201, rv.status_code)
+        self.assertEquals({"id": 1}, json.loads(rv.data))
+
+        task = miami.Task.query.get(1)
+        self.assertEquals('NEW', task.status)
+        self.assertEquals(Team.query.get(1), task.team)
+        self.assertEquals(2, len(task.categories))
+
+    def test_create_task_duplicate_categories(self):
+        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","categories":"BUG,Athena"}')
+
+        self.assertEquals(201, rv.status_code)
+        self.assertEquals({"id": 1}, json.loads(rv.data))
+
+        task = miami.Task.query.get(1)
+        self.assertEquals('NEW', task.status)
+        self.assertEquals(Team.query.get(1), task.team)
+        self.assertEquals(2, len(task.categories))
+        self.assertEquals(2, Category.query.count())
 
     def test_create_task_noteam(self):
         create_entity(User('Bob'))
         self.logout()
-        self.login('Bob','')
+        self.login('Bob', '')
         rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1"}')
 
         self.assertEquals(403, rv.status_code)
@@ -73,8 +97,8 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(401, rv.status_code)
 
     def test_load_task(self):
-        create_entity(Task('title2', 'detail2', status='READY', price=10 ,team = Team.query.get(1)))
-        create_entity(Task('title1', 'detail1', status='READY', price=10 ,team = Team('Refresh')))
+        create_entity(Task('title2', 'detail2', status='READY', price=10, team=Team.query.get(1)))
+        create_entity(Task('title1', 'detail1', status='READY', price=10, team=Team('Refresh')))
         rv = self.app.get('/tasks/READY')
 
         self.assertEquals(200, rv.status_code)
@@ -86,8 +110,8 @@ class MiamiTest(unittest.TestCase):
         assert '<h5>title1</h5>' not in rv.data
 
     def test_load_task_done(self):
-        create_entity(Task('title2', 'detail2', status='DONE', price=10 ,team = Team.query.get(1)))
-        create_entity(Task('title1', 'detail1', status='DONE', price=10 ,start_time=miami.utils.now()-timedelta(days=7),team = Team.query.get(1)))
+        create_entity(Task('title2', 'detail2', status='DONE', price=10, team=Team.query.get(1)))
+        create_entity(Task('title1', 'detail1', status='DONE', price=10, start_time=miami.utils.now() - timedelta(days=7), team=Team.query.get(1)))
         rv = self.app.get('/tasks/DONE')
 
         self.assertEquals(200, rv.status_code)
@@ -100,7 +124,6 @@ class MiamiTest(unittest.TestCase):
 
         assert '<li id="2" style="display: list-item;">' not in rv.data
         assert '<h5>title1</h5>' not in rv.data
-
 
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
@@ -229,7 +252,7 @@ class MiamiTest(unittest.TestCase):
 
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
-        self.assertEquals(miami.utils.now(),task.ready_time)
+        self.assertEquals(miami.utils.now(), task.ready_time)
 
     def test_owner_one_task(self):
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
