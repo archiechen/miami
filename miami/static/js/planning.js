@@ -1,90 +1,110 @@
-$(function(){
+$(function() {
 
-  var Task = Backbone.Model.extend({
-
-    defaults: function() {
-      return {
-        title: "empty todo...",
-        status: "NEW",
-        price : 0,
-        estimate:0
-      };
-    }
-  });
+  var Task = Backbone.Model.extend({});
 
   var TaskList = Backbone.Collection.extend({
-
+    initialize: function(models, options) {
+      this.status = options.status;
+    },
+    url: function() {
+      return '/api/task?q={"filters": [{"name": "status", "op": "eq", "val": "' + this.status + '"}]}';
+    },
     model: Task,
-    url:'/api/task',
     parse: function(response) {
-        return response.objects;
+      return response.objects;
     }
   });
 
-  var Tasks = new TaskList;
+  var TaskCard = Backbone.View.extend({
 
-  var TaskView = Backbone.View.extend({
+    tagName: "li",
+    className: "",
 
-    tagName:  "li",
+    template: _.template($('#taskcard-template').html()),
 
-    template: _.template($('#task-template').html()),
-
-    events: {
-      "click .join"   : "join",
-      "click .leave"  : "leave"
-    },
-
-    initialize: function() {
-      this.model.on('change', this.render, this);
-    },
+    initialize: function() {},
 
     render: function() {
       this.$el.html(this.template(this.model.toJSON()));
+      this.$el.attr('id', this.model.cid);
+      this.$el.draggable({
+        cancel: "a.ui-icon",
+        revert: "invalid",
+        containment: "document",
+        helper: "clone",
+        cursor: "move"
+      });
       return this;
-    },
-
-    join: function() {
-      alert('join');
-    },
-
-    leave: function() {
-      alert('leave');
     }
-
   });
 
-  var TaskSlot = Backbone.View.extend({
+  var newTaskList = new TaskList([], {
+    status: 'NEW'
+  });
 
-    el: $("#ntasks"),
+  var readyTaskList = new TaskList([], {
+    status: 'READY'
+  });
+
+  var TasksView = Backbone.View.extend({
 
     initialize: function() {
-
-      Tasks.on('add', this.addOne, this);
-      Tasks.on('reset', this.addAll, this);
-      Tasks.on('all', this.render, this);
-
-      
-      Tasks.fetch();
-    },  
-
-    render: function() {
-
-     
+      _.bindAll(this, 'addAll', 'addOne');
+      var that = this;
+      this.tasks_ul = this.$('#taskcard_list');
+      this.tasks = this.options.tasks;
+      this.from_task_lists = this.options.from_task_lists;
+      this.tasks.on('add', this.addOne, this);
+      this.tasks.on('reset', this.addAll, this);
+      this.tasks.fetch();
+      this.$el.droppable({
+        accept:this.options.accept,
+        activeClass: "ui-state-highlight",
+        drop: function(event, ui) {
+          var cid=$(ui.draggable).attr('id');
+          _.each(that.from_task_lists, function(from){
+            var draggableTask = from.getByCid(cid);
+            if(typeof draggableTask != 'undefined'){
+              ui.draggable.fadeOut(function(){
+                from.remove(draggableTask);
+                that.tasks.push(draggableTask);
+              });
+            }
+          });
+        }
+      });
     },
 
     addOne: function(task) {
-      var view = new TaskView({model: task});
-      this.$("#newTasks").append(view.render().el);
+      var view = new TaskCard({
+        model: task
+      });
+      view.render().$el.appendTo(this.tasks_ul).fadeIn();
     },
 
-    // Add all items in the **Todos** collection at once.
     addAll: function() {
-      Tasks.each(this.addOne);
+      this.tasks.each(this.addOne);
+    },
+
+    render: function() {
+      console.log('tasks view render.');
+      return this;
     }
 
   });
 
-  // Finally, we kick things off by creating the **App**.
-  var NewTaskSlot = new TaskSlot;
+  var newTasks = new TasksView({
+    el: $("#ntasks"),
+    from_task_lists:[readyTaskList],
+    accept:"#rtasks li",
+    tasks: newTaskList
+  });
+
+  var readyTasks = new TasksView({
+    el: $("#rtasks"),
+    from_task_lists:[newTaskList],
+    accepts:"#ntasks li",
+    tasks: readyTaskList
+  });
 
 });

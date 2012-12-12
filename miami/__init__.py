@@ -58,7 +58,7 @@ manager = flask.ext.restless.APIManager(app, flask_sqlalchemy_db=db)
 
 
 manager.create_api(Task, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
-                   authentication_function=auth_func, results_per_page=2)
+                   authentication_function=auth_func, results_per_page=15)
 manager.create_api(Team, methods=['GET', 'POST', 'DELETE'], authentication_required_for=['POST', 'DELETE'],
                    authentication_function=auth_func)
 import miami.views

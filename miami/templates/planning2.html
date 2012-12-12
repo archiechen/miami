@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+<div id ="borad" class="row">
+  <div id="ntasks" class="ui-tasks span6">
+    <h4 class="page-header">
+      New
+      <a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
+      </a>
+    </h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
+  </div>
+  <div id="rtasks" class="ui-tasks span6">
+    <h4 class="page-header">Ready</h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
+  </div>
+</div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/planning.js') }}"></script>
+<!-- Templates -->
+
+<script type="text/template" id="taskcard-template">
+    <h5><%=title%></h5>
+    <div class="left">
+        <p class="text-warning">$<%=price%></p>
+        <p class="text-info"><%=estimate%>H</p>
+    </div>
+  </script>
+{% endblock %}
