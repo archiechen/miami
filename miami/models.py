@@ -77,7 +77,7 @@ class Category(db.Model):
         self.name = name
 
     def toJSON(self):
-        return {'name':self.name}
+        return {'name': self.name}
 
 
 class Team(db.Model):
@@ -94,6 +94,9 @@ class Team(db.Model):
             return hashlib.sha224(self.name).hexdigest()[0:6]
 
         return db.Model.__getattr__(name)
+
+    def toJSON(self):
+        return {'name': self.name, 'color': self.color}
 
     def has_member(self, user):
         for member in self.members:
@@ -181,6 +184,9 @@ class Task(db.Model):
             return math.fsum([ts.consuming for ts in self.time_slots])
 
         return db.Model.__getattr__(name)
+
+    def toJSON(self):
+        return {'id':self.id,'title': self.title, 'detail': self.detail, 'price': self.price, 'estimate': self.estimate, 'team': self.team.toJSON()}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:

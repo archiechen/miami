@@ -34,7 +34,7 @@ $(function() {
       this.status = options.status;
     },
     url: function() {
-      return '/api/task?q={"filters": [{"name": "status", "op": "eq", "val": "' + this.status + '"}]}';
+      return '/tasks/' + this.status;
     },
     model: Task,
     parse: function(response) {
@@ -150,7 +150,7 @@ $(function() {
       newTask.url = '/tasks';
       newTask.save([], {
         success: function(model, response, options) {
-          that.options.tasks.add(model);
+          that.options.tasks.add(response.object);
           that.$el.modal('hide');
         }
       });

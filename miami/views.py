@@ -69,7 +69,7 @@ def create_task():
             task.categories.append(Category(category_name))
     db.session.add(task)
     db.session.commit()
-    return jsonify(id=task.id), 201
+    return jsonify(object=task.toJSON()), 201
 
 
 @app.route('/planning', methods=['GET'])
@@ -97,7 +97,8 @@ def load_tasks(status):
         team_conditions.append(Task.team == team)
     if status == 'DONE':
         return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
-    return render_template('task_card.html', tasks=Task.query.filter(Task.status == status, or_(*team_conditions)), user=current_user)
+    #return render_template('task_card.html', tasks=Task.query.filter(Task.status == status, or_(*team_conditions)), user=current_user)
+    return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.status == status, or_(*team_conditions))])
 
 
 @app.route('/estimate/<tid>/<estimate>', methods=['PUT'])
