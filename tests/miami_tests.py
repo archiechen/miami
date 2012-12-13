@@ -179,9 +179,7 @@ class MiamiTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
 
-        assert '<h5>title1</h5>' in rv.data
-        assert '<p class="text-warning">$10</p>' in rv.data
-        assert '<p class="text-info">0H</p>' in rv.data
+        self.assertEquals({"id": 1}, json.loads(rv.data))
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
 

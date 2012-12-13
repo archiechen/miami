@@ -72,9 +72,7 @@ class PairTest(unittest.TestCase):
         rv = self.app.put('/tasks/DONE/1')
 
         self.assertEquals(200, rv.status_code)
-        assert '<h5>title2</h5>' in rv.data
-        assert '<p class="text-warning">$10</p>' in rv.data
-        assert '<p class="text-info">10H</p>' in rv.data
+        self.assertEquals({"id": 1}, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
