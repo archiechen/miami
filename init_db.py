@@ -70,6 +70,16 @@ task.time_slots.append(ts)
 db.session.add(task)
 db.session.commit()
 
+task = Task('title8', 'detail4', status='NEW', team=Team.query.get(1))
+task.categories.append(Category.query.get(2))
+db.session.add(task)
+db.session.commit()
+
+task = Task('title9', 'detail4', status='NEW', team=Team.query.get(1))
+task.categories.append(Category.query.get(2))
+db.session.add(task)
+db.session.commit()
+
 burning = Burning(Team.query.get(1), miami.utils.get_current_monday())
 burning.burning = 1
 burning.remaining = 10

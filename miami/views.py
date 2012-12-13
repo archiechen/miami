@@ -117,7 +117,7 @@ def pricing(tid, price):
         abort(403)
     task = Task.query.get_or_404(tid)
     task.pricing(price)
-    return render_template('task_card.html', tasks=[task], user=current_user)
+    return jsonify(id=task.id)
 
 
 @app.route('/jointask/<tid>', methods=['PUT'])
@@ -140,7 +140,7 @@ def to_status(status, tid):
     task = Task.query.get_or_404(tid)
     try:
         task.changeTo(status)
-        return render_template('task_card.html', tasks=[task], user=current_user)
+        return jsonify(id=task.id)
     except NotPricing:
         return render_template('price.html', task=task), 400
     except NotEstimate:

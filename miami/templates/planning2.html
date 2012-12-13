@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
+<!-- Pricing Task Form -->
+<div id="priceForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="priceFormLabel" aria-hidden="true"></div>
 <div id ="borad" class="row">
   <div id="ntasks" class="ui-tasks span6">
     <h4 class="page-header">
@@ -24,5 +26,23 @@
         <p class="text-warning">$<%=price%></p>
         <p class="text-info"><%=estimate%>H</p>
     </div>
+  </script>
+<script type="text/template" id="pricingform-template">
+  <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Pricing</h3>
+  </div>
+  <div class="modal-body">
+      <blockquote>
+          <h4><%=title%></h4>
+          <p><%=detail%></p>
+      </blockquote>
+      <div id="btn-price" class="btn-group pull-right">
+          <button class="btn btn-success" value="1">$1</button>
+          <button class="btn btn-info" value="2">$2</button>
+          <button class="btn btn-warning" value="5">$5</button>
+          <button class="btn btn-danger" value="10">$10</button>
+      </div>
+  </div>
   </script>
 {% endblock %}

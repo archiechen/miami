@@ -22,7 +22,9 @@ $(function() {
 
     template: _.template($('#taskcard-template').html()),
 
-    initialize: function() {},
+    initialize: function() {
+      this.model.on('change', this.render, this);
+    },
 
     render: function() {
       this.$el.html(this.template(this.model.toJSON()));
@@ -35,6 +37,37 @@ $(function() {
         cursor: "move"
       });
       return this;
+    }
+  });
+
+  var PricingForm = Backbone.View.extend({
+    el: $('#priceForm'),
+    templ: _.template($('#pricingform-template').html()),
+    events: {
+      "click .btn": "pricing"
+    },
+    initialize: function() {
+      this.render();
+    },
+    render: function() {
+      this.$el.html(this.templ(this.model.toJSON()));
+      return this;
+    },
+    show: function() {
+      this.$el.modal('show');
+    },
+    pricing: function(event) {
+      this.model.url = function() {
+        return '/pricing/' + this.get('id') + '/' + this.get('price');
+      };
+      var that = this;
+      this.model.save('price', parseInt(event.target.value), {
+        success: function() {
+          that.$el.modal('hide');
+          that.remove();
+          that.options.price_success();
+        }
+      });
     }
   });
 
@@ -58,16 +91,39 @@ $(function() {
       this.tasks.on('reset', this.addAll, this);
       this.tasks.fetch();
       this.$el.droppable({
-        accept:this.options.accept,
+        accept: this.options.accept,
         activeClass: "ui-state-highlight",
         drop: function(event, ui) {
-          var cid=$(ui.draggable).attr('id');
-          _.each(that.from_task_lists, function(from){
+          var cid = $(ui.draggable).attr('id');
+          _.each(that.from_task_lists, function(from) {
             var draggableTask = from.getByCid(cid);
-            if(typeof draggableTask != 'undefined'){
-              ui.draggable.fadeOut(function(){
-                from.remove(draggableTask);
-                that.tasks.push(draggableTask);
+            if(typeof draggableTask != 'undefined') {
+              draggableTask.url = function() {
+                return "/tasks/" + this.get('status') + '/' + this.get('id');
+              }
+              var success_handle = function() {
+                  ui.draggable.fadeOut(function() {
+                    from.remove(draggableTask);
+                    that.tasks.push(draggableTask);
+                  });
+                }
+              draggableTask.save('status', that.tasks.status, {
+                success: success_handle,
+                error: function(model, response, options) {
+                  if(response.status == 400) {
+                    var pricingForm = new PricingForm({
+                      model: model,
+                      price_success: success_handle
+                    });
+                    pricingForm.show();
+                  }
+                  if(response.status == 401) {
+                    alert('unauthorization');
+                  }
+                  if(response.status == 403) {
+                    alert('已经有任务了');
+                  }
+                }
               });
             }
           });
@@ -95,15 +151,15 @@ $(function() {
 
   var newTasks = new TasksView({
     el: $("#ntasks"),
-    from_task_lists:[readyTaskList],
-    accept:"#rtasks li",
+    from_task_lists: [readyTaskList],
+    accept: "#rtasks li",
     tasks: newTaskList
   });
 
   var readyTasks = new TasksView({
     el: $("#rtasks"),
-    from_task_lists:[newTaskList],
-    accepts:"#ntasks li",
+    from_task_lists: [newTaskList],
+    accepts: "#ntasks li",
     tasks: readyTaskList
   });
 
