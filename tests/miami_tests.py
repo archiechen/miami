@@ -43,7 +43,12 @@ class MiamiTest(unittest.TestCase):
         rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1"}')
 
         self.assertEquals(201, rv.status_code)
-        self.assertEquals({"id": 1}, json.loads(rv.data))
+        self.assertEquals({'object': {'detail': 'detail1',
+                                      'estimate': 0,
+                                      'id': 1,
+                                      'price': 0,
+                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'title': 'title1'}}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
@@ -53,7 +58,12 @@ class MiamiTest(unittest.TestCase):
         rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","categories":"Feature,Athena"}')
 
         self.assertEquals(201, rv.status_code)
-        self.assertEquals({"id": 1}, json.loads(rv.data))
+        self.assertEquals({'object': {'detail': 'detail1',
+                                      'estimate': 0,
+                                      'id': 1,
+                                      'price': 0,
+                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'title': 'title1'}}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
@@ -64,7 +74,12 @@ class MiamiTest(unittest.TestCase):
         rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","categories":"BUG,Athena"}')
 
         self.assertEquals(201, rv.status_code)
-        self.assertEquals({"id": 1}, json.loads(rv.data))
+        self.assertEquals({'object': {'detail': 'detail1',
+                                      'estimate': 0,
+                                      'id': 1,
+                                      'price': 0,
+                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'title': 'title1'}}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
         self.assertEquals('NEW', task.status)
@@ -103,11 +118,21 @@ class MiamiTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
 
-        assert '<li id="1" style="display: list-item;">' in rv.data
-        assert '<h5>title2</h5>' in rv.data
-        assert '<p class="text-warning">$10</p>' in rv.data
-        assert '<p class="text-info">0H</p>' in rv.data
-        assert '<h5>title1</h5>' not in rv.data
+        self.assertEquals({
+                          "objects": [
+                              {
+                                  "title": "title2",
+                                  "price": 10,
+                                  "detail": "detail2",
+                                  "team": {
+                                      "color": "2a33d8",
+                                      "name": "Log"
+                                  },
+                                  "estimate": 0,
+                                  "id": 1
+                              }
+                          ]
+                          }, json.loads(rv.data))
 
     def test_load_task_done(self):
         create_entity(Task('title2', 'detail2', status='DONE', price=10, team=Team.query.get(1)))
