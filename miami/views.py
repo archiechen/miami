@@ -45,7 +45,7 @@ def index():
 @app.route('/categories', methods=['GET'])
 @login_required
 def load_categories():
-    return render_template('categories.html', categories=Category.query.all())
+    return jsonify(objects=[c.toJSON() for c in Category.query.all()])
 
 @app.route('/tasks', methods=['POST'])
 @login_required

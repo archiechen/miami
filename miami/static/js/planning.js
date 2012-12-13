@@ -1,6 +1,33 @@
 $(function() {
 
-  var Task = Backbone.Model.extend({});
+  var Task = Backbone.Model.extend({
+    defaults: function() {
+      return {
+        price:0,
+        estimate:0,
+        detail:''
+      };
+    },
+
+    initialize: function() {
+      if(!this.get("price")) {
+        this.set({
+          "price": this.defaults().price
+        });
+      }
+      if(!this.get("estimate")) {
+        this.set({
+          "estimate": this.defaults().estimate
+        });
+      }
+      if(!this.get("detail")) {
+        this.set({
+          "detail": this.defaults().detail
+        });
+      }
+    }
+  });
+  var Category = Backbone.Model.extend({});
 
   var TaskList = Backbone.Collection.extend({
     initialize: function(models, options) {
@@ -10,6 +37,16 @@ $(function() {
       return '/api/task?q={"filters": [{"name": "status", "op": "eq", "val": "' + this.status + '"}]}';
     },
     model: Task,
+    parse: function(response) {
+      return response.objects;
+    }
+  });
+
+  var CategoryList = Backbone.Collection.extend({
+    url: function() {
+      return '/categories';
+    },
+    model: Category,
     parse: function(response) {
       return response.objects;
     }
@@ -41,12 +78,16 @@ $(function() {
   });
 
   var PricingForm = Backbone.View.extend({
-    el: $('#priceForm'),
+    el: $('#modalForm'),
     templ: _.template($('#pricingform-template').html()),
     events: {
       "click .btn": "pricing"
     },
     initialize: function() {
+      var that = this;
+      this.$el.on('hidden', function() {
+        that.remove();
+      });
       this.render();
     },
     render: function() {
@@ -64,10 +105,86 @@ $(function() {
       this.model.save('price', parseInt(event.target.value), {
         success: function() {
           that.$el.modal('hide');
-          that.remove();
           that.options.price_success();
         }
       });
+    }
+  });
+
+  var TaskForm = Backbone.View.extend({
+    el: $('#modalForm'),
+    templ: _.template($('#taskform-template').html()),
+    category_templ: _.template('<li class="btn btn_category"><%=name%></li>'),
+    events: {
+      "click .btn_category": "selectCategory",
+      "click #saveTask": "saveTask",
+      "click .btn_pricing": "pricingTask"
+    },
+    initialize: function() {
+      _.bindAll(this, 'addAll');
+      var that = this;
+      this.$el.on('hidden', function() {
+        that.remove();
+      });
+      this.categories = new CategoryList;
+      this.categories.on('reset', this.addAll, this);
+      this.render();
+      this.categories.fetch({
+        success: function() {
+          that.show();
+        }
+      });
+    },
+    saveTask: function(task) {
+      var that = this;
+      var newTask 
+      if(task instanceof Task){
+        newTask = task;
+      } else{
+        newTask = new Task({
+          title: this.$('#title').val(),
+          categories: this.$('#tags').val(),
+          status: 'NEW'
+        });
+      }
+      newTask.url = '/tasks';
+      newTask.save([], {
+        success: function(model, response, options) {
+          that.options.tasks.add(model);
+          that.$el.modal('hide');
+        }
+      });
+    },
+    pricingTask: function(event) {
+      var task = new Task({
+        title: this.$('#title').val(),
+        categories: this.$('#tags').val(),
+        status: 'NEW',
+        price:parseInt(event.target.value)
+      });
+      this.saveTask(task);
+    },
+    selectCategory: function(event) {
+      this.$('#tags').tagit('createTag', event.target.textContent);
+    },
+    addAll: function() {
+      var that = this;
+      this.categories.each(function(category) {
+        var li = that.category_templ(category.toJSON());
+        that.$('#select_tags').append(li);
+      });
+    },
+    render: function() {
+      this.$el.html(this.templ());
+      this.$('#title').limit('33', '#charsLeft');
+      this.$('#tags').tagit({
+        placeholderText: 'Custom Tags'
+      });
+      this.$('#tags').tagit('removeAll');
+      return this;
+    },
+    show: function() {
+      this.$el.modal('show');
     }
   });
 
@@ -80,6 +197,10 @@ $(function() {
   });
 
   var TasksView = Backbone.View.extend({
+
+    events: {
+      "click #newtask_btn": "showTaskForm"
+    },
 
     initialize: function() {
       _.bindAll(this, 'addAll', 'addOne');
@@ -145,6 +266,12 @@ $(function() {
     render: function() {
       console.log('tasks view render.');
       return this;
+    },
+
+    showTaskForm: function() {
+      var taskForm = new TaskForm({
+        tasks: this.tasks
+      });
     }
 
   });

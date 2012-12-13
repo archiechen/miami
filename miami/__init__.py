@@ -30,7 +30,7 @@ elif os.getenv('MIAMI_ENV') == 'prod':
 
 db = SQLAlchemy(app)
 import miami.models
-from miami.models import Anonymous, Task, TimeSlot, User, Team, Burning
+from miami.models import Anonymous, Task, TimeSlot, User, Team, Burning,Category
 
 login_manager = LoginManager()
 login_manager.anonymous_user = Anonymous

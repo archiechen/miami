@@ -76,6 +76,9 @@ class Category(db.Model):
     def __init__(self, name):
         self.name = name
 
+    def toJSON(self):
+        return {'name':self.name}
+
 
 class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
