@@ -1,0 +1,57 @@
+{% from 'macros_task.html' import task_form %}
+{% extends "layout.html" %}
+{% block body %}
+<!-- NEW Task Form -->
+<div id="modalForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"></div>
+
+<div id ="tasks" class="row">
+  <div id="rtasks" class="ui-tasks span4">
+    <h4 class="page-header">
+      Ready
+      <a id="newtask_btn" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
+      </a>
+    </h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
+  </div>
+  <div id="ptasks" class="ui-tasks span4">
+    <h4 class="page-header">Progress</h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
+  </div>
+  <div id="dtasks" class="ui-tasks span4">
+    <h4 class="page-header">Done</h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
+  </div>
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/dashborad.js') }}"></script>
+<!-- Templates -->
+
+<script type="text/template" id="taskcard-template">
+    <h5><%=title%></h5>
+    <div class="left">
+        <p class="text-warning">$<%=price%></p>
+        <p class="text-info"><%=estimate%>H</p>
+    </div>
+    <div id="downright" class="right">
+        <div style="float:right;background-color:#<%=team.color%>;height:20px;width:20px;margin-top: 1px" title="<%=team.name%>"></div>   
+    </div>
+  </script>
+  <script type="text/template" id="estimatingform-template">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Estimate</h3>
+</div>
+<div class="modal-body">
+    <blockquote>
+        <h4><%=title%></h4>
+    </blockquote>
+    <div class="input-append">
+        <input id="estimate" type="text" class="span1 input-small" placeholder="estimate" value="<%=estimate%>"/>
+        <span class="add-on">Hours</span>
+    </div>
+</div>
+<div class="modal-footer">
+    <button id="save" class="btn btn-primary">Save</button>
+</div>
+  </script>
+<script type="text/template" id="taskform-template">{{task_form(is_ready = true)}}</script>
+{% endblock %}

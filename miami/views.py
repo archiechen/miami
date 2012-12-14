@@ -40,7 +40,12 @@ def logout():
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    return render_template('dashborad.html', user=current_user)
+    return render_template('dashborad2.html', user=current_user)
+
+@app.route('/current_user', methods=['GET'])
+@login_required
+def get_current_user():
+    return jsonify(object=current_user.toJSON())
 
 @app.route('/categories', methods=['GET'])
 @login_required
@@ -88,6 +93,10 @@ def load_tasks_page(page):
     tasks = Task.query.filter(or_(*team_conditions)).order_by(Task.created_time.desc()).paginate(int(page), per_page=15, error_out=True)
     return render_template('tasks.html', pagination=tasks, user=current_user)
 
+@app.route('/task/<task_id>', methods=['GET'])
+@login_required
+def load_task(task_id):
+    return jsonify(object=Task.query.get_or_404(task_id).toJSON())
 
 @app.route('/tasks/<status>', methods=['GET'])
 @login_required
@@ -108,7 +117,7 @@ def estimate(tid, estimate):
         abort(403)
     task = Task.query.get_or_404(tid)
     task.estimating(estimate)
-    return render_template('task_card.html', tasks=[task], user=current_user)
+    return jsonify(object=task.toJSON())
 
 
 @app.route('/pricing/<tid>/<price>', methods=['PUT'])
@@ -125,14 +134,14 @@ def pricing(tid, price):
 @login_required
 def join_task(tid):
     task = current_user.join(tid)
-    return render_template('task_card.html', tasks=[task], user=current_user)
+    return jsonify(object=task.toJSON())
 
 
 @app.route('/leavetask/<tid>', methods=['PUT'])
 @login_required
 def leave_task(tid):
     task = current_user.leave(tid)
-    return render_template('task_card.html', tasks=[task], user=current_user)
+    return jsonify(object=task.toJSON())
 
 
 @app.route('/tasks/<status>/<tid>', methods=['PUT'])
@@ -141,11 +150,11 @@ def to_status(status, tid):
     task = Task.query.get_or_404(tid)
     try:
         task.changeTo(status)
-        return jsonify(id=task.id)
+        return jsonify(object=task.toJSON())
     except NotPricing:
-        return render_template('price.html', task=task), 400
+        return jsonify(id=task.id), 400
     except NotEstimate:
-        return render_template('estimate.html', task=task), 400
+        return jsonify(id=task.id), 400
 
 
 @app.route('/teams', methods=['GET'])

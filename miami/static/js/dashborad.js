@@ -1,12 +1,12 @@
 $(function() {
   $('.nav li').removeClass('active');
-  $(".nav li:nth-child(3)").addClass('active');
+  $(".nav li:nth-child(1)").addClass('active');
   var Task = Backbone.Model.extend({
     defaults: function() {
       return {
-        price:0,
-        estimate:0,
-        detail:''
+        price: 0,
+        estimate: 0,
+        detail: ''
       };
     },
 
@@ -29,6 +29,16 @@ $(function() {
     }
   });
   var Category = Backbone.Model.extend({});
+
+  var CurrentUser = Backbone.Model.extend({
+    url: "/current_user",
+    parse:function(response){
+      return response.object;
+    }
+  });
+
+  var current_user = new CurrentUser;
+
 
   var TaskList = Backbone.Collection.extend({
     initialize: function(models, options) {
@@ -59,14 +69,52 @@ $(function() {
     className: "",
 
     template: _.template($('#taskcard-template').html()),
-
+    gravatar_templ: _.template('<img src="http://gravatar.com/avatar/<%=gravater%>?s=20&amp;d=retro&amp;r=x" title="<%=name%>">'),
+    events: {
+      "click .btn-join": "join",
+      "click .btn-leave": "leave"
+    },
     initialize: function() {
       this.model.on('change', this.render, this);
     },
-
+    join: function() {
+      this.model.url = function() {
+        return '/jointask/' + this.get('id');
+      };
+      this.model.save([], {
+        success: function(model, response, options) {
+          model.set('partner', response.object.partner);
+        }
+      });
+    },
+    leave: function() {
+      this.model.url = function() {
+        return '/leavetask/' + this.get('id');
+      };
+      this.model.save([], {
+        success: function(model, response, options) {
+          model.set('partner', response.object.partner);
+        }
+      });
+    },
     render: function() {
-      this.$el.html(this.template(this.model.toJSON()));
+      var jsonModel = this.model.toJSON();
+      this.$el.html(this.template(jsonModel));
       this.$el.attr('id', this.model.cid);
+      if(jsonModel.owner.hasOwnProperty('name')) {
+        this.$('#downright').append(this.gravatar_templ(jsonModel.owner));
+      }
+      if(jsonModel.partner.hasOwnProperty('name')) {
+        this.$('#downright').append(this.gravatar_templ(jsonModel.partner));
+        if(current_user.get('name') == jsonModel.partner.name) {
+          this.$('#downright').append('<button class="btn btn-mini btn-leave" type="button">离开</button>');
+        }
+      } else {
+        if(jsonModel.status == 'PROGRESS' && current_user.get('name') != jsonModel.owner.name) {
+          this.$('#downright').append('<button class="btn btn-mini btn-join" type="button">加入</button>');
+        }
+      }
+
       this.$el.draggable({
         cancel: "a.ui-icon",
         revert: "invalid",
@@ -78,11 +126,11 @@ $(function() {
     }
   });
 
-  var PricingForm = Backbone.View.extend({
+  var EstimatingForm = Backbone.View.extend({
     el: $('#modalForm'),
-    templ: _.template($('#pricingform-template').html()),
+    templ: _.template($('#estimatingform-template').html()),
     events: {
-      "click .btn": "pricing"
+      "click #save": "estimate"
     },
     initialize: function() {
       var that = this;
@@ -98,19 +146,20 @@ $(function() {
     show: function() {
       this.$el.modal('show');
     },
-    pricing: function(event) {
+    estimate: function(event) {
       this.model.url = function() {
-        return '/pricing/' + this.get('id') + '/' + this.get('price');
+        return '/estimate/' + this.get('id') + '/' + this.get('estimate');
       };
       var that = this;
-      this.model.save('price', parseInt(event.target.value), {
-        success: function() {
+      this.model.save('estimate', parseInt(this.$('#estimate').val()), {
+        success: function(model, response, options) {
           that.$el.modal('hide');
-          that.options.price_success();
+          that.options.estimate_success(model, response, options);
         }
       });
     }
   });
+
 
   var TaskForm = Backbone.View.extend({
     el: $('#modalForm'),
@@ -118,7 +167,6 @@ $(function() {
     category_templ: _.template('<li class="btn btn_category"><%=name%></li>'),
     events: {
       "click .btn_category": "selectCategory",
-      "click #saveTask": "saveTask",
       "click .btn_pricing": "pricingTask"
     },
     initialize: function() {
@@ -136,34 +184,21 @@ $(function() {
         }
       });
     },
-    saveTask: function(task) {
+    pricingTask: function(event) {
       var that = this;
-      var newTask 
-      if(task instanceof Task){
-        newTask = task;
-      } else{
-        newTask = new Task({
-          title: this.$('#title').val(),
-          categories: this.$('#tags').val(),
-          status: 'NEW'
-        });
-      }
-      newTask.url = '/tasks';
-      newTask.save([], {
+      var task = new Task({
+        title: this.$('#title').val(),
+        categories: this.$('#tags').val(),
+        status: 'READY',
+        price: parseInt(event.target.value)
+      });
+      task.url = '/tasks';
+      task.save([], {
         success: function(model, response, options) {
           that.options.tasks.add(response.object);
           that.$el.modal('hide');
         }
       });
-    },
-    pricingTask: function(event) {
-      var task = new Task({
-        title: this.$('#title').val(),
-        categories: this.$('#tags').val(),
-        status: 'NEW',
-        price:parseInt(event.target.value)
-      });
-      this.saveTask(task);
     },
     selectCategory: function(event) {
       this.$('#tags').tagit('createTag', event.target.textContent);
@@ -189,13 +224,7 @@ $(function() {
     }
   });
 
-  var newTaskList = new TaskList([], {
-    status: 'NEW'
-  });
 
-  var readyTaskList = new TaskList([], {
-    status: 'READY'
-  });
 
   var TasksView = Backbone.View.extend({
 
@@ -221,23 +250,29 @@ $(function() {
             var draggableTask = from.getByCid(cid);
             if(typeof draggableTask != 'undefined') {
               draggableTask.url = function() {
-                return "/tasks/" + this.get('status') + '/' + this.get('id');
+                return "/tasks/" + that.tasks.status + '/' + this.get('id');
               }
-              var success_handle = function() {
+              var success_handle = function(model, response, options) {
                   ui.draggable.fadeOut(function() {
                     from.remove(draggableTask);
-                    that.tasks.push(draggableTask);
+                    that.tasks.push(new Task(response.object));
                   });
                 }
-              draggableTask.save('status', that.tasks.status, {
+              draggableTask.save([], {
                 success: success_handle,
                 error: function(model, response, options) {
                   if(response.status == 400) {
-                    var pricingForm = new PricingForm({
+                    var estimatingForm = new EstimatingForm({
                       model: model,
-                      price_success: success_handle
+                      estimate_success: success_handle
                     });
-                    pricingForm.show();
+                    estimatingForm.show();
+                  }
+                  if(response.status == 401) {
+                    alert('unauthorization');
+                  }
+                  if(response.status == 403) {
+                    alert('已经有任务了');
                   }
                 }
               });
@@ -271,18 +306,41 @@ $(function() {
 
   });
 
-  var newTasks = new TasksView({
-    el: $("#ntasks"),
-    from_task_lists: [readyTaskList],
-    accept: "#rtasks li",
-    tasks: newTaskList
+
+  var readyTaskList = new TaskList([], {
+    status: 'READY'
   });
 
-  var readyTasks = new TasksView({
-    el: $("#rtasks"),
-    from_task_lists: [newTaskList],
-    accepts: "#ntasks li",
-    tasks: readyTaskList
+  var progressTaskList = new TaskList([], {
+    status: 'PROGRESS'
   });
 
+  var doneTaskList = new TaskList([], {
+    status: 'DONE'
+  });
+
+  current_user.fetch({
+    success: function() {
+      var readyTasks = new TasksView({
+        el: $("#rtasks"),
+        from_task_lists: [progressTaskList, doneTaskList],
+        accepts: "#ptasks li,#dtasks li",
+        tasks: readyTaskList
+      });
+
+      var progressTasks = new TasksView({
+        el: $("#ptasks"),
+        from_task_lists: [readyTaskList, doneTaskList],
+        accept: "#rtasks li,#dtasks li",
+        tasks: progressTaskList
+      });
+
+      var doneTasks = new TasksView({
+        el: $("#dtasks"),
+        from_task_lists: [progressTaskList],
+        accept: "#ptasks li",
+        tasks: doneTaskList
+      });
+    }
+  });
 });

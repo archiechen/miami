@@ -78,6 +78,9 @@ class MiamiTest(unittest.TestCase):
                                       'estimate': 0,
                                       'id': 1,
                                       'price': 0,
+                                      'status':'NEW',
+                                      'owner': {},
+                                      'partner': {},
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'title': 'title1'}}, json.loads(rv.data))
 
@@ -124,6 +127,9 @@ class MiamiTest(unittest.TestCase):
                                   "title": "title2",
                                   "price": 10,
                                   "detail": "detail2",
+                                  "status":'READY',
+                                  "owner": {},
+                                  "partner": {},
                                   "team": {
                                       "color": "2a33d8",
                                       "name": "Log"
@@ -186,12 +192,7 @@ class MiamiTest(unittest.TestCase):
         rv = self.app.put('/estimate/1/10')
 
         self.assertEquals('200 OK', rv.status)
-
-        assert '<h5>title1</h5>' in rv.data
-        assert '<p class="text-warning">$0</p>' in rv.data
-        assert '<p class="text-info">10H</p>' in rv.data
-        assert '<div style="float:right;background-color:#;height:20px;width:20px;margin-top: 1px" title=""></div>' in rv.data
-        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Mike">' in rv.data
+        self.assertEquals({'id':1},json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertEquals('PROGRESS', task.status)

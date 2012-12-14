@@ -186,7 +186,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id':self.id,'title': self.title, 'detail': self.detail, 'price': self.price, 'estimate': self.estimate, 'team': self.team.toJSON()}
+        return {'id':self.id,'title': self.title, 'detail': self.detail,'status':self.status ,'price': self.price, 'estimate': self.estimate, 'team': self.team.toJSON(),'owner':self.owner.toJSON() if self.owner else {},'partner':self.partner.toJSON() if self.partner else {}}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -247,6 +247,9 @@ class User(db.Model, UserMixin):
         self.name = name
         self.email = email
         self.active = active
+
+    def toJSON(self):
+        return {'name':self.name,'gravater':hashlib.md5(self.email).hexdigest()}
 
     def is_active(self):
         return self.active
