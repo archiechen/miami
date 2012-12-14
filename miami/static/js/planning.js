@@ -1,5 +1,6 @@
 $(function() {
-
+  $('.nav li').removeClass('active');
+  $(".nav li:nth-child(3)").addClass('active');
   var Task = Backbone.Model.extend({
     defaults: function() {
       return {

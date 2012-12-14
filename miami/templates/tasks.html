@@ -1,11 +1,13 @@
 {% from 'macros_task.html' import task_form %} 
 {% extends "layout.html" %}
 {% block body %}
-<a href="#taskForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
+<a href="#modalForm" role="button" class="btn btn-small" data-toggle="modal"> <i class="icon-plus"></i>
 </a>
 
 <!-- NEW Task Form -->
-{{task_form()}}
+<div id="modalForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="priceFormLabel" aria-hidden="true">
+</div>
+
 <div id="tasks_table">
   <table class="table .table-striped">
     <thead>
@@ -72,23 +74,8 @@
   {% endmacro %}
 {{render_pagination(pagination,'load_tasks_page')}}
 </div>
-
-<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
-<script type="text/javascript">
-(function() {
-  "use strict";
-  $(document).ready(function() {
-    $('.nav li').removeClass('active');
-    $(".nav li:nth-child(2)").addClass('active');
-
-    var taskFormView = new Miami.views.TaskForm({
-      success_handle: function() {
-          location = location;
-      }
-    });
-  });
-}());
+<script type="text/template" id="taskform-template">
+{{task_form()}}
 </script>
-
-
+<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
 {% endblock %}

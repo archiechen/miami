@@ -1,98 +1,114 @@
-(function() {
-    // Initial Setup
-    // -------------
-    // Save a reference to the global object (`window` in the browser, `exports`
-    // on the server).
-    var root = this;
+$(function() {
+  $('.nav li').removeClass('active');
+  $(".nav li:nth-child(2)").addClass('active');
+  var Task = Backbone.Model.extend({
+    defaults: function() {
+      return {
+        price:0,
+        estimate:0,
+        detail:''
+      };
+    },
 
-    // Save the previous value of the `Backbone` variable, so that it can be
-    // restored later on, if `noConflict` is used.
-    var previousMiami = root.Miami;
-
-    // The top-level namespace. All public Miami classes and modules will
-    // be attached to this. Exported for both CommonJS and the browser.
-    var Miami;
-    if(typeof exports !== 'undefined') {
-        Miami = exports;
-    } else {
-        Miami = root.Miami = {};
-    }
-
-    // Require Underscore, if we're on the server, and it's not already present.
-    var _ = root._;
-    if(!_ && (typeof require !== 'undefined')) _ = require('underscore');
-
-        // For Miami's purposes, jQuery, Zepto, or Ender owns the `$` variable.
-        Miami.$ = root.jQuery || root.Zepto || root.ender;
-
-        // Runs Miami.js in *noConflict* mode, returning the `Miami` variable
-        // to its previous owner. Returns a reference to this Miami object.
-        Miami.noConflict = function() {
-            root.Miami = previousMiami;
-            return this;
-        };
-
-        var views = Miami.views = {};
-        Miami.views.TaskForm = Backbone.View.extend({
-
-            el: $("#taskForm"),
-
-            events: {
-                "click #saveTask": "save",
-                "click #taskform-price button": "pricing"
-            },
-
-            initialize: function() {
-                $('#title').val('');
-                $('#title').limit('33', '#charsLeft');
-                $('#detail').val('');
-                $('#tags').val('');
-                $('#saveTask').removeAttr('disabled');
-                $('#taskform-price button').removeAttr('disabled');
-                $('#tags').tagit({
-                    placeholderText: 'Custom Tags'
-                });
-                $('#tags').tagit('removeAll');
-                $.ajax({
-                    type: 'GET',    
-                    url: '/categories',
-                    success: function(data){
-                        $('#select_tags').children().remove();
-                        $('#select_tags').append(data);
-                        $('#select_tags li').click(function(){
-                            $('#tags').tagit('createTag', this.textContent);
-                        });
-                    },
-                    dataType: 'html'
-                });
-            },
-
-            save: function(event) {
-                $('#saveTask').attr('disabled', 'true');
-                $('#taskform-price button').attr('disabled', 'true')
-                $.ajax({
-                    type: 'POST',
-                    url: '/tasks',
-                    data: '{"title":"' + $('#title').val() + '","detail":"' + $('#detail').val() + '","status":"' + $('#status').val() + '","categories":"'+$('#tags').val()+'"}',
-                    success: this.options.success_handle,
-                    dataType: 'json',
-                    contentType: 'application/json'
-                });
-            },
-
-            pricing: function(event) {
-                $('#taskform-price button').attr('disabled', 'true');
-                $.ajax({
-                    type: 'POST',
-                    url: '/tasks',
-                    data: '{"title":"' + $('#title').val() + '","detail":"' + $('#detail').val() + '","price":' + event.target.value + ',"status":"' + $('#status').val() + '","categories":"'+$('#tags').val()+'"}',
-                    success: this.options.success_handle,
-                    dataType: 'json',
-                    contentType: 'application/json'
-                });
-            },
-
+    initialize: function() {
+      if(!this.get("price")) {
+        this.set({
+          "price": this.defaults().price
         });
+      }
+      if(!this.get("estimate")) {
+        this.set({
+          "estimate": this.defaults().estimate
+        });
+      }
+      if(!this.get("detail")) {
+        this.set({
+          "detail": this.defaults().detail
+        });
+      }
+    }
+  });
 
+  var Category = Backbone.Model.extend({});
+  var CategoryList = Backbone.Collection.extend({
+    url: function() {
+      return '/categories';
+    },
+    model: Category,
+    parse: function(response) {
+      return response.objects;
+    }
+  });
 
-    }).call(this);
+  var TaskForm = Backbone.View.extend({
+    el: $('#modalForm'),
+    templ: _.template($('#taskform-template').html()),
+    category_templ: _.template('<li class="btn btn_category"><%=name%></li>'),
+    events: {
+      "click .btn_category": "selectCategory",
+      "click #saveTask": "saveTask",
+      "click .btn_pricing": "pricingTask"
+    },
+    initialize: function() {
+      _.bindAll(this, 'addAll');
+      var that = this;
+      this.$el.on('hidden', function() {
+        that.remove();
+      });
+      this.categories = new CategoryList;
+      this.categories.on('reset', this.addAll, this);
+      this.render();
+      this.categories.fetch();
+    },
+    saveTask: function(task) {
+      var that = this;
+      var newTask
+      if(task instanceof Task) {
+        newTask = task;
+      } else {
+        newTask = new Task({
+          title: this.$('#title').val(),
+          categories: this.$('#tags').val(),
+          status: 'NEW'
+        });
+      }
+      newTask.url = '/tasks';
+      newTask.save([], {
+        success: function() {
+          location = location;
+        }
+      });
+    },
+    pricingTask: function(event) {
+      var task = new Task({
+        title: this.$('#title').val(),
+        categories: this.$('#tags').val(),
+        status: 'NEW',
+        price: parseInt(event.target.value)
+      });
+      this.saveTask(task);
+    },
+    selectCategory: function(event) {
+      this.$('#tags').tagit('createTag', event.target.textContent);
+    },
+    addAll: function() {
+      var that = this;
+      this.categories.each(function(category) {
+        var li = that.category_templ(category.toJSON());
+        that.$('#select_tags').append(li);
+      });
+    },
+    render: function() {
+      this.$el.html(this.templ());
+      this.$('#title').limit('33', '#charsLeft');
+      this.$('#tags').tagit({
+        placeholderText: 'Custom Tags'
+      });
+      this.$('#tags').tagit('removeAll');
+      return this;
+    }
+  });
+
+  var taskForm = new TaskForm;
+
+});
