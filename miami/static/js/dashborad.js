@@ -227,7 +227,7 @@ $(function() {
 
 
   var TasksView = Backbone.View.extend({
-
+    total_price_templ: _.template('<span class="badge badge-warning">$<%=price%></span>'),
     events: {
       "click #newtask_btn": "showTaskForm"
     },
@@ -240,6 +240,7 @@ $(function() {
       this.from_task_lists = this.options.from_task_lists;
       this.tasks.on('add', this.addOne, this);
       this.tasks.on('reset', this.addAll, this);
+      this.tasks.on('all', this.render, this);
       this.tasks.fetch();
       this.$el.droppable({
         accept: this.options.accept,
@@ -294,7 +295,11 @@ $(function() {
     },
 
     render: function() {
-      console.log('tasks view render.');
+      var total_price=0;
+      this.tasks.each(function(task){
+        total_price+=task.get('price');
+      });
+      this.$('#total_price').html(this.total_price_templ({price:total_price}));
       return this;
     },
 
