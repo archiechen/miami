@@ -52,29 +52,35 @@ def get_current_user():
 def load_categories():
     return jsonify(objects=[c.toJSON() for c in Category.query.all()])
 
-@app.route('/tasks', methods=['POST'])
+@app.route('/tasks', methods=['POST','PUT'])
 @login_required
 def create_task():
     if current_user.teams.count() == 0:
         abort(403)
     jsons = json.loads(request.data)
-    status = jsons.get('status', 'NEW')
-    if status not in ['NEW', 'READY']:
-        abort(403)
-    price = jsons.get('price', 0)
-    if status == 'READY' and price == 0:
-        abort(403)
+    if jsons.get('id',0):
+        task = Task.query.get_or_404(jsons.get('id'))
+        task.title = jsons.get('title','')
+        db.session.commit()
+        return jsonify(object=task.toJSON()), 200
+    else:
+        status = jsons.get('status', 'NEW')
+        if status not in ['NEW', 'READY']:
+            abort(403)
+        price = jsons.get('price', 0)
+        if status == 'READY' and price == 0:
+            abort(403)
 
-    task = Task(jsons.get('title'), jsons.get('detail'), status=status, price=price, team=current_user.teams[0])
-    for category_name in jsons.get('categories', '').split(','):
-        category = Category.query.filter(Category.name == category_name).first()
-        if category:
-            task.categories.append(category)
-        else:
-            task.categories.append(Category(category_name))
-    db.session.add(task)
-    db.session.commit()
-    return jsonify(object=task.toJSON()), 201
+        task = Task(jsons.get('title'), jsons.get('detail'), status=status, price=price, team=current_user.teams[0])
+        for category_name in jsons.get('categories', '').split(','):
+            category = Category.query.filter(Category.name == category_name).first()
+            if category:
+                task.categories.append(category)
+            else:
+                task.categories.append(Category(category_name))
+        db.session.add(task)
+        db.session.commit()
+        return jsonify(object=task.toJSON()), 201
 
 
 @app.route('/planning', methods=['GET'])

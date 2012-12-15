@@ -72,7 +72,10 @@ $(function() {
     gravatar_templ: _.template('<img src="http://gravatar.com/avatar/<%=gravater%>?s=20&amp;d=retro&amp;r=x" title="<%=name%>">'),
     events: {
       "click .btn-join": "join",
-      "click .btn-leave": "leave"
+      "click .btn-leave": "leave",
+      "dblclick .title": "edit",
+      "keypress .edit"  : "updateOnEnter",
+      "blur .edit"      : "close"
     },
     initialize: function() {
       this.model.on('change', this.render, this);
@@ -96,6 +99,23 @@ $(function() {
           model.set('partner', response.object.partner);
         }
       });
+    },
+    edit:function(){
+      this.$el.addClass('editing');
+      this.title_input.focus();
+    },
+    // Close the `"editing"` mode, saving changes to the todo.
+    close: function() {
+      if(this.title_input.val() != this.model.get('title')){
+        this.model.url = '/tasks'
+        this.model.save({title: this.title_input.val()});
+      }
+      this.$el.removeClass("editing");
+    },
+
+    // If you hit `enter`, we're through editing the item.
+    updateOnEnter: function(e) {
+      if (e.keyCode == 13) this.close();
     },
     render: function() {
       var jsonModel = this.model.toJSON();
@@ -122,6 +142,8 @@ $(function() {
         helper: "clone",
         cursor: "move"
       });
+      this.title_input = this.$('.edit');
+      this.title_input.limit('33');
       return this;
     }
   });
