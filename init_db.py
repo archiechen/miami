@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import os
 os.environ['MIAMI_ENV'] = 'dev'
 import miami
@@ -11,7 +12,7 @@ team.members.append(User('yachuan.chen', email='yachuan.chen@chinacache.com'))
 team.members.append(User('yue.zhang', email='yue.zhang@chinacache.com'))
 team.members.append(User('peng.yuan', email='peng.yuan@chinacache.com'))
 db.session.add(team)
-db.session.add(Category('Feature'))
+db.session.add(Category(u'功能'))
 db.session.add(Category('Bug'))
 db.session.add(Category('Test'))
 db.session.commit()

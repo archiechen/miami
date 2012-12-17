@@ -414,7 +414,7 @@ class ReviewData(object):
                         ratio[category_name] += 1
                     else:
                         ratio[category_name] = 1
-        return str([[k, int(v)] for k, v in ratio.iteritems()])
+        return json.dumps([[k, int(v)] for k, v in ratio.iteritems()],ensure_ascii=False)
 
     def categories_price_ratio(self):
         ratio = {}
@@ -429,7 +429,7 @@ class ReviewData(object):
                         ratio[category_name] += task.price
                     else:
                         ratio[category_name] = task.price
-        return str([[k, int(v)] for k, v in ratio.iteritems()])
+        return json.dumps([[k, int(v)] for k, v in ratio.iteritems()],ensure_ascii=False)
 
     def planneds(self):
         return len(self.tasks) - self.unplanneds
