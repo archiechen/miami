@@ -89,8 +89,8 @@ class ReviewModelsTest(unittest.TestCase):
         self.assertEquals(4, rd.paired_time)
         self.assertEquals(1, rd.unplanneds)
         self.assertEquals("[['$1', 0], ['$2', 4], ['$5', 0], ['$10', 0]]", rd.price_ratio())
-        self.assertEquals("[['Uncategorized', 1], ['Feature', 2], ['Bug', 1]]", rd.categories_ratio())
-        self.assertEquals("[['Uncategorized', 2], ['Feature', 4], ['Bug', 2]]", rd.categories_price_ratio())
+        self.assertEquals(u'[["Uncategorized", 1], ["Feature", 2], ["Bug", 1]]', rd.categories_ratio())
+        self.assertEquals(u'[["Uncategorized", 2], ["Feature", 4], ["Bug", 2]]', rd.categories_price_ratio())
 
     def test_personal_review_data(self):
         member = User.query.get(2)

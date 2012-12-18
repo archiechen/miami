@@ -7,7 +7,7 @@ import miami
 import simplejson as json
 from datetime import datetime
 from mockito import when, unstub
-from miami.models import Task, TimeSlot, User
+from miami.models import Task, TimeSlot, User, Team
 
 
 def create_entity(entity):
@@ -20,7 +20,11 @@ class PairTest(unittest.TestCase):
     def setUp(self):
         self.app = miami.app.test_client()
         miami.init_db()
-        create_entity(User('Mike'))
+        team = Team('Log')
+        team.members.append(User('Mike'))
+        team.members.append(User('Bob'))
+
+        create_entity(team)
         when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
         self.login('Mike', '')
 
@@ -37,20 +41,35 @@ class PairTest(unittest.TestCase):
         return self.app.get('/logout', follow_redirects=True)
 
     def test_join_partner(self):
-        create_entity(User('Bob'))
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
         task.owner = User.query.get(2)
         create_entity(task)
 
         rv = self.app.put('/jointask/1')
 
         self.assertEquals(200, rv.status_code)
-        assert '<h5>title2</h5>' in rv.data
-        assert '<p class="text-warning">$10</p>' in rv.data
-        assert '<p class="text-info">10H</p>' in rv.data
-        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Bob">' in rv.data
-        assert '<button class="btn btn-mini btn-leave" type="button">' in rv.data
-
+        self.assertEquals({
+                          "object": {
+                              "status": "PROGRESS",
+                              "owner": {
+                                  "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                  "name": "Bob"
+                              },
+                              "title": "title2",
+                              "estimate": 10,
+                              "partner": {
+                                  "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                  "name": "Mike"
+                              },
+                              "price": 10,
+                              "team": {
+                                  "color": "2a33d8",
+                                  "name": "Log"
+                              },
+                              "id": 1,
+                              "detail": "detail2"
+                          }
+                          }, json.loads(rv.data))
         task = Task.query.get(1)
         self.assertEquals(1, task.time_slots.count())
         self.assertEquals('PROGRESS', task.status)
@@ -60,8 +79,7 @@ class PairTest(unittest.TestCase):
         self.assertEquals(task.start_time, miami.utils.now())
 
     def test_paired_to_done(self):
-        create_entity(User('Bob'))
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
         task.owner = User.query.get(1)
         task.partner = User.query.get(2)
         task.start_time = datetime(2012, 11, 11, 0, 1, 0)
@@ -72,7 +90,15 @@ class PairTest(unittest.TestCase):
         rv = self.app.put('/tasks/DONE/1')
 
         self.assertEquals(200, rv.status_code)
-        self.assertEquals({"id": 1}, json.loads(rv.data))
+        self.assertEquals({'object': {'detail': 'detail2',
+                                      'estimate': 10,
+                                      'id': 1,
+                                      'owner': {},
+                                      'partner': {},
+                                      'price': 10,
+                                      'status': 'DONE',
+                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'title': 'title2'}}, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
@@ -87,8 +113,7 @@ class PairTest(unittest.TestCase):
         self.assertEquals('Bob', task.time_slots[1].partner.name)
 
     def test_leave_paired(self):
-        create_entity(User('Bob'))
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
         task.owner = User.query.get(2)
         task.partner = User.query.get(1)
         create_entity(task)
@@ -96,11 +121,26 @@ class PairTest(unittest.TestCase):
         rv = self.app.put('/leavetask/1')
 
         self.assertEquals(200, rv.status_code)
-        assert '<h5>title2</h5>' in rv.data
-        assert '<p class="text-warning">$10</p>' in rv.data
-        assert '<p class="text-info">10H</p>' in rv.data
-        assert '<img src="http://gravatar.com/avatar/91f376c4b36912e5075b6170d312eab5?s=20&amp;d=retro&amp;r=x" title="Bob">' in rv.data
-        assert '<button class="btn btn-mini btn-join" type="button">' in rv.data
+        self.assertEquals({
+              "object": {
+                  "status": "PROGRESS",
+                  "owner": {
+              "gravater": "91f376c4b36912e5075b6170d312eab5",
+              "name": "Bob"
+                  },
+                  "title": "title2",
+                  "estimate": 10,
+                  "partner": {
+                  },
+                  "price": 10,
+                  "team": {
+              "color": "2a33d8",
+              "name": "Log"
+                  },
+                  "id": 1,
+                  "detail": "detail2"
+              }
+        }, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)

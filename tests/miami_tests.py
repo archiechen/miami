@@ -46,7 +46,10 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals({'object': {'detail': 'detail1',
                                       'estimate': 0,
                                       'id': 1,
+                                      'owner': {},
+                                      'partner': {},
                                       'price': 0,
+                                      'status': 'NEW',
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'title': 'title1'}}, json.loads(rv.data))
 
@@ -61,7 +64,10 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals({'object': {'detail': 'detail1',
                                       'estimate': 0,
                                       'id': 1,
+                                      'owner': {},
+                                      'partner': {},
                                       'price': 0,
+                                      'status': 'NEW',
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'title': 'title1'}}, json.loads(rv.data))
 
@@ -78,7 +84,7 @@ class MiamiTest(unittest.TestCase):
                                       'estimate': 0,
                                       'id': 1,
                                       'price': 0,
-                                      'status':'NEW',
+                                      'status': 'NEW',
                                       'owner': {},
                                       'partner': {},
                                       'team': {'color': '2a33d8', 'name': 'Log'},
@@ -163,10 +169,7 @@ class MiamiTest(unittest.TestCase):
 
         self.assertEquals(400, rv.status_code)
 
-        assert '<h3 id="myModalLabel">Estimate</h3>' in rv.data
-        assert '<h4>title1</h4>' in rv.data
-        assert '<p>detail1</p>' in rv.data
-        assert '<input id="estimate" type="text" class="span1 input-small" placeholder="estimate" value="0"/>' in rv.data
+        self.assertEquals({'id': 1}, json.loads(rv.data))
 
     def test_ready_to_progress_without_estimate_logout(self):
         self.logout()
@@ -178,7 +181,7 @@ class MiamiTest(unittest.TestCase):
         assert '<form action="/login" method="POST" class="form-horizontal">' in rv.data
 
     def test_ready_to_progress_with_estimate(self):
-        create_entity(Task('title2', 'detail2', status='READY', estimate=10))
+        create_entity(Task('title2', 'detail2', status='READY', estimate=10, team=Team.query.get(1)))
 
         rv = self.app.put('/tasks/PROGRESS/1')
 
@@ -187,12 +190,21 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals('PROGRESS', task.status)
 
     def test_estimate(self):
-        create_entity(Task('title1', 'detail1', status='READY'))
+        create_entity(Task('title1', 'detail1', status='READY', team=Team.query.get(1)))
 
         rv = self.app.put('/estimate/1/10')
 
         self.assertEquals('200 OK', rv.status)
-        self.assertEquals({'id':1},json.loads(rv.data))
+        self.assertEquals({'object': {'detail': 'detail1',
+                                      'estimate': 10,
+                                      'id': 1,
+                                      'owner': {'gravater': '91f376c4b36912e5075b6170d312eab5',
+                                                'name': 'Mike'},
+                                      'partner': {},
+                                      'price': 0,
+                                      'status': 'PROGRESS',
+                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'title': 'title1'}}, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertEquals('PROGRESS', task.status)
@@ -224,7 +236,7 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(401, rv.status_code)
 
     def test_progress_to_ready(self):
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
         task.owner = User.query.get(1)
         create_entity(task)
 
@@ -238,7 +250,7 @@ class MiamiTest(unittest.TestCase):
 
     def test_multi_timeslots(self):
         create_entity(User('Bob'))
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
         task.time_slots.append(TimeSlot(task.start_time, 20, User.query.get(1)))
         task.owner = User.query.get(2)
         create_entity(task)
@@ -260,16 +272,10 @@ class MiamiTest(unittest.TestCase):
         rv = self.app.put('/tasks/READY/1')
         self.assertEquals(400, rv.status_code)
 
-        print rv.data
-
-        assert '<h3 id="myModalLabel">Pricing</h3>' in rv.data
-        assert '<h4>title</h4>' in rv.data
-        assert '<p>detail</p>' in rv.data
-        assert '<div id="btn-price" class="btn-group pull-right">' in rv.data
-        assert '<button class="btn btn-danger" value="10">$10</button>' in rv.data
+        self.assertEquals({'id': 1}, json.loads(rv.data))
 
     def test_new_to_ready_with_price(self):
-        create_entity(Task('title', 'detail', price=20))
+        create_entity(Task('title', 'detail', price=20, team=Team.query.get(1)))
 
         rv = self.app.put('/tasks/READY/1')
         self.assertEquals(200, rv.status_code)
