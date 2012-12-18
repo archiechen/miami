@@ -111,8 +111,8 @@ def load_tasks(status):
     for team in current_user.teams:
         team_conditions.append(Task.team == team)
     if status == 'DONE':
-        return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
-    #return render_template('task_card.html', tasks=Task.query.filter(Task.status == status, or_(*team_conditions)), user=current_user)
+        return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions))])
+        #return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
     return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.status == status, or_(*team_conditions))])
 
 

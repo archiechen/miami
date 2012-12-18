@@ -153,14 +153,24 @@ class MiamiTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
 
-        assert '<li id="1" style="display: list-item;">' in rv.data
-        assert '<h5>title2</h5>' in rv.data
-        assert '<p class="text-warning">$10</p>' in rv.data
-        assert '<p class="text-info">0H</p>' in rv.data
-        assert '<h5>title1</h5>' not in rv.data
-
-        assert '<li id="2" style="display: list-item;">' not in rv.data
-        assert '<h5>title1</h5>' not in rv.data
+        self.assertEquals({
+                          "objects": [
+                              {
+                                  "title": "title2",
+                                  "price": 10,
+                                  "detail": "detail2",
+                                  "status":'DONE',
+                                  "owner": {},
+                                  "partner": {},
+                                  "team": {
+                                      "color": "2a33d8",
+                                      "name": "Log"
+                                  },
+                                  "estimate": 0,
+                                  "id": 1
+                              }
+                          ]
+                          }, json.loads(rv.data))
 
     def test_ready_to_progress_without_estimate(self):
         create_entity(Task('title1', 'detail1', status='READY'))
