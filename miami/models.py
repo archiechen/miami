@@ -140,8 +140,9 @@ class Burning(db.Model):
         self.remaining = 0
 
     def add(self, task):
-        if task.status == 'DONE' and task.start_time > self.day:
-            self.burning += task.price
+        if task.status == 'DONE'
+            if task.start_time > self.day:
+                self.burning += task.price
         else:
             self.remaining += task.price
 
