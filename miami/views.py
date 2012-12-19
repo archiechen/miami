@@ -40,7 +40,7 @@ def logout():
 @app.route('/', methods=['GET'])
 @login_required
 def index():
-    return render_template('dashborad2.html', user=current_user)
+    return render_template('dashborad.html', user=current_user)
 
 @app.route('/current_user', methods=['GET'])
 @login_required
@@ -86,7 +86,7 @@ def create_task():
 @app.route('/planning', methods=['GET'])
 @login_required
 def planning():
-    return render_template('planning2.html', user=current_user)
+    return render_template('planning.html', user=current_user)
 
 
 @app.route('/tasks/page/<page>', methods=['GET'])

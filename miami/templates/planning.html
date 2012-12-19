@@ -1,61 +1,56 @@
-{% from 'macros_task.html' import task_form,task_form_js %} 
+{% from 'macros_task.html' import task_form %}
 {% extends "layout.html" %}
 {% block body %}
-<!-- NEW Task Form -->
-<div id="priceForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="priceFormLabel" aria-hidden="true"></div>
-<!-- NEW Task Form -->
-{{task_form()}}
-<div id ="tasks" class="row">
+<!-- Pricing Task Form -->
+<div id="modalForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="priceFormLabel" aria-hidden="true"></div>
+<div id ="borad" class="row">
   <div id="ntasks" class="ui-tasks span6">
     <h4 class="page-header">
       New
-      <a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
+      <a id="newtask_btn" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
       </a>
+      <div id="total_price" class="pull-right"></div>
     </h4>
-    <ul class="ui-helper-reset"></ul>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
   <div id="rtasks" class="ui-tasks span6">
-    <h4 class="page-header">Ready</h4>
+    <h4 class="page-header">Ready<div id="total_price" class="pull-right"></div></h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
 </div>
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
-<script type="text/javascript">
-  (function() {
-    "use strict";
-    $(document).ready(function() {
-      $('.nav li').removeClass('active');
-      $(".nav li:nth-child(3)").addClass('active');
-      var $ntasks =$( "#ntasks" ),
-        $rtasks = $('#rtasks');
-      $.miami.wrapTasks($ntasks,'NEW',"#rtasks li",function(ui,data){});
-      $.miami.wrapTasks($rtasks,'READY',"#ntasks li",function(ui,data){
-        $('#priceForm').children().remove();
-        $('#priceForm').append(data.responseText);  
-        $('#btn-price button').click(function(){
-          $.ajax({
-            type: 'PUT',
-            url: '/pricing/'+ui.draggable[0].id+'/'+$(this).attr('value'),
-            success: function(data){
-              $('#priceForm').modal('hide');
-              $.miami.moveto(ui.draggable,$rtasks,data);
-            },
-            dataType: 'html'
-          });
-        });
-        $('#priceForm').modal('show');
-      });
-      $ntasks.loadtasks();
-      $rtasks.loadtasks();
+<script type="text/javascript" src="{{ url_for('static', filename='js/planning.js') }}"></script>
+<!-- Templates -->
 
-      var taskFormView = new Miami.views.TaskForm({
-        success_handle: function() {
-          $ntasks.loadtasks();
-          $('#taskForm').modal('hide');
-          taskFormView.initialize();
-        }
-      });
-    });  
-  }());
-</script>
+<script type="text/template" id="taskcard-template">
+    <h5><%=title%></h5>
+    <div class="left">
+        <p class="text-warning">$<%=price%></p>
+        <p class="text-info"><%=estimate%>H</p>
+    </div>
+    <div class="right">
+        <div style="float:right;background-color:#<%=team.color%>;height:20px;width:20px;margin-top: 1px" title="<%=team.name%>"></div>
+    </div>
+  </script>
+<script type="text/template" id="pricingform-template">
+  <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+      <h3 id="myModalLabel">Pricing</h3>
+  </div>
+  <div class="modal-body">
+      <blockquote>
+          <h4><%=title%></h4>
+          <p><%=detail%></p>
+      </blockquote>
+      <div id="btn-price" class="btn-group pull-right">
+          <button class="btn btn-success" value="1">$1</button>
+          <button class="btn btn-info" value="2">$2</button>
+          <button class="btn btn-warning" value="5">$5</button>
+          <button class="btn btn-danger" value="10">$10</button>
+      </div>
+  </div>
+  </script>
+  <script type="text/template" id="taskform-template">
+{{task_form()}}
+  </script>
 {% endblock %}

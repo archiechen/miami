@@ -1,68 +1,59 @@
-{% from 'macros_task.html' import task_form,task_form_js %}
+{% from 'macros_task.html' import task_form %}
 {% extends "layout.html" %}
 {% block body %}
-
 <!-- NEW Task Form -->
-<div id="myModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
- 
-</div>
-<!-- NEW Task Form -->
-{{task_form(status='READY',is_ready=True)}}
+<div id="modalForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"></div>
 
 <div id ="tasks" class="row">
   <div id="rtasks" class="ui-tasks span4">
-    <h4 class="page-header">Ready<a href="#taskForm" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
-</a></h4>
-    <ul class="ui-helper-reset"></ul>
+    <h4 class="page-header">
+      Ready 
+      <a id="newtask_btn" role="button" class="btn btn-small pull-right" data-toggle="modal"> <i class="icon-plus"></i>
+      </a>
+      <div id="total_price" class="pull-right"></div>
+    </h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
   <div id="ptasks" class="ui-tasks span4">
-    <h4 class="page-header">Progress</h4>
+    <h4 class="page-header">Progress<div id="total_price" class="pull-right"></div></h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
   <div id="dtasks" class="ui-tasks span4">
-    <h4 class="page-header">Done</h4>
+    <h4 class="page-header">Done<div id="total_price" class="pull-right"></div></h4>
+    <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
 </div>
-<script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
-<script type="text/javascript">
-  (function() {
-    "use strict";
-    $(document).ready(function() {
-      $('ul.nav > li').removeClass('active');
-      $("ul.nav > li:nth-child(1)").addClass('active');
-      var $rtasks =$( "#rtasks" ),
-        $ptasks = $('#ptasks'),
-        $dtasks = $('#dtasks');
+<script type="text/javascript" src="{{ url_for('static', filename='js/dashborad.js') }}"></script>
+<!-- Templates -->
 
-      $.miami.wrapTasks($rtasks,'READY',"#ptasks li,#dtasks li",function(ui,data){});
-      $.miami.wrapTasks($ptasks,'PROGRESS',"#rtasks li,#dtasks li",function(ui,data){
-        $('#myModal').children().remove();
-        $('#myModal').append(data.responseText);  
-        $('#save').click(function(){
-          $.ajax({
-            type: 'PUT',
-            url: '/estimate/'+ui.draggable[0].id+'/'+$('#estimate').val(),
-            success: function(data){
-              $('#myModal').modal('hide');
-              $.miami.moveto(ui.draggable,$ptasks,data);
-            },
-            dataType: 'html'
-          });
-        });
-        $('#myModal').modal('show');
-      });
-      $.miami.wrapTasks($dtasks,'DONE',"#ptasks li",function(ui,data){});
-      $rtasks.loadtasks();
-      $ptasks.loadtasks();
-      $dtasks.loadtasks();
-
-      var taskFormView = new Miami.views.TaskForm({
-        success_handle: function() {
-          $rtasks.loadtasks();
-          $('#taskForm').modal('hide');
-          taskFormView.initialize();
-        }
-      });
-    });
-  }());
+<script type="text/template" id="taskcard-template">
+    <h5 class="title"><%=title%></h5>
+    <textarea class="edit"><%=title%></textarea>
+    <div class="left">
+        <p class="text-warning">$<%=price%></p>
+        <p class="text-info"><%=estimate%>H</p>
+    </div>
+    <div id="downright" class="right">
+        <div style="float:right;background-color:#<%=team.color%>;height:20px;width:20px;margin-top: 1px" title="<%=team.name%>"></div>   
+    </div>
   </script>
+  <script type="text/template" id="estimatingform-template">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Estimate</h3>
+</div>
+<div class="modal-body">
+    <blockquote>
+        <h4><%=title%></h4>
+    </blockquote>
+    <div class="input-append">
+        <input id="estimate" type="text" class="span1 input-small" placeholder="estimate" value="<%=estimate%>"/>
+        <span class="add-on">Hours</span>
+    </div>
+</div>
+<div class="modal-footer">
+    <button id="save" class="btn btn-primary">Save</button>
+</div>
+  </script>
+<script type="text/template" id="taskform-template">{{task_form(is_ready = true)}}</script>
 {% endblock %}
