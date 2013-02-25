@@ -108,8 +108,12 @@ def load_task(task_id):
 @login_required
 def load_tasks(status):
     team_conditions = [Task.team is None]
-    for team in current_user.teams:
-        team_conditions.append(Task.team == team)
+    team_id = int(request.args.get('team_id', '0')) 
+    if team_id > 0 :
+        team_conditions.append(Task.team == Team.query.get_or_404(team_id))
+    else:
+        for team in current_user.teams:
+            team_conditions.append(Task.team == team)
     if status == 'DONE':
         return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions))])
         #return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)

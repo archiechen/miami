@@ -313,6 +313,7 @@ $(function() {
     },
 
     addAll: function() {
+      this.tasks_ul.empty();
       this.tasks.each(this.addOne);
     },
 
@@ -346,6 +347,24 @@ $(function() {
     status: 'DONE'
   });
 
+  var TeamSelectorView = Backbone.View.extend({
+    el: $("#team_selector"),
+    events: {
+      "click li > a": "select"
+    },
+    initialize: function() {
+      this.current_team = this.$("#current_team");
+      _.bindAll(this, 'select');
+    },
+    select:function(event){
+      this.current_team.text(event.target.text);
+      readyTaskList.fetch({data: {team_id: event.target.name}});
+      progressTaskList.fetch({data: {team_id: event.target.name}});
+      doneTaskList.fetch({data: {team_id: event.target.name}});
+    }
+
+  });
+
   current_user.fetch({
     success: function() {
       var readyTasks = new TasksView({
@@ -368,6 +387,8 @@ $(function() {
         accept: "#ptasks li",
         tasks: doneTaskList
       });
+
+      new TeamSelectorView();
     }
   });
 });

@@ -3,6 +3,7 @@
 {% block body %}
 <!-- Pricing Task Form -->
 <div id="modalForm" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="priceFormLabel" aria-hidden="true"></div>
+
 <div id ="borad" class="row">
   <div id="ntasks" class="ui-tasks span6">
     <h4 class="page-header">
@@ -14,7 +15,10 @@
     <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
   <div id="rtasks" class="ui-tasks span6">
-    <h4 class="page-header">Ready<div id="total_price" class="pull-right"></div></h4>
+    <h4 class="page-header">
+      Ready
+      <div id="total_price" class="pull-right"></div>
+    </h4>
     <ul id="taskcard_list" class="ui-helper-reset"></ul>
   </div>
 </div>
@@ -50,7 +54,5 @@
       </div>
   </div>
   </script>
-  <script type="text/template" id="taskform-template">
-{{task_form()}}
-  </script>
+<script type="text/template" id="taskform-template">{{task_form()}}</script>
 {% endblock %}

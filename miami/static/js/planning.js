@@ -4,9 +4,9 @@ $(function() {
   var Task = Backbone.Model.extend({
     defaults: function() {
       return {
-        price:0,
-        estimate:0,
-        detail:''
+        price: 0,
+        estimate: 0,
+        detail: ''
       };
     },
 
@@ -138,10 +138,10 @@ $(function() {
     },
     saveTask: function(task) {
       var that = this;
-      var newTask 
-      if(task instanceof Task){
+      var newTask
+      if(task instanceof Task) {
         newTask = task;
-      } else{
+      } else {
         newTask = new Task({
           title: this.$('#title').val(),
           categories: this.$('#tags').val(),
@@ -161,7 +161,7 @@ $(function() {
         title: this.$('#title').val(),
         categories: this.$('#tags').val(),
         status: 'NEW',
-        price:parseInt(event.target.value)
+        price: parseInt(event.target.value)
       });
       this.saveTask(task);
     },
@@ -256,15 +256,18 @@ $(function() {
     },
 
     addAll: function() {
+      this.tasks_ul.empty();
       this.tasks.each(this.addOne);
     },
 
     render: function() {
-      var total_price=0;
-      this.tasks.each(function(task){
-        total_price+=task.get('price');
+      var total_price = 0;
+      this.tasks.each(function(task) {
+        total_price += task.get('price');
       });
-      this.$('#total_price').html(this.total_price_templ({price:total_price}));
+      this.$('#total_price').html(this.total_price_templ({
+        price: total_price
+      }));
       return this;
     },
 
@@ -272,6 +275,23 @@ $(function() {
       var taskForm = new TaskForm({
         tasks: this.tasks
       });
+    }
+
+  });
+
+  var TeamSelectorView = Backbone.View.extend({
+    el: $("#team_selector"),
+    events: {
+      "click li > a": "select"
+    },
+    initialize: function() {
+      this.current_team = this.$("#current_team");
+      _.bindAll(this, 'select');
+    },
+    select:function(event){
+      this.current_team.text(event.target.text);
+      newTaskList.fetch({data: {team_id: event.target.name}});
+      readyTaskList.fetch({data: {team_id: event.target.name}});
     }
 
   });
@@ -289,5 +309,7 @@ $(function() {
     accepts: "#ntasks li",
     tasks: readyTaskList
   });
+
+  new TeamSelectorView();
 
 });
