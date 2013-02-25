@@ -67,6 +67,7 @@ class PairTest(unittest.TestCase):
                                   "name": "Log"
                               },
                               "id": 1,
+                              'last_updated': 'just now',
                               "detail": "detail2"
                           }
                           }, json.loads(rv.data))
@@ -93,6 +94,7 @@ class PairTest(unittest.TestCase):
         self.assertEquals({'object': {'detail': 'detail2',
                                       'estimate': 10,
                                       'id': 1,
+                                      'last_updated': 'just now',
                                       'owner': {},
                                       'partner': {},
                                       'price': 10,
@@ -138,6 +140,7 @@ class PairTest(unittest.TestCase):
               "name": "Log"
                   },
                   "id": 1,
+                  'last_updated': 'just now',
                   "detail": "detail2"
               }
         }, json.loads(rv.data))

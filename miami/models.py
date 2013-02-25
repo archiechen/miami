@@ -42,7 +42,8 @@ class ReadyState(object):
 class ProgressState(object):
     def to(self, task, status):
         if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-            task.time_slots.append(TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
+            task.time_slots.append(
+                TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
             task.partner = None
             task.owner = None
         else:
@@ -110,15 +111,18 @@ class Team(db.Model):
                 self.members.remove(member)
 
     def review_data(self, last_monday):
-        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, TimeSlot.start_time < last_monday + timedelta(days=7), Task.team == self)
+        time_slots = TimeSlot.query.join(TimeSlot.task).filter(
+            TimeSlot.start_time > last_monday, TimeSlot.start_time < last_monday + timedelta(days=7), Task.team == self)
         review_data = ReviewData()
         for ts in time_slots:
             review_data.merge(ts)
-        review_data.merge_ready(Task.query.filter(Task.start_time > last_monday, Task.start_time < last_monday + timedelta(days=7), Task.status == 'READY', Task.team == self))
+        review_data.merge_ready(Task.query.filter(Task.start_time > last_monday, Task.start_time < last_monday +
+                                timedelta(days=7), Task.status == 'READY', Task.team == self))
         return review_data
 
     def burning_data(self):
-        burnings = Burning.query.filter(Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
+        burnings = Burning.query.filter(
+            Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
         return json.dumps([[b.remaining for b in burnings], [b.burning for b in burnings]])
 
     def daily_meeting_tasks(self):
@@ -157,6 +161,7 @@ class Task(db.Model):
     created_time = db.Column(db.DateTime, default=datetime.now)
     ready_time = db.Column(db.DateTime)
     start_time = db.Column(db.DateTime)
+    last_updated = db.Column(db.DateTime, onupdate=datetime.now, default=datetime.now)
     time_slots = db.relationship('TimeSlot', backref='task',
                                  lazy='dynamic')
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -187,7 +192,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id':self.id,'title': self.title, 'detail': self.detail,'status':self.status ,'price': self.price, 'estimate': self.estimate, 'team': self.team.toJSON(),'owner':self.owner.toJSON() if self.owner else {},'partner':self.partner.toJSON() if self.partner else {}}
+        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'last_updated':utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -250,7 +255,7 @@ class User(db.Model, UserMixin):
         self.active = active
 
     def toJSON(self):
-        return {'name':self.name,'gravater':hashlib.md5(self.email).hexdigest()}
+        return {'name': self.name, 'gravater': hashlib.md5(self.email).hexdigest()}
 
     def is_active(self):
         return self.active
@@ -273,7 +278,8 @@ class User(db.Model, UserMixin):
         task = Task.query.get_or_404(tid)
         task.partner = None
         current_time = utils.now()
-        task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=self))
+        task.time_slots.append(
+            TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=self))
         task.start_time = current_time
         db.session.commit()
         return task
@@ -286,7 +292,9 @@ class User(db.Model, UserMixin):
         return card
 
     def review_data(self, last_monday, team_id):
-        time_slots = TimeSlot.query.join(TimeSlot.task).filter(TimeSlot.start_time > last_monday, TimeSlot.start_time < last_monday + timedelta(days=7), Task.team == Team.query.get(team_id), or_(TimeSlot.user == self, TimeSlot.partner == self))
+        time_slots = TimeSlot.query.join(
+            TimeSlot.task).filter(TimeSlot.start_time > last_monday, TimeSlot.start_time < last_monday + timedelta(days=7),
+                                  Task.team == Team.query.get(team_id), or_(TimeSlot.user == self, TimeSlot.partner == self))
         review_data = ReviewData()
         for ts in time_slots:
             review_data.merge_personal(self, ts)
@@ -415,7 +423,7 @@ class ReviewData(object):
                         ratio[category_name] += 1
                     else:
                         ratio[category_name] = 1
-        return json.dumps([[k, int(v)] for k, v in ratio.iteritems()],ensure_ascii=False)
+        return json.dumps([[k, int(v)] for k, v in ratio.iteritems()], ensure_ascii=False)
 
     def categories_price_ratio(self):
         ratio = {}
@@ -430,7 +438,7 @@ class ReviewData(object):
                         ratio[category_name] += task.price
                     else:
                         ratio[category_name] = task.price
-        return json.dumps([[k, int(v)] for k, v in ratio.iteritems()],ensure_ascii=False)
+        return json.dumps([[k, int(v)] for k, v in ratio.iteritems()], ensure_ascii=False)
 
     def planneds(self):
         return len(self.tasks) - self.unplanneds

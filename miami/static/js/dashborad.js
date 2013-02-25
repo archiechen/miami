@@ -86,7 +86,7 @@ $(function() {
       };
       this.model.save([], {
         success: function(model, response, options) {
-          model.set('partner', response.object.partner);
+          model.set({'partner':response.object.partner,'last_updated':response.object.last_updated});
         }
       });
     },
@@ -96,7 +96,7 @@ $(function() {
       };
       this.model.save([], {
         success: function(model, response, options) {
-          model.set('partner', response.object.partner);
+          model.set({'partner':response.object.partner,'last_updated':response.object.last_updated});
         }
       });
     },
@@ -108,7 +108,11 @@ $(function() {
     close: function() {
       if(this.title_input.val() != this.model.get('title')){
         this.model.url = '/tasks'
-        this.model.save({title: this.title_input.val()});
+        this.model.save({title: this.title_input.val()},{
+          success: function(model, response, options) {
+            model.set({'title':response.object.title,'last_updated':response.object.last_updated});
+          }
+        });
       }
       this.$el.removeClass("editing");
     },
