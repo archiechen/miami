@@ -47,6 +47,7 @@ class MiamiTest(unittest.TestCase):
                                       'estimate': 0,
                                       'id': 1,
                                       'last_updated': 'just now',
+                                      'created_time': 'just now',
                                       'owner': {},
                                       'partner': {},
                                       'price': 0,
@@ -66,6 +67,7 @@ class MiamiTest(unittest.TestCase):
                                       'estimate': 0,
                                       'id': 1,
                                       'last_updated': 'just now',
+                                      'created_time': 'just now',
                                       'owner': {},
                                       'partner': {},
                                       'price': 0,
@@ -86,6 +88,7 @@ class MiamiTest(unittest.TestCase):
                                       'estimate': 0,
                                       'id': 1,
                                       'last_updated': 'just now',
+                                      'created_time': 'just now',
                                       'price': 0,
                                       'status': 'NEW',
                                       'owner': {},
@@ -145,6 +148,7 @@ class MiamiTest(unittest.TestCase):
                                   },
                                   "estimate": 0,
                                   'last_updated': 'just now',
+                                  'created_time': 'just now',
                                   "id": 1
                               }
                           ]
@@ -172,6 +176,7 @@ class MiamiTest(unittest.TestCase):
                                   },
                                   "estimate": 0,
                                   "last_updated": "just now",
+                                  'created_time': 'just now',
                                   "id": 1
                               }
                           ]
@@ -214,6 +219,7 @@ class MiamiTest(unittest.TestCase):
                                       'estimate': 10,
                                       'id': 1,
                                       'last_updated': 'just now',
+                                      'created_time': 'just now',
                                       'owner': {'gravater': '91f376c4b36912e5075b6170d312eab5',
                                                 'name': 'Mike'},
                                       'partner': {},

@@ -68,6 +68,7 @@ class PairTest(unittest.TestCase):
                               },
                               "id": 1,
                               'last_updated': 'just now',
+                              'created_time': 'just now',
                               "detail": "detail2"
                           }
                           }, json.loads(rv.data))
@@ -95,6 +96,7 @@ class PairTest(unittest.TestCase):
                                       'estimate': 10,
                                       'id': 1,
                                       'last_updated': 'just now',
+                                      'created_time': 'just now',
                                       'owner': {},
                                       'partner': {},
                                       'price': 10,
@@ -141,6 +143,7 @@ class PairTest(unittest.TestCase):
                   },
                   "id": 1,
                   'last_updated': 'just now',
+                  'created_time': 'just now',
                   "detail": "detail2"
               }
         }, json.loads(rv.data))
