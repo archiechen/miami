@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from flask.ext.login import UserMixin, AnonymousUser, current_user
 from flask import abort, render_template
 from werkzeug.exceptions import BadRequest, Unauthorized, Forbidden
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 
 import math
 import hashlib
@@ -54,6 +54,7 @@ class DoneState(object):
     def to(self, task, status):
         if task.status == 'DONE' and (status == 'READY' or status == 'PROGRESS'):
             if status == 'PROGRESS':
+                current_user.check_progress()
                 task.owner = current_user
         else:
             raise BadRequest
@@ -123,7 +124,11 @@ class Team(db.Model):
     def burning_data(self):
         burnings = Burning.query.filter(
             Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
-        return json.dumps([[b.remaining for b in burnings], [b.burning for b in burnings]])
+        today_remaining = Task.query.session.query(func.sum(Task.price).label('remaining')).filter(
+            or_(Task.status == 'READY', Task.status == 'PROGRESS'), Task.last_updated > utils.today(), Task.team == self).one().remaining
+        today_burning = Task.query.session.query(func.sum(Task.price).label(
+            'burning')).filter(Task.status == 'DONE', Task.last_updated > utils.today(), Task.team == self).one().burning
+        return json.dumps([[b.remaining for b in burnings] + [today_remaining], [b.burning for b in burnings] + [today_burning]])
 
     def daily_meeting_tasks(self):
         return Task.query.filter(Task.team == self, Task.start_time >= utils.yestoday(), Task.start_time < utils.today())
@@ -192,7 +197,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'created_time':utils.pretty_date(self.created_time),'last_updated':utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}}
+        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:

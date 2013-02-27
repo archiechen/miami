@@ -42,6 +42,29 @@
             show: false
           }
       });
+
+      var TeamSelectorView = Backbone.View.extend({
+        el: $("#team_selector"),
+        events: {
+          "click li > a": "select"
+        },
+        initialize: function() {
+          this.current_team = this.$("#current_team");
+          this.current_team.text('{{user.teams[0].name}}');
+          this.$(".dropdown-menu").children(":first").remove();
+          _.bindAll(this, 'select');
+        },
+        select:function(event){
+          this.current_team.text(event.target.text);
+          $.get("/burning/team/"+event.target.name, function(data){
+            plot1.series[0].data = data['remaining'];
+            plot1.series[1].data = data['burning'];
+            plot1.replot({});
+          });
+        }
+      });
+
+      new TeamSelectorView();
     });
   }());
   </script>

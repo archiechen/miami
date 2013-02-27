@@ -42,25 +42,28 @@ def logout():
 def index():
     return render_template('dashborad.html', user=current_user)
 
+
 @app.route('/current_user', methods=['GET'])
 @login_required
 def get_current_user():
     return jsonify(object=current_user.toJSON())
+
 
 @app.route('/categories', methods=['GET'])
 @login_required
 def load_categories():
     return jsonify(objects=[c.toJSON() for c in Category.query.all()])
 
-@app.route('/tasks', methods=['POST','PUT'])
+
+@app.route('/tasks', methods=['POST', 'PUT'])
 @login_required
 def create_task():
     if current_user.teams.count() == 0:
         abort(403)
     jsons = json.loads(request.data)
-    if jsons.get('id',0):
+    if jsons.get('id', 0):
         task = Task.query.get_or_404(jsons.get('id'))
-        task.title = jsons.get('title','')
+        task.title = jsons.get('title', '')
         db.session.commit()
         return jsonify(object=task.toJSON()), 200
     else:
@@ -96,27 +99,32 @@ def load_tasks_page(page):
     for team in current_user.teams:
         team_conditions.append(Task.team == team)
 
-    tasks = Task.query.filter(or_(*team_conditions)).order_by(Task.created_time.desc()).paginate(int(page), per_page=15, error_out=True)
+    tasks = Task.query.filter(
+        or_(*team_conditions)).order_by(Task.created_time.desc()).paginate(int(page), per_page=15, error_out=True)
     return render_template('tasks.html', pagination=tasks, user=current_user)
+
 
 @app.route('/task/<task_id>', methods=['GET'])
 @login_required
 def load_task(task_id):
     return jsonify(object=Task.query.get_or_404(task_id).toJSON())
 
+
 @app.route('/tasks/<status>', methods=['GET'])
 @login_required
 def load_tasks(status):
     team_conditions = [Task.team is None]
-    team_id = int(request.args.get('team_id', '0')) 
-    if team_id > 0 :
+    team_id = int(request.args.get('team_id', '0'))
+    if team_id > 0:
         team_conditions.append(Task.team == Team.query.get_or_404(team_id))
     else:
         for team in current_user.teams:
             team_conditions.append(Task.team == team)
     if status == 'DONE':
         return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions))])
-        #return render_template('task_card.html', tasks=Task.query.filter(Task.start_time > utils.get_current_monday(), Task.status == status, or_(*team_conditions)), user=current_user)
+        # return render_template('task_card.html',
+        # tasks=Task.query.filter(Task.start_time > utils.get_current_monday(),
+        # Task.status == status, or_(*team_conditions)), user=current_user)
     return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.status == status, or_(*team_conditions))])
 
 
@@ -228,3 +236,11 @@ def burning():
 @login_required
 def burning_team(team_id):
     return render_template('burning.html', team=Team.query.get(team_id), user=current_user)
+
+
+@app.route('/burning/team/<team_id>', methods=['GET'])
+@login_required
+def burning_team_ajax(team_id):
+    team = Team.query.get_or_404(team_id)
+    burning_data = json.loads(team.burning_data())
+    return jsonify(remaining=[[idx + 1, value] for idx, value in enumerate(burning_data[0])], burning=[[idx + 1, value] for idx, value in enumerate(burning_data[1])])

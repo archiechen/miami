@@ -6,12 +6,12 @@ os.environ['MIAMI_ENV'] = 'test'
 import miami
 import simplejson as json
 from datetime import datetime, timedelta
-from miami.models import Team, User, Burning
+from miami.models import Team, User, Burning, Task
 from tests import BaseTestCase
 from mockito import when
 
 
-class TeamTest(BaseTestCase):
+class BurningTest(BaseTestCase):
 
     def setUp(self):
         BaseTestCase.setUp(self)
@@ -28,14 +28,23 @@ class TeamTest(BaseTestCase):
         burning.burning = 2
         burning.remaining = 8
         self.create_entity(burning)
-        
+
+        task = Task('title1', 'detail', status='DONE', price=1, estimate=4, team=Team.query.get(1))
+        self.create_entity(task)
+        task = Task('title1', 'detail', status='PROGRESS', price=1, estimate=4, team=Team.query.get(1))
+        self.create_entity(task)
+        task = Task('title1', 'detail', status='READY', price=1, estimate=4, team=Team.query.get(1))
+        self.create_entity(task)
+        task = Task('title1', 'detail', status='NEW', price=1, estimate=4, team=Team.query.get(1))
+        self.create_entity(task)
+
     def test_burning(self):
 
         rv = self.app.get('/burning')
 
         self.assertEquals(200, rv.status_code)
 
-        assert 'var line1=[[10, 8], [1, 2]];' in rv.data
+        assert 'var line1=[[10, 8, 2], [1, 2, 1]];' in rv.data
 
     def test_burning_team(self):
 
@@ -43,4 +52,10 @@ class TeamTest(BaseTestCase):
 
         self.assertEquals(200, rv.status_code)
 
-        assert 'var line1=[[10, 8], [1, 2]];' in rv.data
+        assert 'var line1=[[10, 8, 2], [1, 2, 1]];' in rv.data
+
+    def test_burning_ajax(self):
+
+        rv = self.app.get('/burning/team/1')
+
+        self.assertEquals({'remaining': [[1, 10], [2, 8], [3, 2]], 'burning': [[1, 1], [2, 2], [3, 1]]}, json.loads(rv.data))
