@@ -125,7 +125,7 @@ class Team(db.Model):
         burnings = Burning.query.filter(
             Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
         today_remaining = Task.query.session.query(func.sum(Task.price).label('remaining')).filter(
-            or_(Task.status == 'READY', Task.status == 'PROGRESS'), Task.last_updated > utils.today(), Task.team == self).one().remaining
+            or_(Task.status == 'READY', Task.status == 'PROGRESS'), Task.team == self).one().remaining
         today_burning = Task.query.session.query(func.sum(Task.price).label(
             'burning')).filter(Task.status == 'DONE', Task.last_updated > utils.today(), Task.team == self).one().burning
         return json.dumps([[b.remaining for b in burnings] + [today_remaining], [b.burning for b in burnings] + [today_burning]])
@@ -197,7 +197,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}}
+        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'consuming':'{0:0.2g}'.format(self.consuming/3600.0),'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {},'time_slots':[ts.toJSON() for ts in self.time_slots]}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -246,6 +246,9 @@ class TimeSlot(db.Model):
         self.start_time = start_time
         self.user = user
         self.partner = partner
+
+    def toJSON(self):
+        return {'start_time':utils.pretty_date(self.start_time),'consuming_hours':'{0:0.2g}'.format(self.consuming/3600.0), 'bar_width':'{0:0.2%}'.format(self.consuming/self.task.consuming),'user':self.user.toJSON(),'partner':self.partner.toJSON() if self.partner else {}}
 
 
 class User(db.Model, UserMixin):

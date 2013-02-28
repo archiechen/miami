@@ -244,3 +244,10 @@ def burning_team_ajax(team_id):
     team = Team.query.get_or_404(team_id)
     burning_data = json.loads(team.burning_data())
     return jsonify(remaining=[[idx + 1, value] for idx, value in enumerate(burning_data[0])], burning=[[idx + 1, value] for idx, value in enumerate(burning_data[1])])
+
+@app.route('/burning/tasks', methods=['GET'])
+@login_required
+def burning_tasks():
+    team_id = int(request.args.get('team_id', '0'))
+    return jsonify(objects=[t.toJSON() for t in Team.query.get_or_404(team_id).daily_meeting_tasks()])
+

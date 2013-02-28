@@ -18,7 +18,7 @@
                                 <span class="label label-info">实际工时{{'{0:0.2g}'.format(task.consuming/3600.0)}}Hours</span>
                             </div>
                             {% for ts in task.time_slots %}
-                            <div class="row">
+                            <div id="timeslots{{task.id}}" class="row">
                                 <div class="span5">
                                     {% if ts.partner %}
                                     <img src="{{ ts.partner.email | gravatar(size=20, rating='x') }}">

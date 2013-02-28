@@ -41,7 +41,8 @@ class PairTest(unittest.TestCase):
         return self.app.get('/logout', follow_redirects=True)
 
     def test_join_partner(self):
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11,
+                    11), team=Team.query.get(1))
         task.owner = User.query.get(2)
         create_entity(task)
 
@@ -51,6 +52,19 @@ class PairTest(unittest.TestCase):
         self.assertEquals({
                           "object": {
                               "status": "PROGRESS",
+                              'consuming': '0.017',
+                              "time_slots": [
+                                  {
+                                      "partner": {},
+                                      "start_time": "3 months ago",
+                                      "consuming_hours": "0.017",
+                                      "user": {
+                                          "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                          "name": "Bob"
+                                      },
+                                      "bar_width": "100.00%"
+                                  }
+                              ],
                               "owner": {
                                   "gravater": "91f376c4b36912e5075b6170d312eab5",
                                   "name": "Bob"
@@ -81,7 +95,8 @@ class PairTest(unittest.TestCase):
         self.assertEquals(task.start_time, miami.utils.now())
 
     def test_paired_to_done(self):
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11,
+                    11), team=Team.query.get(1))
         task.owner = User.query.get(1)
         task.partner = User.query.get(2)
         task.start_time = datetime(2012, 11, 11, 0, 1, 0)
@@ -101,8 +116,34 @@ class PairTest(unittest.TestCase):
                                       'partner': {},
                                       'price': 10,
                                       'status': 'DONE',
-                                      'team': {'color': '2a33d8', 'name': 'Log'},
-                                      'title': 'title2'}}, json.loads(rv.data))
+                                      "consuming": "0.033",
+                                      "time_slots": [
+                                      {
+            "partner": {},
+                                          "start_time": "3 months ago",
+                                          "consuming_hours": "0.017",
+                                          "user": {
+                                              "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                              "name": "Mike"
+                                          },
+                                          "bar_width": "50.00%"
+                                      },
+                                          {
+                                              "partner": {
+                                                  "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                                  "name": "Bob"
+                                              },
+                                              "start_time": "3 months ago",
+                                              "consuming_hours": "0.017",
+                                              "user": {
+                                                  "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                                  "name": "Mike"
+                                              },
+                                              "bar_width": "50.00%"
+                                          }
+                                      ],
+            'team': {'color': '2a33d8', 'name': 'Log'},
+            'title': 'title2'}}, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
@@ -117,7 +158,8 @@ class PairTest(unittest.TestCase):
         self.assertEquals('Bob', task.time_slots[1].partner.name)
 
     def test_leave_paired(self):
-        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
+        task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11,
+                    11), team=Team.query.get(1))
         task.owner = User.query.get(2)
         task.partner = User.query.get(1)
         create_entity(task)
@@ -125,28 +167,45 @@ class PairTest(unittest.TestCase):
         rv = self.app.put('/leavetask/1')
 
         self.assertEquals(200, rv.status_code)
+        print rv.data
         self.assertEquals({
-              "object": {
-                  "status": "PROGRESS",
-                  "owner": {
-              "gravater": "91f376c4b36912e5075b6170d312eab5",
-              "name": "Bob"
-                  },
-                  "title": "title2",
-                  "estimate": 10,
-                  "partner": {
-                  },
-                  "price": 10,
-                  "team": {
-              "color": "2a33d8",
-              "name": "Log"
-                  },
-                  "id": 1,
-                  'last_updated': 'just now',
-                  'created_time': 'just now',
-                  "detail": "detail2"
-              }
-        }, json.loads(rv.data))
+                          "object": {
+                              "status": "PROGRESS",
+                              "owner": {
+                                  "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                  "name": "Bob"
+                              },
+                              "consuming": "0.017",
+                              "time_slots": [
+                                  {
+                                      "partner": {
+                                          "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                          "name": "Mike"
+                                      },
+                                      "start_time": "3 months ago",
+                                      "consuming_hours": "0.017",
+                                      "user": {
+                                          "gravater": "91f376c4b36912e5075b6170d312eab5",
+                                          "name": "Bob"
+                                      },
+                                      "bar_width": "100.00%"
+                                  }
+                              ],
+                              "title": "title2",
+                              "estimate": 10,
+                              "partner": {
+                              },
+                              "price": 10,
+                              "team": {
+                                  "color": "2a33d8",
+                                  "name": "Log"
+                              },
+                              "id": 1,
+                              'last_updated': 'just now',
+                              'created_time': 'just now',
+                              "detail": "detail2"
+                          }
+                          }, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)

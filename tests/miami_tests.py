@@ -52,7 +52,9 @@ class MiamiTest(unittest.TestCase):
                                       'partner': {},
                                       'price': 0,
                                       'status': 'NEW',
+                                      'consuming': '0',
                                       'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'time_slots': [],
                                       'title': 'title1'}}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
@@ -73,6 +75,8 @@ class MiamiTest(unittest.TestCase):
                                       'price': 0,
                                       'status': 'NEW',
                                       'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'time_slots': [],
+                                      'consuming': '0',
                                       'title': 'title1'}}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
@@ -94,6 +98,8 @@ class MiamiTest(unittest.TestCase):
                                       'owner': {},
                                       'partner': {},
                                       'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'time_slots': [],
+                                      'consuming': '0',
                                       'title': 'title1'}}, json.loads(rv.data))
 
         task = miami.Task.query.get(1)
@@ -146,6 +152,8 @@ class MiamiTest(unittest.TestCase):
                                       "color": "2a33d8",
                                       "name": "Log"
                                   },
+                                  'time_slots': [],
+                                  'consuming': '0',
                                   "estimate": 0,
                                   'last_updated': 'just now',
                                   'created_time': 'just now',
@@ -175,6 +183,8 @@ class MiamiTest(unittest.TestCase):
                                       "name": "Log"
                                   },
                                   "estimate": 0,
+                                  'time_slots': [],
+                                  'consuming': '0',
                                   "last_updated": "just now",
                                   'created_time': 'just now',
                                   "id": 1
@@ -226,6 +236,8 @@ class MiamiTest(unittest.TestCase):
                                       'price': 0,
                                       'status': 'PROGRESS',
                                       'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'time_slots': [],
+                                      'consuming': '0',
                                       'title': 'title1'}}, json.loads(rv.data))
 
         task = Task.query.get(1)

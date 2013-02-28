@@ -1,10 +1,48 @@
-{% from 'macros.html' import task_accordion %} 
 {% extends "layout.html" %}
 {% block body %}
 <div class="row">
 <div id="burning_chart" class="jqplot-target span12" style="height: 400px;"></div>
 </div>
-{{task_accordion(team.daily_meeting_tasks())}}
+<div class="accordion" id="accordion2">
+</div>
+
+<script type="text/template" id="task-template">
+    <div class="accordion-heading">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse<%=id%>">
+            <%=title%>
+            <span class="badge"><%=status%></span>
+            <span class="badge"><%=price%></span>
+            <span class="badge badge-info"><%=estimate%>Hours</span>
+            <span class="label label-info">实际工时<%=consuming%>Hours</span>
+        </a>
+    </div>
+    <div id="collapse<%=id%>" class="accordion-body collapse" style="height: 0px; ">
+        <div class="accordion-inner">
+            <div class="span8">
+                <div id="timeslots" class="row">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="timeslots-template">
+  <div class="span5">
+      <% if (partner != {}) { %>
+        <img src="http://gravatar.com/avatar/<%=partner.gravater%>?s=20&amp;d=retro&amp;r=x" title="<%=partner.name%>">
+      <% } else { %>
+        <div style="float:left;height:20px;width:20px;margin: 2px"></div>
+      <% } %>
+      <img src="http://gravatar.com/avatar/<%=user.gravater%>?s=20&amp;d=retro&amp;r=x" title="<%=user.name%>">
+      <div class="progress">
+          <div class="bar" style="width: <%=bar_width%>"><%=consuming_hours%>Hours</div>
+      </div>
+  </div>
+  <div class="span3">
+      <span class="label">Start@<%=start_time%></span>
+  </div>
+</script>
 <script type="text/javascript">
   (function() { 
     "use strict";
@@ -43,6 +81,68 @@
           }
       });
 
+      var Task = Backbone.Model.extend({
+        defaults: function() {
+          return {
+            price: 0,
+            estimate: 0,
+            detail: ''
+          };
+        },
+
+        initialize: function() {
+          if(!this.get("price")) {
+            this.set({
+              "price": this.defaults().price
+            });
+          }
+          if(!this.get("estimate")) {
+            this.set({
+              "estimate": this.defaults().estimate
+            });
+          }
+          if(!this.get("detail")) {
+            this.set({
+              "detail": this.defaults().detail
+            });
+          }
+        }
+      });
+
+      var TaskView = Backbone.View.extend({
+        tagName: "div",
+        className: "accordion-group",
+
+        template: _.template($('#task-template').html()),
+        timeslot_tmpl: _.template($('#timeslots-template').html()),
+        
+        initialize: function() {
+          this.model.on('change', this.render, this);
+          _.bindAll(this, 'addTimeslot');
+        },
+        addTimeslot:function(ts){
+          this.$('#timeslots').append(this.timeslot_tmpl(ts))
+        },
+        render: function() {
+          var jsonModel = this.model.toJSON();
+          this.$el.html(this.template(jsonModel));
+          _.each(jsonModel.time_slots,this.addTimeslot);
+          return this;
+        }
+      });
+
+      var TaskList = Backbone.Collection.extend({
+        url: function() {
+          return '/burning/tasks';
+        },
+        model: Task,
+        parse: function(response) {
+          return response.objects;
+        }
+      });
+
+      var tasks = new TaskList()
+
       var TeamSelectorView = Backbone.View.extend({
         el: $("#team_selector"),
         events: {
@@ -59,12 +159,52 @@
           $.get("/burning/team/"+event.target.name, function(data){
             plot1.series[0].data = data['remaining'];
             plot1.series[1].data = data['burning'];
-            plot1.replot({});
+            plot1.replot({resetAxes:true});
           });
+          tasks.fetch({data:{team_id:event.target.name}});
+        }
+      });
+
+
+      var TaskListView = Backbone.View.extend({
+        el: $("#accordion2"),
+        initialize: function() {
+          _.bindAll(this, 'addOne');
+          tasks.on('add', this.addOne, this);
+          tasks.on('reset', this.addAll, this);
+
+          $.get("/burning/team/"+{{user.teams[0].id}}, function(data){
+            plot1.series[0].data = data['remaining'];
+            plot1.series[1].data = data['burning'];
+            plot1.replot({resetAxes:true});
+          });
+          tasks.fetch({data:{team_id:{{user.teams[0].id}}}});
+        },
+        select:function(event){
+          this.current_team.text(event.target.text);
+          $.get("/burning/team/"+event.target.name, function(data){
+            plot1.series[0].data = data['remaining'];
+            plot1.series[1].data = data['burning'];
+            plot1.replot({resetAxes:true});
+          });
+        },
+
+        addOne: function(task) {
+          var view = new TaskView({
+            model: task
+          });
+          view.render().$el.appendTo(this.$el);
+        },
+
+        addAll: function() {
+          this.$el.empty();
+          tasks.each(this.addOne);
         }
       });
 
       new TeamSelectorView();
+
+      new TaskListView();
     });
   }());
   </script>
