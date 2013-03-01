@@ -116,8 +116,8 @@ $(function() {
   /* Priority Slider */
   $("#prioritySlider").slider({
     range: "min",
-    value: 0,
-    min: 0,
+    value: 5,
+    min: 5,
     max: 100,
     step: 5,
     slide: function(event, ui) {
