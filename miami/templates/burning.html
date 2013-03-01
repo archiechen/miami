@@ -29,7 +29,7 @@
 
 <script type="text/template" id="timeslots-template">
   <div class="span5">
-      <% if (partner != {}) { %>
+      <% if (typeof(partner.gravatar) != "undefined") { %>
         <img src="http://gravatar.com/avatar/<%=partner.gravater%>?s=20&amp;d=retro&amp;r=x" title="<%=partner.name%>">
       <% } else { %>
         <div style="float:left;height:20px;width:20px;margin: 2px"></div>

@@ -119,7 +119,7 @@ class PairTest(unittest.TestCase):
                                       "consuming": "0.033",
                                       "time_slots": [
                                       {
-            "partner": {},
+                                          "partner": {},
                                           "start_time": "3 months ago",
                                           "consuming_hours": "0.017",
                                           "user": {
@@ -142,8 +142,8 @@ class PairTest(unittest.TestCase):
                                               "bar_width": "50.00%"
                                           }
                                       ],
-            'team': {'color': '2a33d8', 'name': 'Log'},
-            'title': 'title2'}}, json.loads(rv.data))
+                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'title': 'title2'}}, json.loads(rv.data))
 
         task = Task.query.get(1)
         self.assertIsNone(task.partner)
