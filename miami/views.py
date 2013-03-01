@@ -3,7 +3,7 @@ from miami import app, db, utils
 from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData, Category
 from flask.ext.login import login_user, logout_user, login_required, current_user
 from datetime import datetime, timedelta
-from sqlalchemy import or_
+from sqlalchemy import or_, desc
 import simplejson as json
 
 price_colors = {1: 'btn-success', 2: 'btn-info', 5: 'btn-primary', 10: 'btn-warning'}
@@ -74,7 +74,8 @@ def create_task():
         if status == 'READY' and price == 0:
             abort(403)
 
-        task = Task(jsons.get('title'), jsons.get('detail'), status=status, price=price, team=current_user.teams[0])
+        task = Task(jsons.get('title'), jsons.get(
+            'detail'), priority=jsons.get('priority', 100), status=status, price=price, team=current_user.teams[0])
         for category_name in jsons.get('categories', '').split(','):
             category = Category.query.filter(Category.name == category_name).first()
             if category:
@@ -125,7 +126,7 @@ def load_tasks(status):
         # return render_template('task_card.html',
         # tasks=Task.query.filter(Task.start_time > utils.get_current_monday(),
         # Task.status == status, or_(*team_conditions)), user=current_user)
-    return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.status == status, or_(*team_conditions))])
+    return jsonify(objects=[t.toJSON() for t in Task.query.filter(Task.status == status, or_(*team_conditions)).order_by(desc(Task.priority))])
 
 
 @app.route('/estimate/<tid>/<estimate>', methods=['PUT'])
@@ -245,9 +246,9 @@ def burning_team_ajax(team_id):
     burning_data = json.loads(team.burning_data())
     return jsonify(remaining=[[idx + 1, value] for idx, value in enumerate(burning_data[0])], burning=[[idx + 1, value] for idx, value in enumerate(burning_data[1])])
 
+
 @app.route('/burning/tasks', methods=['GET'])
 @login_required
 def burning_tasks():
     team_id = int(request.args.get('team_id', '0'))
     return jsonify(objects=[t.toJSON() for t in Team.query.get_or_404(team_id).daily_meeting_tasks()])
-

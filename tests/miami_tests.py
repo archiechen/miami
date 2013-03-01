@@ -40,7 +40,7 @@ class MiamiTest(unittest.TestCase):
         return self.app.get('/logout', follow_redirects=True)
 
     def test_create_task(self):
-        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1"}')
+        rv = self.app.post('/tasks', data='{"title":"title1","detail":"detail1","priority":10}')
 
         self.assertEquals(201, rv.status_code)
         self.assertEquals({'object': {'detail': 'detail1',
@@ -53,6 +53,7 @@ class MiamiTest(unittest.TestCase):
                                       'price': 0,
                                       'status': 'NEW',
                                       'consuming': '0',
+                                      'priority': 10,
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
                                       'title': 'title1'}}, json.loads(rv.data))
@@ -73,6 +74,7 @@ class MiamiTest(unittest.TestCase):
                                       'owner': {},
                                       'partner': {},
                                       'price': 0,
+                                      'priority': 100,
                                       'status': 'NEW',
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
@@ -99,6 +101,7 @@ class MiamiTest(unittest.TestCase):
                                       'partner': {},
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
+                                      'priority': 100,
                                       'consuming': '0',
                                       'title': 'title1'}}, json.loads(rv.data))
 
@@ -154,6 +157,7 @@ class MiamiTest(unittest.TestCase):
                                   },
                                   'time_slots': [],
                                   'consuming': '0',
+                                  'priority': 100,
                                   "estimate": 0,
                                   'last_updated': 'just now',
                                   'created_time': 'just now',
@@ -183,6 +187,7 @@ class MiamiTest(unittest.TestCase):
                                       "name": "Log"
                                   },
                                   "estimate": 0,
+                                  'priority': 100,
                                   'time_slots': [],
                                   'consuming': '0',
                                   "last_updated": "just now",
@@ -238,6 +243,7 @@ class MiamiTest(unittest.TestCase):
                                       'team': {'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
                                       'consuming': '0',
+                                      'priority': 100,
                                       'title': 'title1'}}, json.loads(rv.data))
 
         task = Task.query.get(1)

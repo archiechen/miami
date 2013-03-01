@@ -53,6 +53,7 @@ $(function() {
     }
   });
 
+
   var CategoryList = Backbone.Collection.extend({
     url: function() {
       return '/categories';
@@ -209,11 +210,25 @@ $(function() {
           that.show();
         }
       });
+      /* Priority Slider */
+      this.$("#prioritySlider").slider({
+        range: "min",
+        value: 0,
+        min: 0,
+        max: 100,
+        step: 5,
+        slide: function(event, ui) {
+          that.$("#priorityAmount").text(ui.value);
+        }
+      });
+
+      this.$("#priorityAmount").text(this.$("#prioritySlider").slider("value"));
     },
     pricingTask: function(event) {
       var that = this;
       var task = new Task({
         title: this.$('#title').val(),
+        priority: this.$("#prioritySlider").slider("value"),
         categories: this.$('#tags').val(),
         status: 'READY',
         price: parseInt(event.target.value)
@@ -222,6 +237,7 @@ $(function() {
       task.save([], {
         success: function(model, response, options) {
           that.options.tasks.add(response.object);
+          that.options.tasks.sort();
           that.$el.modal('hide');
         }
       });
@@ -263,6 +279,9 @@ $(function() {
       var that = this;
       this.tasks_ul = this.$('#taskcard_list');
       this.tasks = this.options.tasks;
+      this.tasks.comparator = function(task) {
+        return 100-task.get("priority");
+      };
       this.from_task_lists = this.options.from_task_lists;
       this.tasks.on('add', this.addOne, this);
       this.tasks.on('reset', this.addAll, this);
@@ -283,6 +302,7 @@ $(function() {
                   ui.draggable.fadeOut(function() {
                     from.remove(draggableTask);
                     that.tasks.push(new Task(response.object));
+                    that.tasks.sort();
                   });
                 }
               draggableTask.save([], {

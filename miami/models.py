@@ -42,7 +42,8 @@ class ReadyState(object):
 class ProgressState(object):
     def to(self, task, status):
         if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-            task.append_timeslot(TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
+            task.append_timeslot(
+                TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
             task.partner = None
             task.owner = None
         else:
@@ -162,6 +163,7 @@ class Task(db.Model):
     status = db.Column(db.String(10), default='NEW')
     price = db.Column(db.Integer, default=0)
     estimate = db.Column(db.Integer, default=0)
+    priority = db.Column(db.Integer, default=100)
     created_time = db.Column(db.DateTime, default=datetime.now)
     ready_time = db.Column(db.DateTime)
     start_time = db.Column(db.DateTime)
@@ -179,11 +181,12 @@ class Task(db.Model):
     categories = db.relationship('Category', secondary=categories,
                                  backref=db.backref('tasks', lazy='dynamic'))
 
-    def __init__(self, title, detail, estimate=0, price=0, status='NEW', start_time=datetime.now(), ready_time=None, team=None):
+    def __init__(self, title, detail, estimate=0, price=0, priority=100, status='NEW', start_time=datetime.now(), ready_time=None, team=None):
         self.title = title
         self.detail = detail
         self.price = price
         self.estimate = estimate
+        self.priority = priority
         self.status = status
         self.start_time = start_time
         self.ready_time = ready_time
@@ -196,7 +199,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'consuming': '{0:0.2g}'.format(self.consuming / 3600.0), 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}, 'time_slots': [ts.toJSON() for ts in self.time_slots]}
+        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'priority':self.priority, 'consuming': '{0:0.2g}'.format(self.consuming / 3600.0), 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}, 'time_slots': [ts.toJSON() for ts in self.time_slots]}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -229,7 +232,7 @@ class Task(db.Model):
         global price_colors
         return price_colors[self.price]
 
-    def append_timeslot(self,timeslot):
+    def append_timeslot(self, timeslot):
         if timeslot.consuming > 600:
             self.time_slots.append(timeslot)
 

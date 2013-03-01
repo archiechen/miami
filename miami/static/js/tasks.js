@@ -4,24 +4,24 @@ $(function() {
   var Task = Backbone.Model.extend({
     defaults: function() {
       return {
-        price:0,
-        estimate:0,
-        detail:''
+        price: 0,
+        estimate: 0,
+        detail: ''
       };
     },
 
     initialize: function() {
-      if(!this.get("price")) {
+      if (!this.get("price")) {
         this.set({
           "price": this.defaults().price
         });
       }
-      if(!this.get("estimate")) {
+      if (!this.get("estimate")) {
         this.set({
           "estimate": this.defaults().estimate
         });
       }
-      if(!this.get("detail")) {
+      if (!this.get("detail")) {
         this.set({
           "detail": this.defaults().detail
         });
@@ -63,11 +63,12 @@ $(function() {
     saveTask: function(task) {
       var that = this;
       var newTask
-      if(task instanceof Task) {
+      if (task instanceof Task) {
         newTask = task;
       } else {
         newTask = new Task({
           title: this.$('#title').val(),
+          priority: this.$("#prioritySlider").slider("value"),
           categories: this.$('#tags').val(),
           status: 'NEW'
         });
@@ -82,6 +83,7 @@ $(function() {
     pricingTask: function(event) {
       var task = new Task({
         title: this.$('#title').val(),
+        priority: this.$("#prioritySlider").slider("value"),
         categories: this.$('#tags').val(),
         status: 'NEW',
         price: parseInt(event.target.value)
@@ -110,5 +112,19 @@ $(function() {
   });
 
   var taskForm = new TaskForm;
+
+  /* Priority Slider */
+  $("#prioritySlider").slider({
+    range: "min",
+    value: 0,
+    min: 0,
+    max: 100,
+    step: 5,
+    slide: function(event, ui) {
+      $("#priorityAmount").text(ui.value);
+    }
+  });
+
+  $("#priorityAmount").text($("#prioritySlider").slider("value"));
 
 });

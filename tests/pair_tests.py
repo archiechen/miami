@@ -71,6 +71,7 @@ class PairTest(unittest.TestCase):
                               },
                               "title": "title2",
                               "estimate": 10,
+                              'priority': 100,
                               "partner": {
                                   "gravater": "91f376c4b36912e5075b6170d312eab5",
                                   "name": "Mike"
@@ -117,6 +118,7 @@ class PairTest(unittest.TestCase):
                                       'price': 10,
                                       'status': 'DONE',
                                       "consuming": "2",
+                                      'priority': 100,
                                       "time_slots": [
                                       {
                                           "partner": {},
@@ -175,6 +177,7 @@ class PairTest(unittest.TestCase):
                                   "name": "Bob"
                               },
                               "consuming": "1",
+                              'priority': 100,
                               "time_slots": [
                                   {
                                       "partner": {
