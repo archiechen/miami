@@ -42,8 +42,7 @@ class ReadyState(object):
 class ProgressState(object):
     def to(self, task, status):
         if task.status == 'PROGRESS' and (status == 'READY' or status == 'DONE'):
-            task.time_slots.append(
-                TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
+            task.append_timeslot(TimeSlot(task.start_time, (utils.now() - task.start_time).total_seconds(), current_user, partner=task.partner))
             task.partner = None
             task.owner = None
         else:
@@ -197,7 +196,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'consuming':'{0:0.2g}'.format(self.consuming/3600.0),'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {},'time_slots':[ts.toJSON() for ts in self.time_slots]}
+        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'consuming': '{0:0.2g}'.format(self.consuming / 3600.0), 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}, 'time_slots': [ts.toJSON() for ts in self.time_slots]}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -230,6 +229,10 @@ class Task(db.Model):
         global price_colors
         return price_colors[self.price]
 
+    def append_timeslot(self,timeslot):
+        if timeslot.consuming > 600:
+            self.time_slots.append(timeslot)
+
 
 class TimeSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -248,7 +251,7 @@ class TimeSlot(db.Model):
         self.partner = partner
 
     def toJSON(self):
-        return {'start_time':utils.pretty_date(self.start_time),'consuming_hours':'{0:0.2g}'.format(self.consuming/3600.0), 'bar_width':'{0:0.2%}'.format(self.consuming/self.task.consuming),'user':self.user.toJSON(),'partner':self.partner.toJSON() if self.partner else {}}
+        return {'start_time': utils.pretty_date(self.start_time), 'consuming_hours': '{0:0.2g}'.format(self.consuming / 3600.0), 'bar_width': '{0:0.2%}'.format(self.consuming / self.task.consuming), 'user': self.user.toJSON(), 'partner': self.partner.toJSON() if self.partner else {}}
 
 
 class User(db.Model, UserMixin):
@@ -277,7 +280,8 @@ class User(db.Model, UserMixin):
         task = Task.query.get_or_404(tid)
         task.partner = self
         current_time = utils.now()
-        task.time_slots.append(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
+        print current_time
+        task.append_timeslot(TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner))
         task.start_time = current_time
         db.session.commit()
         return task
@@ -286,7 +290,7 @@ class User(db.Model, UserMixin):
         task = Task.query.get_or_404(tid)
         task.partner = None
         current_time = utils.now()
-        task.time_slots.append(
+        task.append_timeslot(
             TimeSlot(task.start_time, (current_time - task.start_time).total_seconds(), task.owner, partner=self))
         task.start_time = current_time
         db.session.commit()

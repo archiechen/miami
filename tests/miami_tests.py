@@ -24,7 +24,7 @@ class MiamiTest(unittest.TestCase):
         team.members.append(User('Mike'))
         create_entity(team)
         create_entity(Category('BUG'))
-        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 1, 0, 0))
         self.login('Mike', '')
 
     def tearDown(self):
@@ -279,13 +279,13 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(200, rv.status_code)
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
-        self.assertEquals(60, task.consuming)
+        self.assertEquals(3600, task.consuming)
         self.assertEquals(1, task.time_slots[0].user.id)
 
     def test_multi_timeslots(self):
         create_entity(User('Bob'))
         task = Task('title2', 'detail2', estimate=10, price=10, status='PROGRESS', start_time=datetime(2012, 11, 11), team=Team.query.get(1))
-        task.time_slots.append(TimeSlot(task.start_time, 20, User.query.get(1)))
+        task.time_slots.append(TimeSlot(task.start_time, 3600, User.query.get(1)))
         task.owner = User.query.get(2)
         create_entity(task)
         self.logout()
@@ -296,7 +296,7 @@ class MiamiTest(unittest.TestCase):
         self.assertEquals(200, rv.status_code)
         task = Task.query.get(1)
         self.assertEquals('READY', task.status)
-        self.assertEquals(80, task.consuming)
+        self.assertEquals(7200, task.consuming)
         self.assertEquals(1, task.time_slots[0].user.id)
         self.assertEquals(2, task.time_slots[1].user.id)
 

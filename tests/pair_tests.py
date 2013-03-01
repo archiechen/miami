@@ -25,7 +25,7 @@ class PairTest(unittest.TestCase):
         team.members.append(User('Bob'))
 
         create_entity(team)
-        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 0, 1, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 1, 0, 0))
         self.login('Mike', '')
 
     def tearDown(self):
@@ -50,14 +50,14 @@ class PairTest(unittest.TestCase):
 
         self.assertEquals(200, rv.status_code)
         self.assertEquals({
-                          "object": {
+                            "object": {
                               "status": "PROGRESS",
-                              'consuming': '0.017',
+                              'consuming': '1',
                               "time_slots": [
                                   {
                                       "partner": {},
                                       "start_time": "3 months ago",
-                                      "consuming_hours": "0.017",
+                                      "consuming_hours": "1",
                                       "user": {
                                           "gravater": "91f376c4b36912e5075b6170d312eab5",
                                           "name": "Bob"
@@ -84,12 +84,12 @@ class PairTest(unittest.TestCase):
                               'last_updated': 'just now',
                               'created_time': 'just now',
                               "detail": "detail2"
-                          }
+                            }
                           }, json.loads(rv.data))
         task = Task.query.get(1)
         self.assertEquals(1, task.time_slots.count())
         self.assertEquals('PROGRESS', task.status)
-        self.assertEquals(60, task.time_slots[0].consuming)
+        self.assertEquals(3600, task.time_slots[0].consuming)
         self.assertEquals('Bob', task.time_slots[0].user.name)
         self.assertIsNone(task.time_slots[0].partner)
         self.assertEquals(task.start_time, miami.utils.now())
@@ -99,11 +99,11 @@ class PairTest(unittest.TestCase):
                     11), team=Team.query.get(1))
         task.owner = User.query.get(1)
         task.partner = User.query.get(2)
-        task.start_time = datetime(2012, 11, 11, 0, 1, 0)
-        task.time_slots.append(TimeSlot(task.start_time, 60, task.owner))
+        task.start_time = datetime(2012, 11, 11, 1, 0, 0)
+        task.time_slots.append(TimeSlot(task.start_time, 3600, task.owner))
         create_entity(task)
 
-        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 0, 2, 0))
+        when(miami.utils).now().thenReturn(datetime(2012, 11, 11, 2, 0, 0))
         rv = self.app.put('/tasks/DONE/1')
 
         self.assertEquals(200, rv.status_code)
@@ -116,12 +116,12 @@ class PairTest(unittest.TestCase):
                                       'partner': {},
                                       'price': 10,
                                       'status': 'DONE',
-                                      "consuming": "0.033",
+                                      "consuming": "2",
                                       "time_slots": [
                                       {
                                           "partner": {},
                                           "start_time": "3 months ago",
-                                          "consuming_hours": "0.017",
+                                          "consuming_hours": "1",
                                           "user": {
                                               "gravater": "91f376c4b36912e5075b6170d312eab5",
                                               "name": "Mike"
@@ -134,7 +134,7 @@ class PairTest(unittest.TestCase):
                                                   "name": "Bob"
                                               },
                                               "start_time": "3 months ago",
-                                              "consuming_hours": "0.017",
+                                              "consuming_hours": "1",
                                               "user": {
                                                   "gravater": "91f376c4b36912e5075b6170d312eab5",
                                                   "name": "Mike"
@@ -150,10 +150,10 @@ class PairTest(unittest.TestCase):
         self.assertIsNone(task.owner)
         self.assertEquals('DONE', task.status)
         self.assertEquals(2, task.time_slots.count())
-        self.assertEquals(60, task.time_slots[0].consuming)
+        self.assertEquals(3600, task.time_slots[0].consuming)
         self.assertEquals('Mike', task.time_slots[0].user.name)
         self.assertIsNone(task.time_slots[0].partner)
-        self.assertEquals(60, task.time_slots[1].consuming)
+        self.assertEquals(3600, task.time_slots[1].consuming)
         self.assertEquals('Mike', task.time_slots[1].user.name)
         self.assertEquals('Bob', task.time_slots[1].partner.name)
 
@@ -167,7 +167,6 @@ class PairTest(unittest.TestCase):
         rv = self.app.put('/leavetask/1')
 
         self.assertEquals(200, rv.status_code)
-        print rv.data
         self.assertEquals({
                           "object": {
                               "status": "PROGRESS",
@@ -175,7 +174,7 @@ class PairTest(unittest.TestCase):
                                   "gravater": "91f376c4b36912e5075b6170d312eab5",
                                   "name": "Bob"
                               },
-                              "consuming": "0.017",
+                              "consuming": "1",
                               "time_slots": [
                                   {
                                       "partner": {
@@ -183,7 +182,7 @@ class PairTest(unittest.TestCase):
                                           "name": "Mike"
                                       },
                                       "start_time": "3 months ago",
-                                      "consuming_hours": "0.017",
+                                      "consuming_hours": "1",
                                       "user": {
                                           "gravater": "91f376c4b36912e5075b6170d312eab5",
                                           "name": "Bob"
@@ -211,8 +210,8 @@ class PairTest(unittest.TestCase):
         self.assertIsNone(task.partner)
         self.assertEquals('PROGRESS', task.status)
         self.assertEquals(1, task.time_slots.count())
-        self.assertEquals(datetime(2012, 11, 11, 0, 1, 0), task.start_time)
-        self.assertEquals(60, task.time_slots[0].consuming)
+        self.assertEquals(datetime(2012, 11, 11, 1, 0, 0), task.start_time)
+        self.assertEquals(3600, task.time_slots[0].consuming)
         self.assertEquals('Bob', task.time_slots[0].user.name)
         self.assertEquals('Mike', task.time_slots[0].partner.name)
 
