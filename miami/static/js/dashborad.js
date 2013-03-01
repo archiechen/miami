@@ -80,6 +80,7 @@ $(function() {
     },
     initialize: function() {
       this.model.on('change', this.render, this);
+      _.bindAll(this, 'edit');
     },
     join: function() {
       this.model.url = function() {
@@ -102,8 +103,10 @@ $(function() {
       });
     },
     edit:function(){
-      this.$el.addClass('editing');
-      this.title_input.focus();
+      if(this.model.get('status')!='DONE'){
+        this.$el.addClass('editing');
+        this.title_input.focus();
+      }
     },
     // Close the `"editing"` mode, saving changes to the todo.
     close: function() {
