@@ -64,6 +64,7 @@ def create_task():
     if jsons.get('id', 0):
         task = Task.query.get_or_404(jsons.get('id'))
         task.title = jsons.get('title', '')
+        task.detail = jsons.get('detail', '')
         db.session.commit()
         return jsonify(object=task.toJSON()), 200
     else:
@@ -75,7 +76,7 @@ def create_task():
             abort(403)
 
         task = Task(jsons.get('title'), jsons.get(
-            'detail'), priority=jsons.get('priority', 100), status=status, price=price, team=current_user.teams[0])
+            'detail',''), priority=jsons.get('priority', 100), status=status, price=price, team=current_user.teams[0])
         for category_name in jsons.get('categories', '').split(','):
             category = Category.query.filter(Category.name == category_name).first()
             if category:

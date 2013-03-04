@@ -20,7 +20,7 @@
     padding: 0.2em;
     width: 164px;
 }
-.ui-tasks li a { cursor: move; margin: 0 0 0.4em; }
+.ui-tasks li a {  margin: 0.4em; }
 .ui-tasks li p { float: left; margin: 0 2px 2px; }
 .ui-tasks li h6 { margin: 0em; color:#ddd;}
 .ui-tasks li .left { float: left; width: 38%; }
@@ -92,6 +92,14 @@
 .ui-teams h5 { height: 25px; margin: 0.1em 0.1em 0 0.1em; width: 100%; }
 
 .ui-teams .members { height: 65px; margin: 0.1em; width: 100%; }
+
+.modal-body textarea {
+    font-size: 16px;
+    height: auto;
+    width: 90%;
+    margin-bottom: 15px;
+    padding: 7px 9px;
+}
 
 .ui-charts {
     border: 0px;

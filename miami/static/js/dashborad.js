@@ -76,11 +76,13 @@ $(function() {
       "click .btn-leave": "leave",
       "dblclick .title": "edit",
       "keypress .edit"  : "updateOnEnter",
-      "blur .edit"      : "close"
+      "blur .edit"      : "close",
+      "click #comments" : "show_detail"
     },
     initialize: function() {
       this.model.on('change', this.render, this);
       _.bindAll(this, 'edit');
+      _.bindAll(this, 'show_detail');
     },
     join: function() {
       this.model.url = function() {
@@ -119,6 +121,10 @@ $(function() {
         });
       }
       this.$el.removeClass("editing");
+    },
+
+    show_detail: function(){
+      new BigTaskCard({model:this.model});
     },
 
     // If you hit `enter`, we're through editing the item.
@@ -190,6 +196,38 @@ $(function() {
     }
   });
 
+  var BigTaskCard = Backbone.View.extend({
+    el: $('#modalForm'),
+    templ: _.template($('#bigtaskcard-template').html()),
+    events: {
+      "click #save": "save"
+    },
+    initialize: function() {
+      var that = this;
+      this.$el.on('hidden', function() {
+        that.remove();
+      });
+      this.render();
+      this.show();
+    },
+    save: function(event) {
+      this.model.url = "/tasks";
+      var that = this;
+      this.model.save({detail: this.$('#detail').val()},{
+        success: function(model, response, options) {
+          that.$el.modal('hide');
+          model.set({'detail':response.object.detail,'last_updated':response.object.last_updated});
+        }
+      });
+    },
+    render: function() {
+      this.$el.html(this.templ(this.model.toJSON()));
+      return this;
+    },
+    show: function() {
+      this.$el.modal('show');
+    }
+  });
 
   var TaskForm = Backbone.View.extend({
     el: $('#modalForm'),
