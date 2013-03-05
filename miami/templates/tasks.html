@@ -16,6 +16,7 @@
         <td>Status</td>
         <td>Title</td>
         <td>Created</td>
+        <td>Operations</td>
       </tr>
     </thead>
     <tbody>
@@ -26,6 +27,7 @@
         <td>{{task.status}}</td>
         <td>{{task.title}}</td>
         <td>{{task.created_time}}</td>
+        <td><a href="#" class="delete" name="{{task.id}}">Delete</a></td>
       </tr>
       {% endfor %}
     {% endif %}
@@ -78,4 +80,28 @@
 {{task_form()}}
 </script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+
+<script type="text/javascript">
+  (function() {
+    "use strict";
+    $(document).ready(function() {
+      $('.delete').click(function(){
+        var that = this;
+        bootbox.confirm("Are you sure?", function(result) {
+          if(result){
+            var request = $.ajax({
+              url: "/api/task/"+that.name,
+              type: "DELETE",
+              dataType: "json"
+            });
+            request.done(function(){
+              alert('deleted!');
+              location.reload();
+            });
+          }
+        }); 
+      });
+    });  
+  }());
+</script>
 {% endblock %}
