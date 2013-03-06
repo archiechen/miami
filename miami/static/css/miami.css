@@ -1,7 +1,9 @@
 .ui-tasks {
     border: 1px solid #AAA;
+    border-radius:5px;
     float: left;
-    margin-left: 10px;
+    padding: 0.6em;
+    margin-left: 0.5em;
     min-height: 46em;
 }
 
