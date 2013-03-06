@@ -125,9 +125,9 @@ class Team(db.Model):
         burnings = Burning.query.filter(
             Burning.team == self, Burning.day >= utils.get_current_monday(), Burning.day < utils.get_next_monday())
         today_remaining = Task.query.session.query(func.sum(Task.price).label('remaining')).filter(
-            or_(Task.status == 'READY', Task.status == 'PROGRESS'), Task.team == self).one().remaining
+            or_(Task.status == 'READY', Task.status == 'PROGRESS'), Task.team == self).one().remaining or 0
         today_burning = Task.query.session.query(func.sum(Task.price).label(
-            'burning')).filter(Task.status == 'DONE', Task.last_updated > utils.today(), Task.team == self).one().burning
+            'burning')).filter(Task.status == 'DONE', Task.last_updated > utils.today(), Task.team == self).one().burning or 0
         return json.dumps([[b.remaining for b in burnings] + [today_remaining], [b.burning for b in burnings] + [today_burning]])
 
     def daily_meeting_tasks(self):
