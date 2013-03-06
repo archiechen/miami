@@ -157,6 +157,7 @@ $(function() {
       } else {
         newTask = new Task({
           title: this.$('#title').val(),
+          detail:this.$('#detail').val(),
           priority: this.$("#prioritySlider").slider("value"),
           categories: this.$('#tags').val(),
           status: 'NEW'
@@ -174,6 +175,7 @@ $(function() {
     pricingTask: function(event) {
       var task = new Task({
         title: this.$('#title').val(),
+        detail:this.$('#detail').val(),
         priority: this.$("#prioritySlider").slider("value"),
         categories: this.$('#tags').val(),
         status: 'NEW',

@@ -392,9 +392,10 @@ $(function() {
     },
 
     showTaskForm: function() {
-      var taskForm = new TaskForm({
-        tasks: this.tasks
-      });
+      alert('禁用了:}');
+      //var taskForm = new TaskForm({
+      //  tasks: this.tasks
+      //});
     }
 
   });

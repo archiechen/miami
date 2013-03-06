@@ -93,14 +93,6 @@
 
 .ui-teams .members { height: 65px; margin: 0.1em; width: 100%; }
 
-.modal-body textarea {
-    font-size: 16px;
-    height: auto;
-    width: 90%;
-    margin-bottom: 15px;
-    padding: 7px 9px;
-}
-
 .ui-charts {
     border: 0px;
     float: left;
