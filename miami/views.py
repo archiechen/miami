@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 from flask import render_template, abort, flash, request, redirect, url_for, jsonify
 from miami import app, db, utils
 from miami.models import User, Task, TimeSlot, Team, NotPricing, NotEstimate, ReviewData, Category
@@ -78,6 +79,8 @@ def create_task():
         task = Task(jsons.get('title'), jsons.get(
             'detail',''), priority=jsons.get('priority', 100), status=status, price=price, team=current_user.teams[0])
         for category_name in jsons.get('categories', '').split(','):
+            if not category_name:
+                category_name=u'未分类'
             category = Category.query.filter(Category.name == category_name).first()
             if category:
                 task.categories.append(category)
