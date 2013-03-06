@@ -199,7 +199,7 @@ class Task(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'priority':self.priority, 'consuming': '{0:0.2g}'.format(self.consuming / 3600.0), 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}, 'time_slots': [ts.toJSON() for ts in self.time_slots]}
+        return {'id': self.id, 'title': self.title, 'detail': self.detail, 'status': self.status, 'price': self.price, 'estimate': self.estimate, 'priority': self.priority, 'consuming': '{0:0.2g}'.format(self.consuming / 3600.0), 'created_time': utils.pretty_date(self.created_time), 'last_updated': utils.pretty_date(self.last_updated), 'team': self.team.toJSON(), 'owner': self.owner.toJSON() if self.owner else {}, 'partner': self.partner.toJSON() if self.partner else {}, 'time_slots': [ts.toJSON() for ts in self.time_slots]}
 
     def changeTo(self, status):
         if self.owner and self.owner.id != current_user.id:
@@ -457,6 +457,9 @@ class ReviewData(object):
 
     def planneds(self):
         return len(self.tasks) - self.unplanneds
+
+    def sorted_tasks(self):
+        return sorted(self.tasks.values(), key=lambda x: x.status, reverse=True)
 
 
 class Anonymous(AnonymousUser):

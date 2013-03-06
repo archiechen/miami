@@ -92,6 +92,14 @@ class ReviewModelsTest(unittest.TestCase):
         self.assertEquals(u'[["Uncategorized", 1], ["Feature", 2], ["Bug", 1]]', rd.categories_ratio())
         self.assertEquals(u'[["Uncategorized", 2], ["Feature", 4], ["Bug", 2]]', rd.categories_price_ratio())
 
+    def test_review_data_sorted_tasks(self):
+        team = Team.query.get(1)
+        rd = team.review_data(miami.utils.get_last_monday())
+
+        tasks = rd.sorted_tasks()
+         
+        self.assertEquals([u'READY', u'READY', u'DONE', u'DONE', u'DONE'],[t.status for t in tasks])
+
     def test_personal_review_data(self):
         member = User.query.get(2)
 

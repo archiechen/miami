@@ -9,6 +9,9 @@
                         <span class="badge{% if task.status=='DONE' %} badge-success {%else%} badge-important {% endif %}">{{task.status}}</span>
                         <span class="badge {{task.price_color()}}">${{task.price}}</span>
                         <span class="badge badge-info">{{task.estimate}}Hours</span>
+                        {% if task.consuming/3600 > task.estimate %}
+                        <span class="badge badge-important">超时</span>
+                        {% endif %}
                     </a>
                 </div>
                 <div id="collapse{{task.id}}" class="accordion-body collapse" style="height: 0px; ">

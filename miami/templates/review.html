@@ -58,7 +58,7 @@
         </div>
     </div>
     <div class="tab-pane fade" id="tasks">
-        {{task_accordion(review_data.tasks.values())}}
+        {{task_accordion(review_data.sorted_tasks())}}
     </div>
     <div class="tab-pane fade" id="personal"></div>
 </div>
