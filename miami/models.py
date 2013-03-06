@@ -98,7 +98,7 @@ class Team(db.Model):
         return db.Model.__getattr__(name)
 
     def toJSON(self):
-        return {'name': self.name, 'color': self.color}
+        return {'id': self.id, 'name': self.name, 'color': self.color}
 
     def has_member(self, user):
         for member in self.members:

@@ -55,6 +55,10 @@ def get_current_user():
 def load_categories():
     return jsonify(objects=[c.toJSON() for c in Category.query.all()])
 
+@app.route('/user/teams', methods=['GET'])
+@login_required
+def load_user_teams():
+    return jsonify(objects=[t.toJSON() for t in current_user.teams])
 
 @app.route('/tasks', methods=['POST', 'PUT'])
 @login_required
@@ -75,9 +79,9 @@ def create_task():
         price = jsons.get('price', 0)
         if status == 'READY' and price == 0:
             abort(403)
-
+        team_id=int(jsons.get('team_id',0))
         task = Task(jsons.get('title'), jsons.get(
-            'detail',''), priority=jsons.get('priority', 100), status=status, price=price, team=current_user.teams[0])
+            'detail',''), priority=jsons.get('priority', 100), status=status, price=price, team=Team.query.get(team_id) if team_id else current_user.teams[0])
         for category_name in jsons.get('categories', '').split(','):
             if not category_name:
                 category_name=u'未分类'

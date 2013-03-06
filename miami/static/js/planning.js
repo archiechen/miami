@@ -29,6 +29,7 @@ $(function() {
     }
   });
   var Category = Backbone.Model.extend({});
+  var Team = Backbone.Model.extend({});
 
   var TaskList = Backbone.Collection.extend({
     initialize: function(models, options) {
@@ -48,6 +49,16 @@ $(function() {
       return '/categories';
     },
     model: Category,
+    parse: function(response) {
+      return response.objects;
+    }
+  });
+
+  var Teams = Backbone.Collection.extend({
+    url: function() {
+      return '/user/teams';
+    },
+    model: Team,
     parse: function(response) {
       return response.objects;
     }
@@ -180,6 +191,13 @@ $(function() {
 
       this.$("#priorityAmount").text(this.$("#prioritySlider").slider("value"));
     },
+    get_team_id:function(){
+      if(teamsView.current_team.attr('name')=='0'){
+        return this.$('#selected_team_id').val();
+      }else{
+        return teamsView.current_team.attr('name');
+      }
+    },
     saveTask: function(task) {
       var that = this;
       var newTask
@@ -189,6 +207,7 @@ $(function() {
         newTask = new Task({
           title: this.$('#title').val(),
           detail:this.$('#detail').val(),
+          team_id:this.get_team_id(),
           priority: this.$("#prioritySlider").slider("value"),
           categories: this.$('#tags').val(),
           status: 'NEW'
@@ -207,6 +226,7 @@ $(function() {
       var task = new Task({
         title: this.$('#title').val(),
         detail:this.$('#detail').val(),
+        team_id:this.get_team_id(),
         priority: this.$("#prioritySlider").slider("value"),
         categories: this.$('#tags').val(),
         status: 'NEW',
@@ -216,6 +236,10 @@ $(function() {
     },
     selectCategory: function(event) {
       this.$('#tags').tagit('createTag', event.target.textContent);
+    },
+    addTeamSelector: function(){
+      var team_selector = new TeamSelector();
+      this.$('.modal-body').prepend(team_selector.$el);
     },
     addAll: function() {
       var that = this;
@@ -328,6 +352,9 @@ $(function() {
       var taskForm = new TaskForm({
         tasks: this.tasks
       });
+      if(teamsView.current_team.attr('name')=='0'){
+        taskForm.addTeamSelector();
+      }
     }
 
   });
@@ -343,10 +370,37 @@ $(function() {
     },
     select:function(event){
       this.current_team.text(event.target.text);
+      this.current_team.attr('name',event.target.name);
       newTaskList.fetch({data: {team_id: event.target.name}});
       readyTaskList.fetch({data: {team_id: event.target.name}});
     }
 
+  });
+
+  var TeamSelector = Backbone.View.extend({
+    tagName:"select",
+    id:"selected_team_id",
+    templ:_.template('<option value="<%=id%>"><%=name%></option>'),
+    initialize: function() {
+      _.bindAll(this, 'addOne');
+      this.teams = new Teams();
+      this.teams.on('add', this.addOne, this);
+      this.teams.on('reset', this.addAll, this);
+      this.teams.on('all', this.render, this);
+      this.teams.fetch();
+    },
+    addOne: function(team) {
+      this.$el.append(this.templ(team.toJSON()));
+    },
+
+    addAll: function() {
+      this.$el.empty();
+      this.teams.each(this.addOne);
+    },
+
+    render: function() {
+      return this;
+    }
   });
 
   var newTasks = new TasksView({
@@ -363,6 +417,6 @@ $(function() {
     tasks: readyTaskList
   });
 
-  new TeamSelectorView();
+  var teamsView = new TeamSelectorView();
 
 });

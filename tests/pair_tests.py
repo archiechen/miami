@@ -78,6 +78,7 @@ class PairTest(unittest.TestCase):
                               },
                               "price": 10,
                               "team": {
+                                  'id':1,
                                   "color": "2a33d8",
                                   "name": "Log"
                               },
@@ -144,7 +145,7 @@ class PairTest(unittest.TestCase):
                                               "bar_width": "50.00%"
                                           }
                                       ],
-                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'team': {'id':1, 'color': '2a33d8', 'name': 'Log'},
                                       'title': 'title2'}}, json.loads(rv.data))
 
         task = Task.query.get(1)
@@ -199,6 +200,7 @@ class PairTest(unittest.TestCase):
                               },
                               "price": 10,
                               "team": {
+                                  'id':1,
                                   "color": "2a33d8",
                                   "name": "Log"
                               },

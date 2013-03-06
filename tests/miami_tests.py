@@ -54,7 +54,7 @@ class MiamiTest(unittest.TestCase):
                                       'status': 'NEW',
                                       'consuming': '0',
                                       'priority': 10,
-                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'team': {'id':1, 'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
                                       'title': 'title1'}}, json.loads(rv.data))
 
@@ -76,7 +76,7 @@ class MiamiTest(unittest.TestCase):
                                       'price': 0,
                                       'priority': 100,
                                       'status': 'NEW',
-                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'team': {'id':1, 'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
                                       'consuming': '0',
                                       'title': 'title1'}}, json.loads(rv.data))
@@ -99,7 +99,7 @@ class MiamiTest(unittest.TestCase):
                                       'status': 'NEW',
                                       'owner': {},
                                       'partner': {},
-                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'team': {'id':1, 'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
                                       'priority': 100,
                                       'consuming': '0',
@@ -152,6 +152,7 @@ class MiamiTest(unittest.TestCase):
                                   "owner": {},
                                   "partner": {},
                                   "team": {
+                                      'id':1,
                                       "color": "2a33d8",
                                       "name": "Log"
                                   },
@@ -183,6 +184,7 @@ class MiamiTest(unittest.TestCase):
                                   "owner": {},
                                   "partner": {},
                                   "team": {
+                                      'id':1,
                                       "color": "2a33d8",
                                       "name": "Log"
                                   },
@@ -240,7 +242,7 @@ class MiamiTest(unittest.TestCase):
                                       'partner': {},
                                       'price': 0,
                                       'status': 'PROGRESS',
-                                      'team': {'color': '2a33d8', 'name': 'Log'},
+                                      'team': {'id':1, 'color': '2a33d8', 'name': 'Log'},
                                       'time_slots': [],
                                       'consuming': '0',
                                       'priority': 100,
